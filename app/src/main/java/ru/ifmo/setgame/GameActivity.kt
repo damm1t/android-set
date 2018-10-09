@@ -3,9 +3,10 @@ package ru.ifmo.setgame
 import android.graphics.Color
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import android.support.v4.content.res.ResourcesCompat
 import android.support.v7.widget.GridLayout
-import android.view.Gravity
-import android.widget.TextView
+import android.util.Log
+import android.widget.ImageView
 import kotlinx.android.synthetic.main.activity_game.*
 
 class GameActivity : AppCompatActivity() {
@@ -25,18 +26,21 @@ class GameActivity : AppCompatActivity() {
         for (i in 0 until DEFAULT_ROWS) {
             for (j in 0 until DEFAULT_COLUMNS) {
                 val params = GridLayout.LayoutParams(GridLayout.spec(i, GridLayout.FILL, 1f), GridLayout.spec(j,GridLayout.FILL,1f))
+                params.width = 0
+                params.height = 0
 
-                val tv = TextView(this)
-                tv.text = "$i x $j"
-                tv.gravity = Gravity.CENTER
+                val image = ImageView(this)
+                image.setImageDrawable(ResourcesCompat.getDrawable(resources, R.drawable.diamond_1_stripes_violet, null))
+                image.scaleType = ImageView.ScaleType.CENTER_INSIDE
 
-                tv.setOnClickListener {
+                image.setOnClickListener {
                     val index = i * DEFAULT_COLUMNS + j
                     board_state[index] = !board_state[index]
-                    it.setBackgroundColor(if(board_state[index]) Color.RED else Color.WHITE)
+                    (it as ImageView).setColorFilter(if(board_state[index]) Color.RED else Color.TRANSPARENT)
+                    Log.d("TG", index.toString())
                 }
 
-                game_grid.addView(tv, params)
+                game_grid.addView(image, params)
             }
         }
     }
