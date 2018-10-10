@@ -1,6 +1,7 @@
 package ru.ifmo.setgame
 
 import android.graphics.Color
+import android.graphics.PorterDuff
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.v4.content.res.ResourcesCompat
@@ -13,6 +14,8 @@ class GameActivity : AppCompatActivity() {
 
     private val DEFAULT_COLUMNS = 3
     private val DEFAULT_ROWS = 4
+
+    private val SELECTION_COLOR = Color.argb(255,255,128,0)
 
     private val board_state = MutableList(DEFAULT_COLUMNS * DEFAULT_ROWS){false}
 
@@ -36,7 +39,7 @@ class GameActivity : AppCompatActivity() {
                 image.setOnClickListener {
                     val index = i * DEFAULT_COLUMNS + j
                     board_state[index] = !board_state[index]
-                    (it as ImageView).setColorFilter(if(board_state[index]) Color.RED else Color.TRANSPARENT)
+                    (it as ImageView).setColorFilter(if(board_state[index]) SELECTION_COLOR else Color.TRANSPARENT, PorterDuff.Mode.SCREEN)
                     Log.d("TG", index.toString())
                 }
 
