@@ -45,6 +45,7 @@ class GameActivity : AppCompatActivity() {
                     board[index].selected = !board[index].selected
                     (it as ImageView).setColorFilter(if(board[index].selected) SELECTION_COLOR else Color.TRANSPARENT, PorterDuff.Mode.SCREEN)
                     Log.d("TG", index.toString())
+                    checkSets()
                 }
 
                 images.add(image)
@@ -52,6 +53,39 @@ class GameActivity : AppCompatActivity() {
                 deck.removeAt(0)
 
                 game_grid.addView(image, params)
+            }
+        }
+    }
+
+    private fun checkSets() {
+        var selectedCount = 0
+        var propertiesSize = 0
+
+        for (card in board) {
+            if (card.selected) {
+                selectedCount++
+                propertiesSize = card.properties.size
+            }
+        }
+
+        if (selectedCount == 3) {
+            val properties = Array(propertiesSize){ mutableListOf<Int>() }
+            for (card in board) {
+                if (!card.selected) { continue }
+                for (i in 0 until propertiesSize) {
+                    properties[i].add(card.properties[i])
+                }
+            }
+
+            if (properties.map { prop -> prop.distinct().let { it.size==1 || it.size == 3 } }.all { it }) {
+                for (i in 0 until DEFAULT_COLUMNS * DEFAULT_ROWS) {
+                    if (board[i].selected) {
+                        board[i] = deck[0]
+                        images[i].setImageDrawable(ResourcesCompat.getDrawable(resources, deck[0].drawable_id, null))
+                        images[i].setColorFilter(Color.TRANSPARENT, PorterDuff.Mode.SCREEN)
+                        if (deck.size > 1) deck.removeAt(0) // check so we never crash because of pulling from empty deck
+                    }
+                }
             }
         }
     }
