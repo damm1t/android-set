@@ -35,11 +35,11 @@ fun loadDefaultDeck() : MutableList<PlayingCard> {
             R.drawable.diamond_3_stripes_red,
             R.drawable.diamond_3_stripes_violet)
 
-    val result = mutableListOf<PlayingCard>()
+    var result = mutableListOf<PlayingCard>()
 
-    for (number in 0..3)
-        for (fill in 0..3)
-            for (color in 0..3)
+    for (number in 0..2)
+        for (fill in 0..2)
+            for (color in 0..2)
                 result.add(PlayingCard(drawableIds[number * 9 + fill * 3 + color], intArrayOf(number, fill, color)))
 
     return result

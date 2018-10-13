@@ -17,7 +17,10 @@ class GameActivity : AppCompatActivity() {
 
     private val SELECTION_COLOR = Color.argb(255,255,128,0)
 
-    private val board_state = MutableList(DEFAULT_COLUMNS * DEFAULT_ROWS){false}
+    private val board = mutableListOf<PlayingCard>()
+    private val images = mutableListOf<ImageView>()
+
+    private val deck = loadDefaultDeck()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -26,6 +29,7 @@ class GameActivity : AppCompatActivity() {
         game_grid.rowCount = DEFAULT_ROWS
         game_grid.columnCount = DEFAULT_COLUMNS
 
+        deck.shuffle()
         for (i in 0 until DEFAULT_ROWS) {
             for (j in 0 until DEFAULT_COLUMNS) {
                 val params = GridLayout.LayoutParams(GridLayout.spec(i, GridLayout.FILL, 1f), GridLayout.spec(j,GridLayout.FILL,1f))
@@ -33,15 +37,19 @@ class GameActivity : AppCompatActivity() {
                 params.height = 0
 
                 val image = ImageView(this)
-                image.setImageDrawable(ResourcesCompat.getDrawable(resources, R.drawable.diamond_1_stripes_violet, null))
+                image.setImageDrawable(ResourcesCompat.getDrawable(resources, deck[0].drawable_id, null))
                 image.scaleType = ImageView.ScaleType.CENTER_INSIDE
 
                 image.setOnClickListener {
                     val index = i * DEFAULT_COLUMNS + j
-                    board_state[index] = !board_state[index]
-                    (it as ImageView).setColorFilter(if(board_state[index]) SELECTION_COLOR else Color.TRANSPARENT, PorterDuff.Mode.SCREEN)
+                    board[index].selected = !board[index].selected
+                    (it as ImageView).setColorFilter(if(board[index].selected) SELECTION_COLOR else Color.TRANSPARENT, PorterDuff.Mode.SCREEN)
                     Log.d("TG", index.toString())
                 }
+
+                images.add(image)
+                board.add(deck[0])
+                deck.removeAt(0)
 
                 game_grid.addView(image, params)
             }
