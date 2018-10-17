@@ -5,12 +5,12 @@ import android.support.v7.app.AppCompatActivity
 
 interface GameInterface {
     fun startGame()
-    fun showScore()
+    fun showScore(score : Int)
 }
 
 class GameActivity : AppCompatActivity(), GameInterface {
-    override fun showScore() {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    override fun showScore(score : Int) {
+        supportFragmentManager.beginTransaction().apply { replace(R.id.game_fragment, GameScoreFragment.newInstance(score)); commit() }
     }
 
     override fun startGame() {
