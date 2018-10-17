@@ -2,6 +2,7 @@ package ru.ifmo.setgame
 
 import android.graphics.Color
 import android.graphics.PorterDuff
+import android.media.Image
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.support.v4.content.res.ResourcesCompat
@@ -10,7 +11,10 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.FrameLayout
 import android.widget.ImageView
+import kotlinx.android.synthetic.main.card_frame.*
+import kotlinx.android.synthetic.main.card_frame.view.*
 import kotlinx.android.synthetic.main.fragment_game.view.*
 
 class GameFragment : Fragment() {
@@ -18,10 +22,8 @@ class GameFragment : Fragment() {
     private val DEFAULT_COLUMNS = 3
     private val DEFAULT_ROWS = 4
 
-    private val SELECTION_COLOR = Color.argb(255,255,128,0)
-
     private val board = mutableListOf<PlayingCard>()
-    private val images = mutableListOf<ImageView>()
+    private val images = mutableListOf<FrameLayout>()
 
     private val deck = loadDefaultDeck()
 
@@ -38,14 +40,16 @@ class GameFragment : Fragment() {
                 params.width = 0
                 params.height = 0
 
-                val image = ImageView(context)
-                image.setImageDrawable(ResourcesCompat.getDrawable(resources, deck[0].drawable_id, null))
-                image.scaleType = ImageView.ScaleType.CENTER_INSIDE
+                val image = inflater.inflate(R.layout.card_frame, view.game_grid, false) as FrameLayout
+                image.card_image.setImageDrawable(ResourcesCompat.getDrawable(resources, deck[0].drawable_id, null))
+                image.card_frame.setImageDrawable(ResourcesCompat.getDrawable(resources, R.drawable.card_frame_drawable, null))
 
                 image.setOnClickListener {
                     val index = i * DEFAULT_COLUMNS + j
                     board[index].selected = !board[index].selected
-                    (it as ImageView).setColorFilter(if(board[index].selected) SELECTION_COLOR else Color.TRANSPARENT, PorterDuff.Mode.SCREEN)
+
+                    it.card_frame.visibility = if (board[index].selected) ImageView.VISIBLE else ImageView.GONE
+
                     Log.d("TG", index.toString())
                     checkSets()
                 }
@@ -85,8 +89,8 @@ class GameFragment : Fragment() {
                 for (i in 0 until DEFAULT_COLUMNS * DEFAULT_ROWS) {
                     if (board[i].selected) {
                         board[i] = deck[0]
-                        images[i].setImageDrawable(ResourcesCompat.getDrawable(resources, deck[0].drawable_id, null))
-                        images[i].setColorFilter(Color.TRANSPARENT, PorterDuff.Mode.SCREEN)
+                        images[i].card_image.setImageDrawable(ResourcesCompat.getDrawable(resources, deck[0].drawable_id, null))
+                        images[i].card_frame.visibility = ImageView.GONE
                         if (deck.size > 1) deck.removeAt(0) // check so we never crash because of pulling from empty deck
                     }
                 }
