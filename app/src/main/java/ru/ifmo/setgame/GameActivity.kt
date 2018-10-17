@@ -8,9 +8,11 @@ interface GameInterface {
     fun showScore(score : Int)
 }
 
+const val SCORE_FRAGMENT_TAG = "SCORE_FRAGMENT_TAG"
+
 class GameActivity : AppCompatActivity(), GameInterface {
     override fun showScore(score : Int) {
-        supportFragmentManager.beginTransaction().apply { replace(R.id.game_fragment, GameScoreFragment.newInstance(score)); commit() }
+        supportFragmentManager.beginTransaction().apply { replace(R.id.game_fragment, GameScoreFragment.newInstance(score), SCORE_FRAGMENT_TAG); commit() }
     }
 
     override fun startGame() {

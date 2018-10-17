@@ -9,24 +9,30 @@ import android.view.ViewGroup
 import android.widget.TextView
 
 class GameScoreFragment:Fragment() {
+    private val SCORE_TAG = "SCORE_TAG"
+
     var score = 0
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        score = savedInstanceState?.getInt("SCORE") ?: 0
+        score = arguments?.getInt(SCORE_TAG) ?: 0
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
-        TextView(activity).apply {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        arguments?.let {
+            score = it.getInt(SCORE_TAG)
+        }
+        return TextView(activity).apply {
             text = "Your score: $score"
             textSize = 32f
             gravity = Gravity.CENTER
         }
+    }
 
     companion object {
         @JvmStatic
         fun newInstance(param1 : Int) =
-                GameCreationFragment().apply {
-                    arguments = Bundle().apply { putInt("SCORE", param1) }
+                GameScoreFragment().apply {
+                    arguments = Bundle().apply { putInt(SCORE_TAG, param1) }
                 }
     }
 }

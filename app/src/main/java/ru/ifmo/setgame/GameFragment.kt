@@ -23,6 +23,7 @@ class GameFragment : Fragment() {
     private val images = mutableListOf<FrameLayout>()
 
     private val deck = loadDefaultDeck()
+    private var score = 0
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_game, container, false)
@@ -49,6 +50,10 @@ class GameFragment : Fragment() {
 
                     Log.d("TG", index.toString())
                     checkSets()
+
+                    if (!hasSets()) {
+                        (activity as GameInterface).showScore(score)
+                    }
                 }
 
                 images.add(image)
@@ -77,6 +82,8 @@ class GameFragment : Fragment() {
             }
 
             if (properties.map { prop -> prop.distinct().let { it.size==1 || it.size == CARDS_IN_SET } }.all { it }) {
+                score++
+
                 for (i in 0 until DEFAULT_COLUMNS * DEFAULT_ROWS) {
                     if (board[i].selected) {
                         board[i] = deck[0]
@@ -87,5 +94,40 @@ class GameFragment : Fragment() {
                 }
             }
         }
+    }
+
+    private fun hasSets() : Boolean {
+        if (deck.size == 1) return false
+
+        var has = false
+        val propertiesSize = board[0].properties.size
+
+        for (i in 0 until DEFAULT_COLUMNS * DEFAULT_ROWS)
+            for (j in i + 1 until DEFAULT_COLUMNS * DEFAULT_ROWS)
+                for (k in j + 1 until DEFAULT_COLUMNS * DEFAULT_ROWS) {
+                    val properties = Array(propertiesSize){ mutableListOf<Int>() }
+
+                    board[i].let {
+                        for (t in 0 until propertiesSize) {
+                            properties[t].add(it.properties[t])
+                        }
+                    }
+
+                    board[j].let {
+                        for (t in 0 until propertiesSize) {
+                            properties[t].add(it.properties[t])
+                        }
+                    }
+
+                    board[k].let {
+                        for (t in 0 until propertiesSize) {
+                            properties[t].add(it.properties[t])
+                        }
+                    }
+
+                    if (properties.map { prop -> prop.distinct().let { it.size==1 || it.size == CARDS_IN_SET } }.all { it }) has = true
+                }
+
+        return has
     }
 }
