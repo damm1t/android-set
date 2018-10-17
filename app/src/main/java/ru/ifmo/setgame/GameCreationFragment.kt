@@ -10,10 +10,10 @@ import android.widget.TextView
 
 class GameCreationFragment : Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
-            TextView(activity).let { tv ->
-                tv.text = "Default deck"
-                tv.textSize = 32f
-                tv.gravity = Gravity.CENTER
-                tv.setOnClickListener { (activity as GameInterface).startGame() }
-                tv }
+            TextView(activity).apply {
+                text = "Default deck"
+                textSize = 32f
+                gravity = Gravity.CENTER
+                setOnClickListener { (activity as GameInterface).startGame() }
+            }
 }

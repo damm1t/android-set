@@ -1,8 +1,5 @@
 package ru.ifmo.setgame
 
-import android.graphics.Color
-import android.graphics.PorterDuff
-import android.media.Image
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.support.v4.content.res.ResourcesCompat
@@ -13,7 +10,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
 import android.widget.ImageView
-import kotlinx.android.synthetic.main.card_frame.*
 import kotlinx.android.synthetic.main.card_frame.view.*
 import kotlinx.android.synthetic.main.fragment_game.view.*
 
@@ -21,6 +17,7 @@ class GameFragment : Fragment() {
 
     private val DEFAULT_COLUMNS = 3
     private val DEFAULT_ROWS = 4
+    private val CARDS_IN_SET = 3
 
     private val board = mutableListOf<PlayingCard>()
     private val images = mutableListOf<FrameLayout>()
@@ -66,18 +63,12 @@ class GameFragment : Fragment() {
     }
 
     private fun checkSets() {
-        var selectedCount = 0
-        var propertiesSize = 0
+        val selectedCount = board.filter { it.selected }.size
+        val propertiesSize = board[0].properties.size
 
-        for (card in board) {
-            if (card.selected) {
-                selectedCount++
-                propertiesSize = card.properties.size
-            }
-        }
-
-        if (selectedCount == 3) {
+        if (selectedCount == CARDS_IN_SET) {
             val properties = Array(propertiesSize){ mutableListOf<Int>() }
+
             for (card in board) {
                 if (!card.selected) { continue }
                 for (i in 0 until propertiesSize) {
@@ -85,7 +76,7 @@ class GameFragment : Fragment() {
                 }
             }
 
-            if (properties.map { prop -> prop.distinct().let { it.size==1 || it.size == 3 } }.all { it }) {
+            if (properties.map { prop -> prop.distinct().let { it.size==1 || it.size == CARDS_IN_SET } }.all { it }) {
                 for (i in 0 until DEFAULT_COLUMNS * DEFAULT_ROWS) {
                     if (board[i].selected) {
                         board[i] = deck[0]
