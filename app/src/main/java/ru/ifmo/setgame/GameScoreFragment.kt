@@ -1,5 +1,6 @@
 package ru.ifmo.setgame
 
+import android.content.Intent
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.view.Gravity
@@ -25,6 +26,10 @@ class GameScoreFragment:Fragment() {
             text = "Your score: $score"
             textSize = 32f
             gravity = Gravity.CENTER
+            setOnClickListener {
+                var mainIntent = Intent(context, MenuActivity::class.java)
+                context.startActivity(mainIntent)
+            }
         }
     }
 
