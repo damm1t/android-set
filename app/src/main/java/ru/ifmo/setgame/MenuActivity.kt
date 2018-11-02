@@ -8,7 +8,6 @@ import android.support.v4.content.ContextCompat.startActivity
 import android.content.Intent
 
 
-
 class MenuActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {

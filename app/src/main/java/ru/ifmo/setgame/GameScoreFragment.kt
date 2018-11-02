@@ -9,7 +9,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 
-class GameScoreFragment:Fragment() {
+class GameScoreFragment : Fragment() {
     private val SCORE_TAG = "SCORE_TAG"
 
     var score = 0
@@ -35,7 +35,7 @@ class GameScoreFragment:Fragment() {
 
     companion object {
         @JvmStatic
-        fun newInstance(param1 : Int) =
+        fun newInstance(param1: Int) =
                 GameScoreFragment().apply {
                     arguments = Bundle().apply { putInt(SCORE_TAG, param1) }
                 }
