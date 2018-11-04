@@ -12,7 +12,9 @@ import android.widget.FrameLayout
 import android.widget.ImageView
 import kotlinx.android.synthetic.main.card_frame.view.*
 import kotlinx.android.synthetic.main.fragment_game.view.*
-import ru.ifmo.setgame.R.drawable.*
+import ru.ifmo.setgame.R.drawable.card_frame_drawable
+import ru.ifmo.setgame.R.layout.card_frame
+import ru.ifmo.setgame.R.layout.fragment_game
 
 class GameFragment : Fragment() {
 
@@ -25,15 +27,17 @@ class GameFragment : Fragment() {
 
     private val deck = loadDefaultDeck()
     private var score = 0
+    private lateinit var gameView: View
+    private var setOnBoard = Array(3) { 0 }
 
-    fun addDopLine(view: View, inflater: LayoutInflater) {
-        view.game_grid.rowCount++
-        for (i in 0 until DEFAULT_COLUMNS) { // rowNow = DEFAULT_ROWS
-            val params = GridLayout.LayoutParams(GridLayout.spec(DEFAULT_ROWS, GridLayout.FILL, 1f), GridLayout.spec(i, GridLayout.FILL, 1f))
+    private fun addRow(inflater: LayoutInflater) {
+        gameView.game_grid.rowCount++
+        for (i in 0 until DEFAULT_COLUMNS) {
+            val params = GridLayout.LayoutParams(GridLayout.spec(gameView.game_grid.rowCount - 1, GridLayout.FILL, 1f), GridLayout.spec(i, GridLayout.FILL, 1f))
             params.width = 0
             params.height = 0
 
-            val image = inflater.inflate(R.layout.card_frame, view.game_grid, false) as FrameLayout
+            val image = inflater.inflate(card_frame, gameView.game_grid, false) as FrameLayout
             image.card_image.setImageDrawable(ResourcesCompat.getDrawable(resources, deck[0].drawable_id, null))
             image.card_frame.setImageDrawable(ResourcesCompat.getDrawable(resources, card_frame_drawable, null))
 
@@ -51,118 +55,144 @@ class GameFragment : Fragment() {
             board.add(deck[0])
             deck.removeAt(0)
 
-            view.game_grid.addView(image, params)
+            gameView.game_grid.addView(image, params)
         }
-        view.game_grid.requestLayout()
+        gameView.game_grid.requestLayout()
     }
 
-        override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-            val view = inflater.inflate(R.layout.fragment_game, container, false)
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        gameView = inflater.inflate(fragment_game, container, false)
 
-            view.game_grid.rowCount = DEFAULT_ROWS
-            view.game_grid.columnCount = DEFAULT_COLUMNS
+        gameView.game_grid.rowCount = DEFAULT_ROWS
+        gameView.game_grid.columnCount = DEFAULT_COLUMNS
 
-            deck.shuffle()
-            for (i in 0 until DEFAULT_ROWS) {
-                for (j in 0 until DEFAULT_COLUMNS) {
-                    val params = GridLayout.LayoutParams(GridLayout.spec(i, GridLayout.FILL, 1f), GridLayout.spec(j, GridLayout.FILL, 1f))
-                    params.width = 0
-                    params.height = 0
+        deck.shuffle()
 
-                    val image = inflater.inflate(R.layout.card_frame, view.game_grid, false) as FrameLayout
-                    image.card_image.setImageDrawable(ResourcesCompat.getDrawable(resources, deck[0].drawable_id, null))
-                    image.card_frame.setImageDrawable(ResourcesCompat.getDrawable(resources, card_frame_drawable, null))
+        for (i in 0 until DEFAULT_ROWS) {
+            for (j in 0 until DEFAULT_COLUMNS) {
+                val params = GridLayout.LayoutParams(GridLayout.spec(i, GridLayout.FILL, 1f), GridLayout.spec(j, GridLayout.FILL, 1f))
+                params.width = 0
+                params.height = 0
 
-                    image.setOnClickListener {
-                        val index = i * DEFAULT_COLUMNS + j
-                        board[index].selected = !board[index].selected
+                val image = inflater.inflate(card_frame, gameView.game_grid, false) as FrameLayout
+                image.card_image.setImageDrawable(ResourcesCompat.getDrawable(resources, deck[0].drawable_id, null))
+                image.card_frame.setImageDrawable(ResourcesCompat.getDrawable(resources, card_frame_drawable, null))
 
-                        it.card_frame.visibility = if (board[index].selected) ImageView.VISIBLE else ImageView.GONE
+                //checkSets()
 
-                        Log.d("TG", index.toString())
-                        checkSets()
+                image.setOnClickListener {
+                    val index = i * DEFAULT_COLUMNS + j
+                    board[index].selected = !board[index].selected
 
-                        if (!hasSets()) {
-                            //(activity as GameInterface).showScore(score)
-                            Log.d("TG", "No sets")
-                            addDopLine(view, inflater) //ToDo
-                        }
-                    }
+                    it.card_frame.visibility = if (board[index].selected) ImageView.VISIBLE else ImageView.GONE
 
-                    images.add(image)
-                    board.add(deck[0])
-                    deck.removeAt(0)
+                    Log.d("TG", index.toString())
+                    checkSets()
 
-                    view.game_grid.addView(image, params)
+                    /*if (!hasSets()) {
+                        //(activity as GameInterface).showScore(score)
+                        Log.d("TG", "No sets")
+                        addRow(inflater) //ToDo incorrect update
+                    }*/
                 }
-            }
 
-            return view
+                images.add(image)
+                board.add(deck[0])
+                deck.removeAt(0)
+
+                gameView.game_grid.addView(image, params)
+            }
         }
 
-        private fun checkSets() {
-            val selectedCount = board.filter { it.selected }.size
-            val propertiesSize = board[0].properties.size
+        return gameView
+    }
 
-            if (selectedCount == CARDS_IN_SET) {
-                val properties = Array(propertiesSize) { mutableListOf<Int>() }
 
-                for (card in board) {
-                    if (!card.selected) {
-                        continue
-                    }
+    private fun checkSets() {
+        val selectedCount = board.filter { it.selected }.size
+        val propertiesSize = board[0].properties.size
+
+        if (selectedCount == CARDS_IN_SET) {
+            val properties = Array(propertiesSize) { mutableListOf<Int>() }
+
+            for (card in board) {
+                if (card.selected) {
                     for (i in 0 until propertiesSize) {
                         properties[i].add(card.properties[i])
                     }
                 }
+            }
 
-                if (properties.map { prop -> prop.distinct().let { it.size == 1 || it.size == CARDS_IN_SET } }.all { it }) {
-                    score++
-
-                    for (i in 0 until DEFAULT_COLUMNS * DEFAULT_ROWS) {
-                        if (board[i].selected) {
-                            board[i] = deck[0]
-                            images[i].card_image.setImageDrawable(ResourcesCompat.getDrawable(resources, deck[0].drawable_id, null))
-                            images[i].card_frame.visibility = ImageView.GONE
-                            if (deck.size > 1) deck.removeAt(0) // check so we never crash because of pulling from empty deck
+            if (properties.all { prop -> prop.distinct().let { it.size == 1 || it.size == CARDS_IN_SET } }) {
+                score++
+                var changedBoardId = mutableListOf<Int>()
+                for (i in 0 until DEFAULT_COLUMNS * DEFAULT_ROWS) {
+                    if (board[i].selected) {
+                        board[i] = deck[0]
+                        changedBoardId.add(i)
+                        images[i].card_image.setImageDrawable(ResourcesCompat.getDrawable(resources, deck[0].drawable_id, null))
+                        images[i].card_frame.visibility = ImageView.GONE
+                        if (deck.size > 1) deck.removeAt(0) // check so we never crash because of pulling from empty deck
+                        else {
+                            //deck[0] = unselectable empty card
                         }
                     }
                 }
+                var iterations = 5
+                while (iterations-- != 0 && !hasSets()) {
+                    Log.d("tg", "no sets here, but i will find")
+                    for (i in changedBoardId) {
+                        deck.add(board[i])
+                        board[i] = deck[0]
+                        images[i].card_image.setImageDrawable(ResourcesCompat.getDrawable(resources, deck[0].drawable_id, null))
+                        images[i].card_frame.visibility = ImageView.GONE
+                        if (deck.size > 1) deck.removeAt(0)
+                    }
+                }
+                if (!hasSets()) {
+                    (activity as GameActivity).showScore(score)
+                }
             }
         }
+    }
 
-        private fun hasSets(): Boolean {
-            if (deck.size == 1) return false
+    private fun hasSets(): Boolean {
+        if (deck.size == 1) return false
 
-            var has = false
-            val propertiesSize = board[0].properties.size
+        var has = false
+        val propertiesSize = board[0].properties.size
 
-            for (i in 0 until DEFAULT_COLUMNS * DEFAULT_ROWS)
-                for (j in i + 1 until DEFAULT_COLUMNS * DEFAULT_ROWS)
-                    for (k in j + 1 until DEFAULT_COLUMNS * DEFAULT_ROWS) {
-                        val properties = Array(propertiesSize) { mutableListOf<Int>() }
+        for (i in 0 until DEFAULT_COLUMNS * gameView.game_grid.rowCount)
+            for (j in i + 1 until DEFAULT_COLUMNS * gameView.game_grid.rowCount)
+                for (k in j + 1 until DEFAULT_COLUMNS * gameView.game_grid.rowCount) {
+                    val properties = Array(propertiesSize) { mutableListOf<Int>() }
 
-                        board[i].let {
-                            for (t in 0 until propertiesSize) {
-                                properties[t].add(it.properties[t])
-                            }
+                    board[i].let {
+                        for (t in 0 until propertiesSize) {
+                            properties[t].add(it.properties[t])
                         }
-
-                        board[j].let {
-                            for (t in 0 until propertiesSize) {
-                                properties[t].add(it.properties[t])
-                            }
-                        }
-
-                        board[k].let {
-                            for (t in 0 until propertiesSize) {
-                                properties[t].add(it.properties[t])
-                            }
-                        }
-
-                        if (properties.map { prop -> prop.distinct().let { it.size == 1 || it.size == CARDS_IN_SET } }.all { it }) has = true
                     }
 
-            return has
-        }
+                    board[j].let {
+                        for (t in 0 until propertiesSize) {
+                            properties[t].add(it.properties[t])
+                        }
+                    }
+
+                    board[k].let {
+                        for (t in 0 until propertiesSize) {
+                            properties[t].add(it.properties[t])
+                        }
+                    }
+
+                    if (properties.all { prop -> prop.distinct().let { it.size == 1 || it.size == CARDS_IN_SET } }) {
+                        has = true
+                        setOnBoard[0] = i
+                        setOnBoard[1] = j
+                        setOnBoard[2] = k
+                    }
+                }
+
+        return has
     }
+}
