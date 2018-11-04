@@ -23,6 +23,6 @@ class GameActivity : AppCompatActivity(), GameInterface {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_game)
 
-        supportFragmentManager.beginTransaction().apply { replace(R.id.game_fragment, GameCreationFragment()); commit() }
+        supportFragmentManager.beginTransaction().apply { replace(R.id.game_fragment, LobbySelectionFragment()); commit() }
     }
 }
