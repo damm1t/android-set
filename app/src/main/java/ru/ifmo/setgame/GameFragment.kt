@@ -1,9 +1,9 @@
 package ru.ifmo.setgame
 
 import android.os.Bundle
-import android.support.v4.app.Fragment
-import android.support.v4.content.res.ResourcesCompat
-import android.support.v7.widget.GridLayout
+import androidx.fragment.app.Fragment
+import androidx.core.content.res.ResourcesCompat
+import androidx.gridlayout.widget.GridLayout
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -16,7 +16,7 @@ import ru.ifmo.setgame.R.drawable.card_frame_drawable
 import ru.ifmo.setgame.R.layout.card_frame
 import ru.ifmo.setgame.R.layout.fragment_game
 
-class GameFragment : Fragment() {
+class GameFragment : androidx.fragment.app.Fragment() {
 
     private val DEFAULT_COLUMNS = 3
     private val DEFAULT_ROWS = 4
@@ -33,7 +33,7 @@ class GameFragment : Fragment() {
     private fun addRow(inflater: LayoutInflater) {
         gameView.game_grid.rowCount++
         for (i in 0 until DEFAULT_COLUMNS) {
-            val params = GridLayout.LayoutParams(GridLayout.spec(gameView.game_grid.rowCount - 1, GridLayout.FILL, 1f), GridLayout.spec(i, GridLayout.FILL, 1f))
+            val params = androidx.gridlayout.widget.GridLayout.LayoutParams(androidx.gridlayout.widget.GridLayout.spec(gameView.game_grid.rowCount - 1, androidx.gridlayout.widget.GridLayout.FILL, 1f), androidx.gridlayout.widget.GridLayout.spec(i, androidx.gridlayout.widget.GridLayout.FILL, 1f))
             params.width = 0
             params.height = 0
 
@@ -70,7 +70,7 @@ class GameFragment : Fragment() {
 
         for (i in 0 until DEFAULT_ROWS) {
             for (j in 0 until DEFAULT_COLUMNS) {
-                val params = GridLayout.LayoutParams(GridLayout.spec(i, GridLayout.FILL, 1f), GridLayout.spec(j, GridLayout.FILL, 1f))
+                val params = androidx.gridlayout.widget.GridLayout.LayoutParams(androidx.gridlayout.widget.GridLayout.spec(i, androidx.gridlayout.widget.GridLayout.FILL, 1f), androidx.gridlayout.widget.GridLayout.spec(j, androidx.gridlayout.widget.GridLayout.FILL, 1f))
                 params.width = 0
                 params.height = 0
 

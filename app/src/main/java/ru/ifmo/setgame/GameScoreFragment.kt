@@ -2,14 +2,14 @@ package ru.ifmo.setgame
 
 import android.content.Intent
 import android.os.Bundle
-import android.support.v4.app.Fragment
+import androidx.fragment.app.Fragment
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 
-class GameScoreFragment : Fragment() {
+class GameScoreFragment : androidx.fragment.app.Fragment() {
     private val SCORE_TAG = "SCORE_TAG"
 
     var score = 0
