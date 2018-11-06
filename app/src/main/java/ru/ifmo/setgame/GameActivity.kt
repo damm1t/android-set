@@ -1,24 +1,19 @@
 package ru.ifmo.setgame
 
-import android.content.BroadcastReceiver
-import android.content.Context
 import android.content.Intent
-import android.content.IntentFilter
 import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
-import android.support.v4.content.LocalBroadcastManager
 import android.util.Log
-import android.widget.Toast
-import com.fasterxml.jackson.databind.JsonNode
+import androidx.appcompat.app.AppCompatActivity
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.kotlin.KotlinModule
-import com.fasterxml.jackson.module.kotlin.readValue
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import java.io.BufferedReader
+import java.io.BufferedWriter
+import java.io.InputStreamReader
+import java.io.OutputStreamWriter
 import java.net.Socket
-
-import kotlinx.coroutines.*
-import java.io.*
-import java.lang.Exception
 
 interface GameInterface {
     val LOBBIES_LIST_BROADCAST: String
