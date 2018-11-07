@@ -1,9 +1,7 @@
 package ru.ifmo.setgame
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import androidx.core.content.res.ResourcesCompat
-import androidx.gridlayout.widget.GridLayout
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -150,7 +148,7 @@ class GameFragment : androidx.fragment.app.Fragment() {
                     }
                 }
                 if (!hasSets()) {
-                    (activity as GameActivity).showScore(score)
+                    (activity as MultiplayerGameActivity).showScore(score)
                 }
             }
         }

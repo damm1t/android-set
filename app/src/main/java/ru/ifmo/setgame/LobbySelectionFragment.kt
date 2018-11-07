@@ -51,12 +51,18 @@ class LobbySelectionFragment : Fragment() {
         view.recycler_view_lobbies.layoutManager = LinearLayoutManager(activity)
         view.recycler_view_lobbies.addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL))
 
+        view.swipe_refresh_lobbies.setOnRefreshListener {
+            (activity as MultiplayerGameActivity).messages.put("REFRESH")
+        }
+
         LocalBroadcastManager.getInstance(context!!).registerReceiver(object :BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent?) {
                 val str = intent?.extras?.getString("lobbies")!!
-                val lobbies = jacksonObjectMapper().readValue<List<Lobby>>(str)
-                adapter.data = lobbies.toTypedArray()
+                val lobbies = jacksonObjectMapper().readValue<Array<Lobby>>(str)
+                adapter.data = lobbies
                 adapter.notifyDataSetChanged()
+
+                view.swipe_refresh_lobbies.isRefreshing = false
             }
         }, IntentFilter("ru.ifmo.setgame.LOBBIES_LIST"))
         return view
