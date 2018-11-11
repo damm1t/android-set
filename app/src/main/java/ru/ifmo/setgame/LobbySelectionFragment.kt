@@ -1,13 +1,13 @@
 package ru.ifmo.setgame
 
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
+import android.app.AlertDialog
+import android.app.Dialog
+import android.content.*
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.recyclerview.widget.DividerItemDecoration
@@ -15,8 +15,23 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
+import kotlinx.android.synthetic.main.dialog_create_lobby.*
+import kotlinx.android.synthetic.main.dialog_create_lobby.view.*
 import kotlinx.android.synthetic.main.fragment_lobby_selection.view.*
 import kotlinx.android.synthetic.main.item_lobby.view.*
+
+class LobbyCreationDialog: DialogFragment() {
+    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+        val view = LayoutInflater.from(context).inflate(R.layout.dialog_create_lobby, null)
+        view.max_players_picker.minValue = 0
+        view.max_players_picker.maxValue = 10
+        return AlertDialog.Builder(context)
+                .setView(view)
+                .setPositiveButton("Create") { dialogInterface: DialogInterface, id: Int ->
+                    (activity as MultiplayerGameActivity).messages.put("CREATE ${view.max_players_picker.value}")
+                }.create()
+    }
+}
 
 class LobbySelectionFragment : Fragment() {
 
@@ -65,6 +80,10 @@ class LobbySelectionFragment : Fragment() {
                 view.swipe_refresh_lobbies.isRefreshing = false
             }
         }, IntentFilter("ru.ifmo.setgame.LOBBIES_LIST"))
+
+        view.fab.setOnClickListener {
+            LobbyCreationDialog().show(fragmentManager, "create_lobby")
+        }
         return view
     }
 }
