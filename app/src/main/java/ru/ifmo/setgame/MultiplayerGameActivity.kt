@@ -9,6 +9,8 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import java.io.BufferedReader
 import java.io.BufferedWriter
 import java.io.InputStreamReader
@@ -33,8 +35,9 @@ const val SCORE_FRAGMENT_TAG = "SCORE_FRAGMENT_TAG"
 
 class Connector(context: Context) : AutoCloseable {
     val LOBBIES_LIST_BROADCAST = "ru.ifmo.setgame.LOBBIES_LIST"
+    val IN_LOBBY_BROADCAST = "ru.ifmo.setgame.LOBBIES_LIST"
 
-
+    private val mutex = Mutex()
     private val hostAddress = "18.222.225.249"
     private val hostPort = 3691
     private val socket = Socket(hostAddress, hostPort)
@@ -45,9 +48,10 @@ class Connector(context: Context) : AutoCloseable {
 
     private var playerId = -1
     private var lobbyId = -1
+    private var status = "NEW"
 
-    fun requestLobbies() {
-        val request = """{"status": "SELECTING_LOBBY",
+    fun requestLobbies() = GlobalScope.launch { mutex.withLock {
+        val request = """{"status": "$status",
             |"player_id": $playerId,
             |"action": "refresh_list"}""".trimMargin()
 
@@ -55,56 +59,61 @@ class Connector(context: Context) : AutoCloseable {
         writer.flush()
 
         val response = mapper.readTree(reader.readLine())
-        val lobbiesStr = mapper.writeValueAsString(response.get("lobbies"))
+        status = response.get("status").asText()
+        val lobbiesStr = mapper.writeValueAsString(response.get("lobbies_list"))
 
         localBroadcastManager.sendBroadcast(Intent(LOBBIES_LIST_BROADCAST).apply { putExtra("lobbies", lobbiesStr) })
-    }
+    }}
+
+    fun createLobby(maxPlayers: Int) = GlobalScope.launch { mutex.withLock {
+        val request = """{"status": "$status",
+            |"player_id": $playerId,
+            |"action": "create_lobby"
+            |"max_players": $maxPlayers}""".trimMargin()
+
+        writer.write(request)
+        writer.flush()
+
+        val response = mapper.readTree(reader.readLine())
+        status = response.get("status").asText()
+        val lobbyStr = mapper.writeValueAsString(response.get("lobby"))
+
+        localBroadcastManager.sendBroadcast(Intent(IN_LOBBY_BROADCAST).apply { putExtra("lobby", lobbyStr) })
+    } }
 
     // send default handshake and get player id and list of lobbies
-    fun init() {
-        val request = """{"status": "NEW"}"""
+    private suspend fun init() = mutex.withLock {
+        val request = """{"status": "$status"}"""
 
         writer.write(request)
         writer.flush()
 
         val response = mapper.readTree(reader.readLine())
         playerId = response.get("player_id").asInt()
-        val lobbiesStr = mapper.writeValueAsString(response.get("lobbies"))
+        status = response.get("status").asText()
+        val lobbiesStr = mapper.writeValueAsString(response.get("lobbies_list"))
 
         localBroadcastManager.sendBroadcast(Intent(LOBBIES_LIST_BROADCAST).apply { putExtra("lobbies", lobbiesStr) })
     }
 
-    fun ready() = reader.ready()
+    suspend fun connect() {
+        init()
 
-    override fun close() {
-        socket.close()
-    }
-}
-
-class MultiplayerGameActivity : AppCompatActivity(), GameInterface {
-    val messages = ArrayBlockingQueue<String>(10)
-    var player_id = 0
-
-
-    private suspend fun connect() {
-        Connector(this).use { connector ->
-            connector.init()
-
-            while (true) {
-                if (connector.ready()) {
-                    //Log.d("TG",reader.readLine())
-                }
-                if (!messages.isEmpty()) {
-                    val msg = messages.take()
-                    if (msg == "EXIT") {
-                        break
-                    } else if (msg == "REFRESH") {
-                        connector.requestLobbies()
-                    }
-                }
+        while (true) {
+            if (reader.ready()) {
+                //Log.d("TG",reader.readLine())
             }
         }
     }
+
+    fun ready() = reader.ready()
+
+    override fun close() = socket.close()
+}
+
+class MultiplayerGameActivity : AppCompatActivity(), GameInterface {
+    lateinit var connector : Connector
+        private set
 
     override fun showScore(score: Int) {
         supportFragmentManager.beginTransaction().apply { replace(R.id.game_fragment, GameScoreFragment.newInstance(score), SCORE_FRAGMENT_TAG); commit() }
@@ -118,10 +127,12 @@ class MultiplayerGameActivity : AppCompatActivity(), GameInterface {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_game)
 
-        supportFragmentManager.beginTransaction().apply { replace(R.id.game_fragment, LobbySelectionFragment()); commit() }
-
         GlobalScope.launch {
-            connect()
+            connector = Connector(this@MultiplayerGameActivity)
+            connector.connect()
+            connector.close()
         }
+
+        supportFragmentManager.beginTransaction().apply { replace(R.id.game_fragment, LobbySelectionFragment()); commit() }
     }
 }

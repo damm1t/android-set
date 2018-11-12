@@ -28,7 +28,7 @@ class LobbyCreationDialog: DialogFragment() {
         return AlertDialog.Builder(context)
                 .setView(view)
                 .setPositiveButton("Create") { dialogInterface: DialogInterface, id: Int ->
-                    (activity as MultiplayerGameActivity).messages.put("CREATE ${view.max_players_picker.value}")
+                    (activity as MultiplayerGameActivity).connector.createLobby(view.max_players_picker.value)
                 }.create()
     }
 }
@@ -67,7 +67,7 @@ class LobbySelectionFragment : Fragment() {
         view.recycler_view_lobbies.addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL))
 
         view.swipe_refresh_lobbies.setOnRefreshListener {
-            (activity as MultiplayerGameActivity).messages.put("REFRESH")
+            (activity as MultiplayerGameActivity).connector.requestLobbies()
         }
 
         LocalBroadcastManager.getInstance(context!!).registerReceiver(object :BroadcastReceiver() {
