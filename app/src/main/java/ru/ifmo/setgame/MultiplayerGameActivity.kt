@@ -35,7 +35,7 @@ const val SCORE_FRAGMENT_TAG = "SCORE_FRAGMENT_TAG"
 
 class Connector(context: Context) : AutoCloseable {
     val LOBBIES_LIST_BROADCAST = "ru.ifmo.setgame.LOBBIES_LIST"
-    val IN_LOBBY_BROADCAST = "ru.ifmo.setgame.LOBBIES_LIST"
+    val IN_LOBBY_BROADCAST = "ru.ifmo.setgame.IN_LOBBY"
 
     private val mutex = Mutex()
     private val hostAddress = "18.222.225.249"
@@ -68,7 +68,7 @@ class Connector(context: Context) : AutoCloseable {
     fun createLobby(maxPlayers: Int) = GlobalScope.launch { mutex.withLock {
         val request = """{"status": "$status",
             |"player_id": $playerId,
-            |"action": "create_lobby"
+            |"action": "create_lobby",
             |"max_players": $maxPlayers}""".trimMargin()
 
         writer.write(request)
