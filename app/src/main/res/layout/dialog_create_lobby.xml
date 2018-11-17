@@ -6,7 +6,7 @@
     android:layout_height="match_parent">
 
     <TextView
-        android:id="@+id/text_max_players"
+        android:id="@+id/max_players_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Maximum players:"
@@ -20,8 +20,14 @@
         android:id="@+id/max_players_picker"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_constraintTop_toTopOf="@id/text_max_players"
-        app:layout_constraintBottom_toBottomOf="@id/text_max_players"
-        app:layout_constraintLeft_toRightOf="@id/text_max_players"
+        app:layout_constraintTop_toTopOf="@id/max_players_text"
+        app:layout_constraintBottom_toBottomOf="@id/max_players_text"
+        app:layout_constraintLeft_toRightOf="@id/max_players_text"
         app:layout_constraintRight_toRightOf="parent"/>
+
+    <ProgressBar
+        android:id="@+id/progress_bar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone" />
 </androidx.constraintlayout.widget.ConstraintLayout>

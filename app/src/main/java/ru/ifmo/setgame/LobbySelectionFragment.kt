@@ -20,7 +20,29 @@ import kotlinx.android.synthetic.main.dialog_create_lobby.view.*
 import kotlinx.android.synthetic.main.fragment_lobby_selection.view.*
 import kotlinx.android.synthetic.main.item_lobby.view.*
 
-class LobbyCreationDialog: DialogFragment() {
+class LobbyCreationDialog : DialogFragment() {
+
+    val broadcastReceiver = object :BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            val lobby = intent!!.extras!!.getString("lobby")!!
+            activity!!.supportFragmentManager.beginTransaction().apply {
+                replace(R.id.game_fragment, LobbyInfoFragment.newInstance(lobby), SCORE_FRAGMENT_TAG)
+                commit()
+            }
+            this@LobbyCreationDialog.dismiss()
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        LocalBroadcastManager.getInstance(context!!).registerReceiver(broadcastReceiver, IntentFilter("ru.ifmo.setgame.IN_LOBBY"))
+    }
+
+    override fun onPause() {
+        super.onPause()
+        LocalBroadcastManager.getInstance(context!!).unregisterReceiver(broadcastReceiver)
+    }
+
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val view = LayoutInflater.from(context).inflate(R.layout.dialog_create_lobby, null)
         view.max_players_picker.minValue = 0
@@ -28,9 +50,22 @@ class LobbyCreationDialog: DialogFragment() {
         return AlertDialog.Builder(context)
                 .setView(view)
                 .setPositiveButton("Create") { dialogInterface: DialogInterface, id: Int ->
-                    (activity as MultiplayerGameActivity).connector.createLobby(view.max_players_picker.value)
-                }.create()
+                }.create().apply {
+                    setOnShowListener { dialogInterface ->
+                        this.getButton(AlertDialog.BUTTON_POSITIVE).apply {
+                            setOnClickListener {
+                                view.progress_bar.visibility = View.VISIBLE
+                                view.max_players_picker.visibility = View.INVISIBLE
+                                view.max_players_text.visibility = View.INVISIBLE
+
+                                (activity as MultiplayerGameActivity).connector.createLobby(view.max_players_picker.value)
+                            }
+                        }
+                    }
+                }
     }
+
+
 }
 
 class LobbySelectionFragment : Fragment() {
@@ -56,6 +91,26 @@ class LobbySelectionFragment : Fragment() {
     }
 
     lateinit var adapter: LobbyAdapter
+    val broadcastReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            val str = intent?.extras?.getString("lobbies_list")!!
+            val lobbies = jacksonObjectMapper().readValue<Array<Lobby>>(str)
+            adapter.data = lobbies
+            adapter.notifyDataSetChanged()
+
+            view?.swipe_refresh_lobbies?.isRefreshing = false
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        LocalBroadcastManager.getInstance(context!!).registerReceiver(broadcastReceiver, IntentFilter("ru.ifmo.setgame.LOBBIES_LIST"))
+    }
+
+    override fun onPause() {
+        super.onPause()
+        LocalBroadcastManager.getInstance(context!!).unregisterReceiver(broadcastReceiver)
+    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_lobby_selection, container, false)
@@ -69,17 +124,6 @@ class LobbySelectionFragment : Fragment() {
         view.swipe_refresh_lobbies.setOnRefreshListener {
             (activity as MultiplayerGameActivity).connector.requestLobbies()
         }
-
-        LocalBroadcastManager.getInstance(context!!).registerReceiver(object :BroadcastReceiver() {
-            override fun onReceive(context: Context?, intent: Intent?) {
-                val str = intent?.extras?.getString("lobbies")!!
-                val lobbies = jacksonObjectMapper().readValue<Array<Lobby>>(str)
-                adapter.data = lobbies
-                adapter.notifyDataSetChanged()
-
-                view.swipe_refresh_lobbies.isRefreshing = false
-            }
-        }, IntentFilter("ru.ifmo.setgame.LOBBIES_LIST"))
 
         view.fab.setOnClickListener {
             LobbyCreationDialog().show(fragmentManager, "create_lobby")

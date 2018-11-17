@@ -62,7 +62,7 @@ class Connector(context: Context) : AutoCloseable {
         status = response.get("status").asText()
         val lobbiesStr = mapper.writeValueAsString(response.get("lobbies_list"))
 
-        localBroadcastManager.sendBroadcast(Intent(LOBBIES_LIST_BROADCAST).apply { putExtra("lobbies", lobbiesStr) })
+        localBroadcastManager.sendBroadcast(Intent(LOBBIES_LIST_BROADCAST).apply { putExtra("lobbies_list", lobbiesStr) })
     }}
 
     fun createLobby(maxPlayers: Int) = GlobalScope.launch { mutex.withLock {
@@ -93,7 +93,7 @@ class Connector(context: Context) : AutoCloseable {
         status = response.get("status").asText()
         val lobbiesStr = mapper.writeValueAsString(response.get("lobbies_list"))
 
-        localBroadcastManager.sendBroadcast(Intent(LOBBIES_LIST_BROADCAST).apply { putExtra("lobbies", lobbiesStr) })
+        localBroadcastManager.sendBroadcast(Intent(LOBBIES_LIST_BROADCAST).apply { putExtra("lobbies_list", lobbiesStr) })
     }
 
     suspend fun connect() {
