@@ -66,6 +66,12 @@ class LobbyInfoFragment : Fragment() {
             }
         }
 
+        view.btn_leave.setOnClickListener {
+            (activity as MultiplayerGameActivity).connector.leaveLobby()
+            (activity as MultiplayerGameActivity).supportFragmentManager.beginTransaction()
+                    .replace(R.id.game_fragment, LobbySelectionFragment()).commit()
+        }
+
         return view
     }
 

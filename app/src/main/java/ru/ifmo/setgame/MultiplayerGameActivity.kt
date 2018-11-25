@@ -80,10 +80,30 @@ class Connector(context: Context) : AutoCloseable {
         localBroadcastManager.sendBroadcast(Intent(IN_LOBBY_BROADCAST).apply { putExtra("lobby", lobbyStr) })
     } }
 
-    fun joinLobby(lobbyId : Int) = GlobalScope.launch { mutex.withLock {
+    fun joinLobby(mLobbyId : Int) = GlobalScope.launch { mutex.withLock {
         val request = """{"status": "$status",
             |"player_id": $playerId,
             |"action": "join_lobby",
+            |"lobby_id": $mLobbyId}""".trimMargin()
+
+        writer.write(request)
+        writer.flush()
+
+        val response = mapper.readTree(reader.readLine())
+        status = response.get("status").asText()
+        lobbyId = response.get("lobby_id").asInt()
+
+        if (status != "IN_LOBBY") TODO()
+
+        val lobbyStr = mapper.writeValueAsString(response.get("lobby"))
+
+        localBroadcastManager.sendBroadcast(Intent(IN_LOBBY_BROADCAST).apply { putExtra("lobby", lobbyStr) })
+    } }
+
+    fun leaveLobby() = GlobalScope.launch { mutex.withLock {
+        val request = """{"status": "$status",
+            |"player_id": $playerId,
+            |"action": "leave_lobby",
             |"lobby_id": $lobbyId}""".trimMargin()
 
         writer.write(request)
@@ -91,12 +111,13 @@ class Connector(context: Context) : AutoCloseable {
 
         val response = mapper.readTree(reader.readLine())
         status = response.get("status").asText()
+        lobbyId = -1
 
-        if (status != "IN_LOBBY") TODO()
+        assert(status == "SELECTING_LOBBY")
 
-        val lobbyStr = mapper.writeValueAsString(response.get("lobby"))
+        val lobbiesStr = mapper.writeValueAsString(response.get("lobbies_list"))
 
-        localBroadcastManager.sendBroadcast(Intent(IN_LOBBY_BROADCAST).apply { putExtra("lobby", lobbyStr) })
+        localBroadcastManager.sendBroadcast(Intent(LOBBIES_LIST_BROADCAST).apply { putExtra("lobbies_list", lobbiesStr) })
     } }
 
     // send default handshake and get player id and list of lobbies
