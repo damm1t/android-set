@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
@@ -15,33 +16,11 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
-import kotlinx.android.synthetic.main.dialog_create_lobby.*
 import kotlinx.android.synthetic.main.dialog_create_lobby.view.*
 import kotlinx.android.synthetic.main.fragment_lobby_selection.view.*
 import kotlinx.android.synthetic.main.item_lobby.view.*
 
 class LobbyCreationDialog : DialogFragment() {
-
-    val broadcastReceiver = object :BroadcastReceiver() {
-        override fun onReceive(context: Context?, intent: Intent?) {
-            val lobby = intent!!.extras!!.getString("lobby")!!
-            activity!!.supportFragmentManager.beginTransaction().apply {
-                replace(R.id.game_fragment, LobbyInfoFragment.newInstance(lobby), SCORE_FRAGMENT_TAG)
-                commit()
-            }
-            this@LobbyCreationDialog.dismiss()
-        }
-    }
-
-    override fun onResume() {
-        super.onResume()
-        LocalBroadcastManager.getInstance(context!!).registerReceiver(broadcastReceiver, IntentFilter("ru.ifmo.setgame.IN_LOBBY"))
-    }
-
-    override fun onPause() {
-        super.onPause()
-        LocalBroadcastManager.getInstance(context!!).unregisterReceiver(broadcastReceiver)
-    }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val view = LayoutInflater.from(context).inflate(R.layout.dialog_create_lobby, null)
@@ -50,19 +29,14 @@ class LobbyCreationDialog : DialogFragment() {
         return AlertDialog.Builder(context)
                 .setView(view)
                 .setPositiveButton("Create") { dialogInterface: DialogInterface, id: Int ->
-                }.create().apply {
-                    setOnShowListener { dialogInterface ->
-                        this.getButton(AlertDialog.BUTTON_POSITIVE).apply {
-                            setOnClickListener {
-                                view.progress_bar.visibility = View.VISIBLE
-                                view.max_players_picker.visibility = View.INVISIBLE
-                                view.max_players_text.visibility = View.INVISIBLE
+                    view.progress_bar.visibility = View.VISIBLE
+                    view.max_players_picker.visibility = View.INVISIBLE
+                    view.max_players_text.visibility = View.INVISIBLE
 
-                                (activity as MultiplayerGameActivity).connector.createLobby(view.max_players_picker.value)
-                            }
-                        }
-                    }
-                }
+                    (activity as MultiplayerGameActivity).supportFragmentManager.beginTransaction()
+                            .replace(R.id.game_fragment, LobbyInfoFragment.newInstanceCreate(view.max_players_picker.value))
+                            .commit()
+                }.create()
     }
 
 
@@ -72,9 +46,18 @@ class LobbySelectionFragment : Fragment() {
 
     class LobbyAdapter(var data: Array<Lobby>) : RecyclerView.Adapter<LobbyAdapter.VH>() {
 
-        class VH(tv: View) : RecyclerView.ViewHolder(tv) {
+        inner class VH(tv: View) : RecyclerView.ViewHolder(tv) {
             val name = tv.lobby_name!!
             val nOfPlayers = tv.lobby_n_players!!
+
+            init {
+                itemView.setOnClickListener{
+                    (tv.context as AppCompatActivity).supportFragmentManager.beginTransaction()
+                            .replace(R.id.game_fragment, LobbyInfoFragment.newInstanceJoin(
+                                    data[adapterPosition].lobby_id
+                            )).commit()
+                }
+            }
         }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {

@@ -9,20 +9,23 @@
         android:id="@+id/info_lobby_name"
         android:textSize="32sp"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"
+        android:visibility="gone"/>
 
     <TextView
         android:id="@+id/info_max_players"
         android:textSize="16sp"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:visibility="gone"/>
 
     <LinearLayout
         android:id="@+id/players_in_lobby"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:orientation="vertical"/>
+        android:orientation="vertical"
+        android:visibility="gone"/>
 
     <TextView
         android:id="@+id/btn_leave"
@@ -32,6 +35,13 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:minHeight="64dp" />
+        android:minHeight="64dp"
+        android:visibility="gone"/>
+
+    <ProgressBar
+        android:id="@+id/info_prograss_bar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"/>
 
 </LinearLayout>

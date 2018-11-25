@@ -16,7 +16,6 @@ import java.io.BufferedWriter
 import java.io.InputStreamReader
 import java.io.OutputStreamWriter
 import java.net.Socket
-import java.util.concurrent.ArrayBlockingQueue
 
 interface GameInterface {
 
@@ -81,6 +80,25 @@ class Connector(context: Context) : AutoCloseable {
         localBroadcastManager.sendBroadcast(Intent(IN_LOBBY_BROADCAST).apply { putExtra("lobby", lobbyStr) })
     } }
 
+    fun joinLobby(lobbyId : Int) = GlobalScope.launch { mutex.withLock {
+        val request = """{"status": "$status",
+            |"player_id": $playerId,
+            |"action": "join_lobby",
+            |"lobby_id": $lobbyId}""".trimMargin()
+
+        writer.write(request)
+        writer.flush()
+
+        val response = mapper.readTree(reader.readLine())
+        status = response.get("status").asText()
+
+        if (status != "IN_LOBBY") TODO()
+
+        val lobbyStr = mapper.writeValueAsString(response.get("lobby"))
+
+        localBroadcastManager.sendBroadcast(Intent(IN_LOBBY_BROADCAST).apply { putExtra("lobby", lobbyStr) })
+    } }
+
     // send default handshake and get player id and list of lobbies
     private suspend fun init() = mutex.withLock {
         val request = """{"status": "$status"}"""
@@ -101,7 +119,25 @@ class Connector(context: Context) : AutoCloseable {
 
         while (true) {
             if (reader.ready()) {
-                //Log.d("TG",reader.readLine())
+                if (status == "SELECTING_LOBBY") {
+                    assert(false)
+                } else if (status == "IN_LOBBY") {
+                    val tmp_str = reader.readLine();
+                    Log.d("TG_connect_loop", tmp_str)
+
+                    val update = mapper.readTree(tmp_str)
+
+                    status = update.get("status").asText()
+
+                    if (status == "IN_GAME") {
+                        TODO()
+                    }
+
+                    val lobbyStr = mapper.writeValueAsString(update.get("lobby"))
+                    localBroadcastManager.sendBroadcast(Intent(IN_LOBBY_BROADCAST).apply { putExtra("lobby", lobbyStr) })
+                } else {
+                    TODO()
+                }
             }
         }
     }

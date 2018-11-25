@@ -29,6 +29,13 @@ class LobbyInfoFragment : Fragment() {
 
         fragment_view.info_lobby_name.text = lobby.get("lobby_id").asText()
         fragment_view.info_max_players.text = "${playersArray.size} / ${lobby.get("max_players").asInt()}"
+        fragment_view.players_in_lobby.removeAllViews()
+
+        fragment_view.info_lobby_name.visibility = View.VISIBLE
+        fragment_view.info_max_players.visibility = View.VISIBLE
+        fragment_view.players_in_lobby.visibility = View.VISIBLE
+        fragment_view.btn_leave.visibility = View.VISIBLE
+        fragment_view.info_prograss_bar.visibility = View.GONE
 
         for (player in playersArray) {
             val tv = TextView(context).apply {
@@ -52,7 +59,11 @@ class LobbyInfoFragment : Fragment() {
         val view = inflater.inflate(R.layout.fragment_lobby_info, container, false)
 
         arguments?.apply {
-            setDataFromJsonString(getString("lobby")!!, view)
+            if (getBoolean("create")) {
+                (activity as MultiplayerGameActivity).connector.createLobby(getInt("max_players"))
+            } else {
+                (activity as MultiplayerGameActivity).connector.joinLobby(getInt("lobby_id"))
+            }
         }
 
         return view
@@ -60,9 +71,21 @@ class LobbyInfoFragment : Fragment() {
 
     companion object {
         @JvmStatic
-        fun newInstance(param1: String) =
+        fun newInstanceJoin(lobbyId: Int) =
                 LobbyInfoFragment().apply {
-                    arguments = Bundle().apply { putString("lobby", param1) }
+                    arguments = Bundle().apply {
+                        putInt("lobby_id", lobbyId)
+                        putBoolean("create", false)
+                    }
+                }
+
+        @JvmStatic
+        fun newInstanceCreate(maxPlayers : Int) =
+                LobbyInfoFragment().apply {
+                    arguments = Bundle().apply {
+                        putBoolean("create", true)
+                        putInt("max_players", maxPlayers)
+                    }
                 }
     }
 }
