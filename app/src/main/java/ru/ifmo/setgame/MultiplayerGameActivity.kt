@@ -1,7 +1,9 @@
 package ru.ifmo.setgame
 
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
@@ -35,6 +37,7 @@ const val SCORE_FRAGMENT_TAG = "SCORE_FRAGMENT_TAG"
 class Connector(context: Context) : AutoCloseable {
     val LOBBIES_LIST_BROADCAST = "ru.ifmo.setgame.LOBBIES_LIST"
     val IN_LOBBY_BROADCAST = "ru.ifmo.setgame.IN_LOBBY"
+    val IN_GAME_BROADCAST = "ru.ifmo.setgame.IN_GAME"
 
     private val mutex = Mutex()
     private val hostAddress = "18.222.225.249"
@@ -47,6 +50,7 @@ class Connector(context: Context) : AutoCloseable {
 
     private var playerId = -1
     private var lobbyId = -1
+    private var gameId = -1
     private var status = "NEW"
 
     fun requestLobbies() = GlobalScope.launch { mutex.withLock {
@@ -120,6 +124,19 @@ class Connector(context: Context) : AutoCloseable {
         localBroadcastManager.sendBroadcast(Intent(LOBBIES_LIST_BROADCAST).apply { putExtra("lobbies_list", lobbiesStr) })
     } }
 
+    fun make_move(positions : IntArray) = GlobalScope.launch { mutex.withLock {
+        val request = """{"status": "$status",
+            |"player_id": $playerId,
+            |"action": "make_move",
+            |"lobby_id": $lobbyId,
+            |"game_id": $gameId,
+            |"move_positions": ${mapper.writeValueAsString(positions)}}""".trimMargin()
+
+        writer.write(request)
+        writer.flush()
+        // we get no response after this
+    } }
+
     // send default handshake and get player id and list of lobbies
     private suspend fun init() = mutex.withLock {
         val request = """{"status": "$status"}"""
@@ -151,13 +168,26 @@ class Connector(context: Context) : AutoCloseable {
                     status = update.get("status").asText()
 
                     if (status == "IN_GAME") {
-                        TODO()
+
+                        gameId = update.get("game_id").asInt()
+                        val gameStr = mapper.writeValueAsString(update.get("game"))
+                        localBroadcastManager.sendBroadcast(Intent("GO_TO_GAME").apply { putExtra("game", gameStr) })
+                    } else {
+                        val lobbyStr = mapper.writeValueAsString(update.get("lobby"))
+                        localBroadcastManager.sendBroadcast(Intent(IN_LOBBY_BROADCAST).apply { putExtra("lobby", lobbyStr) })
+                    }
+                } else if (status == "IN_GAME") {
+                    val update = mapper.readTree(reader.readLine())
+
+                    status = update.get("status").asText()
+
+                    if (status == "GAME_ENDED") {
+                        localBroadcastManager.sendBroadcast(Intent("GO_TO_SCORE"))
+                        continue
                     }
 
-                    val lobbyStr = mapper.writeValueAsString(update.get("lobby"))
-                    localBroadcastManager.sendBroadcast(Intent(IN_LOBBY_BROADCAST).apply { putExtra("lobby", lobbyStr) })
-                } else {
-                    TODO()
+                    val gameStr = mapper.writeValueAsString(update.get("game"))
+                    localBroadcastManager.sendBroadcast(Intent(IN_GAME_BROADCAST).apply { putExtra("game", gameStr) })
                 }
             }
         }
@@ -191,5 +221,19 @@ class MultiplayerGameActivity : AppCompatActivity(), GameInterface {
         }
 
         supportFragmentManager.beginTransaction().apply { replace(R.id.game_fragment, LobbySelectionFragment()); commit() }
+
+        LocalBroadcastManager.getInstance(this).registerReceiver(object :BroadcastReceiver() {
+            override fun onReceive(context: Context?, intent: Intent?) {
+                val gameStr = intent!!.extras!!.getString("game")
+                supportFragmentManager.beginTransaction().apply { replace(R.id.game_fragment, GameFragment.newInstance(gameStr)); commit() }
+                //LocalBroadcastManager.getInstance(this@MultiplayerGameActivity).sendBroadcast(Intent(connector.IN_GAME_BROADCAST).apply { putExtra("game", gameStr) })
+            }
+        }, IntentFilter("GO_TO_GAME"))
+
+        LocalBroadcastManager.getInstance(this).registerReceiver(object :BroadcastReceiver() {
+            override fun onReceive(context: Context?, intent: Intent?) {
+                supportFragmentManager.beginTransaction().apply { replace(R.id.game_fragment, GameScoreFragment.newInstance(0)); commit() }
+            }
+        }, IntentFilter("GO_TO_SCORE"))
     }
 }

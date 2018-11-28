@@ -1,6 +1,11 @@
 package ru.ifmo.setgame
 
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.os.Bundle
+import android.os.LocaleList
 import androidx.core.content.res.ResourcesCompat
 import android.util.Log
 import android.view.LayoutInflater
@@ -8,11 +13,14 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
 import android.widget.ImageView
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import kotlinx.android.synthetic.main.card_frame.view.*
 import kotlinx.android.synthetic.main.fragment_game.view.*
 import ru.ifmo.setgame.R.drawable.card_frame_drawable
 import ru.ifmo.setgame.R.layout.card_frame
 import ru.ifmo.setgame.R.layout.fragment_game
+import java.util.zip.Inflater
 
 class GameFragment : androidx.fragment.app.Fragment() {
 
@@ -28,34 +36,22 @@ class GameFragment : androidx.fragment.app.Fragment() {
     private lateinit var gameView: View
     private var setOnBoard = Array(3) { 0 }
 
-    private fun addRow(inflater: LayoutInflater) {
-        gameView.game_grid.rowCount++
-        for (i in 0 until DEFAULT_COLUMNS) {
-            val params = androidx.gridlayout.widget.GridLayout.LayoutParams(androidx.gridlayout.widget.GridLayout.spec(gameView.game_grid.rowCount - 1, androidx.gridlayout.widget.GridLayout.FILL, 1f), androidx.gridlayout.widget.GridLayout.spec(i, androidx.gridlayout.widget.GridLayout.FILL, 1f))
-            params.width = 0
-            params.height = 0
-
-            val image = inflater.inflate(card_frame, gameView.game_grid, false) as FrameLayout
-            image.card_image.setImageDrawable(ResourcesCompat.getDrawable(resources, deck[0].drawable_id, null))
-            image.card_frame.setImageDrawable(ResourcesCompat.getDrawable(resources, card_frame_drawable, null))
-
-            image.setOnClickListener {
-                val index = DEFAULT_ROWS * DEFAULT_COLUMNS + i
-                board[index].selected = !board[index].selected
-
-                it.card_frame.visibility = if (board[index].selected) ImageView.VISIBLE else ImageView.GONE
-
-                Log.d("TG", index.toString())
-                checkSets()
-
-            }
-            images.add(image)
-            board.add(deck[0])
-            deck.removeAt(0)
-
-            gameView.game_grid.addView(image, params)
+    val receiver = object :BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            val json = intent!!.extras!!.getString("game")!!
+            drawBoard(json)
+            //TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
         }
-        gameView.game_grid.requestLayout()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        LocalBroadcastManager.getInstance(context!!).registerReceiver(receiver, IntentFilter("ru.ifmo.setgame.IN_GAME"))
+    }
+
+    override fun onPause() {
+        super.onPause()
+        LocalBroadcastManager.getInstance(context!!).unregisterReceiver(receiver)
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -63,8 +59,6 @@ class GameFragment : androidx.fragment.app.Fragment() {
 
         gameView.game_grid.rowCount = DEFAULT_ROWS
         gameView.game_grid.columnCount = DEFAULT_COLUMNS
-
-        deck.shuffle()
 
         for (i in 0 until DEFAULT_ROWS) {
             for (j in 0 until DEFAULT_COLUMNS) {
@@ -75,8 +69,6 @@ class GameFragment : androidx.fragment.app.Fragment() {
                 val image = inflater.inflate(card_frame, gameView.game_grid, false) as FrameLayout
                 image.card_image.setImageDrawable(ResourcesCompat.getDrawable(resources, deck[0].drawable_id, null))
                 image.card_frame.setImageDrawable(ResourcesCompat.getDrawable(resources, card_frame_drawable, null))
-
-                //checkSets()
 
                 image.setOnClickListener {
                     val index = i * DEFAULT_COLUMNS + j
@@ -95,11 +87,14 @@ class GameFragment : androidx.fragment.app.Fragment() {
                 }
 
                 images.add(image)
-                board.add(deck[0])
-                deck.removeAt(0)
+                board.add(deck[i * 3 + j])
 
                 gameView.game_grid.addView(image, params)
             }
+        }
+
+        arguments?.apply {
+            drawBoard(getString("json")!!)
         }
 
         return gameView
@@ -111,86 +106,33 @@ class GameFragment : androidx.fragment.app.Fragment() {
         val propertiesSize = board[0].properties.size
 
         if (selectedCount == CARDS_IN_SET) {
-            val properties = Array(propertiesSize) { mutableListOf<Int>() }
-
-            for (card in board) {
-                if (card.selected) {
-                    for (i in 0 until propertiesSize) {
-                        properties[i].add(card.properties[i])
-                    }
+            val selected = mutableListOf<Int>()
+            for (i in 0 until 12) {
+                if (board[i].selected) {
+                    selected.add(i)
                 }
             }
 
-            if (properties.all { prop -> prop.distinct().let { it.size == 1 || it.size == CARDS_IN_SET } }) {
-                score++
-                var changedBoardId = mutableListOf<Int>()
-                for (i in 0 until DEFAULT_COLUMNS * DEFAULT_ROWS) {
-                    if (board[i].selected) {
-                        board[i] = deck[0]
-                        changedBoardId.add(i)
-                        images[i].card_image.setImageDrawable(ResourcesCompat.getDrawable(resources, deck[0].drawable_id, null))
-                        images[i].card_frame.visibility = ImageView.GONE
-                        if (deck.size > 1) deck.removeAt(0) // check so we never crash because of pulling from empty deck
-                        else {
-                            //deck[0] = unselectable empty card
-                        }
-                    }
-                }
-                var iterations = 5
-                while (iterations-- != 0 && !hasSets()) {
-                    Log.d("tg", "no sets here, but i will find")
-                    for (i in changedBoardId) {
-                        deck.add(board[i])
-                        board[i] = deck[0]
-                        images[i].card_image.setImageDrawable(ResourcesCompat.getDrawable(resources, deck[0].drawable_id, null))
-                        images[i].card_frame.visibility = ImageView.GONE
-                        if (deck.size > 1) deck.removeAt(0)
-                    }
-                }
-                if (!hasSets()) {
-                    (activity as MultiplayerGameActivity).showScore(score)
-                }
-            }
+            (activity as MultiplayerGameActivity).connector.make_move(selected.toIntArray())
         }
     }
 
-    private fun hasSets(): Boolean {
-        if (deck.size == 1) return false
+    private fun drawBoard(json : String) {
+        val j_board = jacksonObjectMapper().readTree(json).get("board")
+        for (i in 0 until 12) {
+            val tmp = j_board.get(i.toString())
+            val card_id = tmp[0].asInt() * 27 + tmp[1].asInt() * 9 + tmp[2].asInt() * 3 + tmp[3].asInt()
+            images[i].card_image.setImageDrawable(ResourcesCompat.getDrawable(resources, deck[card_id].drawable_id, null))
+        }
+    }
 
-        var has = false
-        val propertiesSize = board[0].properties.size
-
-        for (i in 0 until DEFAULT_COLUMNS * gameView.game_grid.rowCount)
-            for (j in i + 1 until DEFAULT_COLUMNS * gameView.game_grid.rowCount)
-                for (k in j + 1 until DEFAULT_COLUMNS * gameView.game_grid.rowCount) {
-                    val properties = Array(propertiesSize) { mutableListOf<Int>() }
-
-                    board[i].let {
-                        for (t in 0 until propertiesSize) {
-                            properties[t].add(it.properties[t])
-                        }
-                    }
-
-                    board[j].let {
-                        for (t in 0 until propertiesSize) {
-                            properties[t].add(it.properties[t])
-                        }
-                    }
-
-                    board[k].let {
-                        for (t in 0 until propertiesSize) {
-                            properties[t].add(it.properties[t])
-                        }
-                    }
-
-                    if (properties.all { prop -> prop.distinct().let { it.size == 1 || it.size == CARDS_IN_SET } }) {
-                        has = true
-                        setOnBoard[0] = i
-                        setOnBoard[1] = j
-                        setOnBoard[2] = k
+    companion object {
+        @JvmStatic
+        fun newInstance(json: String) =
+                GameFragment().apply {
+                    arguments = Bundle().apply {
+                        putString("json", json)
                     }
                 }
-
-        return has
     }
 }
