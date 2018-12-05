@@ -36,22 +36,21 @@ class GameFragment : androidx.fragment.app.Fragment() {
     private lateinit var gameView: View
     private var setOnBoard = Array(3) { 0 }
 
-    val receiver = object :BroadcastReceiver() {
+    val receiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
-            val json = intent!!.extras!!.getString("game")!!
+            val json = intent?.extras?.getString("game")!!
             drawBoard(json)
-            //TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
         }
     }
 
-    override fun onResume() {
-        super.onResume()
+    override fun onStart() {
+        super.onStart()
         LocalBroadcastManager.getInstance(context!!).registerReceiver(receiver, IntentFilter("ru.ifmo.setgame.IN_GAME"))
     }
 
-    override fun onPause() {
-        super.onPause()
+    override fun onStop() {
         LocalBroadcastManager.getInstance(context!!).unregisterReceiver(receiver)
+        super.onStop()
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -102,7 +101,7 @@ class GameFragment : androidx.fragment.app.Fragment() {
 
 
     private fun checkSets() {
-        val selectedCount = board.filter { it.selected }.size
+        val selectedCount = board.count { it.selected }
         val propertiesSize = board[0].properties.size
 
         if (selectedCount == CARDS_IN_SET) {
@@ -117,7 +116,7 @@ class GameFragment : androidx.fragment.app.Fragment() {
         }
     }
 
-    private fun drawBoard(json : String) {
+    private fun drawBoard(json: String) {
         val j_board = jacksonObjectMapper().readTree(json).get("board")
         for (i in 0 until 12) {
             val tmp = j_board.get(i.toString())

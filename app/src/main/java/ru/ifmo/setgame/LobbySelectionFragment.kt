@@ -24,11 +24,13 @@ class LobbyCreationDialog : DialogFragment() {
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val view = LayoutInflater.from(context).inflate(R.layout.dialog_create_lobby, null)
-        view.max_players_picker.minValue = 0
+        view.max_players_picker.minValue = 1 // cannot set these from xml :(
         view.max_players_picker.maxValue = 10
+        view.max_players_picker.value = 2 // default value
+
         return AlertDialog.Builder(context)
                 .setView(view)
-                .setPositiveButton("Create") { dialogInterface: DialogInterface, id: Int ->
+                .setPositiveButton(getString(R.string.btn_create_text)) { dialogInterface: DialogInterface, id: Int ->
                     view.progress_bar.visibility = View.VISIBLE
                     view.max_players_picker.visibility = View.INVISIBLE
                     view.max_players_text.visibility = View.INVISIBLE
@@ -38,8 +40,6 @@ class LobbyCreationDialog : DialogFragment() {
                             .commit()
                 }.create()
     }
-
-
 }
 
 class LobbySelectionFragment : Fragment() {
@@ -68,7 +68,8 @@ class LobbySelectionFragment : Fragment() {
         override fun getItemCount(): Int = data.size
 
         override fun onBindViewHolder(holder: VH, position: Int) {
-            holder.nOfPlayers.text = "${data[position].in_lobby.size} / ${data[position].max_players}"
+            val context = holder.itemView.context
+            holder.nOfPlayers.text = context.getString(R.string.players_count_placeholder, data[position].in_lobby.size, data[position].max_players)
             holder.name.text = data[position].lobby_id.toString()
         }
     }
@@ -85,14 +86,14 @@ class LobbySelectionFragment : Fragment() {
         }
     }
 
-    override fun onResume() {
-        super.onResume()
+    override fun onStart() {
+        super.onStart()
         LocalBroadcastManager.getInstance(context!!).registerReceiver(broadcastReceiver, IntentFilter("ru.ifmo.setgame.LOBBIES_LIST"))
     }
 
-    override fun onPause() {
-        super.onPause()
+    override fun onStop() {
         LocalBroadcastManager.getInstance(context!!).unregisterReceiver(broadcastReceiver)
+        super.onStop()
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
