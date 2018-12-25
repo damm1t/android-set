@@ -1,6 +1,7 @@
 package ru.ifmo.setgame
 
 import android.os.Bundle
+import android.os.CountDownTimer
 import androidx.fragment.app.Fragment
 import androidx.core.content.res.ResourcesCompat
 import androidx.gridlayout.widget.GridLayout
@@ -15,6 +16,8 @@ import kotlinx.android.synthetic.main.fragment_game.view.*
 import ru.ifmo.setgame.R.drawable.card_frame_drawable
 import ru.ifmo.setgame.R.layout.card_frame
 import ru.ifmo.setgame.R.layout.fragment_game
+import java.time.Clock
+import java.util.*
 
 class GameFragment : androidx.fragment.app.Fragment() {
 
@@ -28,39 +31,87 @@ class GameFragment : androidx.fragment.app.Fragment() {
     private val deck = loadDefaultDeck()
     private var score = 0
     private lateinit var gameView: View
-    private var setOnBoard = Array(3) { 0 }
+    private var setOnBoard = IntArray(3)
 
-    private fun addRow(inflater: LayoutInflater) {
-        gameView.game_grid.rowCount++
-        for (i in 0 until DEFAULT_COLUMNS) {
-            val params = androidx.gridlayout.widget.GridLayout.LayoutParams(androidx.gridlayout.widget.GridLayout.spec(gameView.game_grid.rowCount - 1, androidx.gridlayout.widget.GridLayout.FILL, 1f), androidx.gridlayout.widget.GridLayout.spec(i, androidx.gridlayout.widget.GridLayout.FILL, 1f))
-            params.width = 0
-            params.height = 0
 
-            val image = inflater.inflate(card_frame, gameView.game_grid, false) as FrameLayout
-            image.card_image.setImageDrawable(ResourcesCompat.getDrawable(resources, deck[0].drawable_id, null))
-            image.card_frame.setImageDrawable(ResourcesCompat.getDrawable(resources, card_frame_drawable, null))
+    private lateinit var timerComp: Timer
+    private var timerGlobalStart: Long = 0
+    private var timerGlobalFinish: Long = 0
 
-            image.setOnClickListener {
-                val index = DEFAULT_ROWS * DEFAULT_COLUMNS + i
-                board[index].selected = !board[index].selected
+    /*  private fun addRow(inflater: LayoutInflater) {
+          gameView.game_grid.rowCount++
+          for (i in 0 until DEFAULT_COLUMNS) {
+              val params = androidx.gridlayout.widget.GridLayout.LayoutParams(androidx.gridlayout.widget.GridLayout.spec(gameView.game_grid.rowCount - 1, androidx.gridlayout.widget.GridLayout.FILL, 1f), androidx.gridlayout.widget.GridLayout.spec(i, androidx.gridlayout.widget.GridLayout.FILL, 1f))
+              params.width = 0
+              params.height = 0
 
-                it.card_frame.visibility = if (board[index].selected) ImageView.VISIBLE else ImageView.GONE
+              val image = inflater.inflate(card_frame, gameView.game_grid, false) as FrameLayout
+              image.card_image.setImageDrawable(ResourcesCompat.getDrawable(resources, deck[0].drawable_id, null))
+              image.card_frame.setImageDrawable(ResourcesCompat.getDrawable(resources, card_frame_drawable, null))
 
-                Log.d("TG", index.toString())
-                checkSets()
+              image.setOnClickListener {
+                  val index = DEFAULT_ROWS * DEFAULT_COLUMNS + i
+                  board[index].selected = !board[index].selected
 
-            }
-            images.add(image)
-            board.add(deck[0])
-            deck.removeAt(0)
+                  it.card_frame.visibility = if (board[index].selected) ImageView.VISIBLE else ImageView.GONE
 
-            gameView.game_grid.addView(image, params)
+                  Log.d("TG", index.toString())
+                  checkSets()
+
+              }
+              images.add(image)
+              board.add(deck[0])
+              deck.removeAt(0)
+
+              gameView.game_grid.addView(image, params)
+          }
+          gameView.game_grid.requestLayout()
+      }
+  */
+
+    fun makeMove(selected: IntArray) {
+        if (selected.size != 3)
+            return
+
+        for (i in selected) {
+            board[i] = deck[0]
+            images[i].card_image.setImageDrawable(ResourcesCompat.getDrawable(resources, deck[0].drawable_id, null))
+            images[i].card_frame.visibility = ImageView.GONE
+            if (deck.size > 1) deck.removeAt(0)
         }
-        gameView.game_grid.requestLayout()
+        var iterations = 5
+        while (iterations-- != 0 && !hasSets()) {
+            Log.d("tg", "set not found, reshuffle deck")
+            for (i in selected) {
+                deck.add(board[i])
+                board[i] = deck[0]
+                images[i].card_image.setImageDrawable(ResourcesCompat.getDrawable(resources, deck[0].drawable_id, null))
+                images[i].card_frame.visibility = ImageView.GONE
+                if (deck.size > 1) deck.removeAt(0)
+            }
+        }
+
+        if (!hasSets()) {
+            timerGlobalFinish = System.currentTimeMillis()
+            //ToDo need to return game time: timerGlobalFinish - timerGlobalStart
+            (activity as GameActivity).showScore(score)
+        }
+
+
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        timerGlobalStart = System.currentTimeMillis()
+
+        timerComp = Timer()
+        timerComp.scheduleAtFixedRate(object : TimerTask() {
+
+            override fun run() {
+                makeMove(setOnBoard)
+
+            }
+        }, 10_000, 10_000)
+
         gameView = inflater.inflate(fragment_game, container, false)
 
         gameView.game_grid.rowCount = DEFAULT_ROWS
@@ -78,8 +129,6 @@ class GameFragment : androidx.fragment.app.Fragment() {
                 image.card_image.setImageDrawable(ResourcesCompat.getDrawable(resources, deck[0].drawable_id, null))
                 image.card_frame.setImageDrawable(ResourcesCompat.getDrawable(resources, card_frame_drawable, null))
 
-                //checkSets()
-
                 image.setOnClickListener {
                     val index = i * DEFAULT_COLUMNS + j
                     board[index].selected = !board[index].selected
@@ -88,12 +137,6 @@ class GameFragment : androidx.fragment.app.Fragment() {
 
                     Log.d("TG", index.toString())
                     checkSets()
-
-                    /*if (!hasSets()) {
-                        //(activity as GameInterface).showScore(score)
-                        Log.d("TG", "No sets")
-                        addRow(inflater) //ToDo incorrect update
-                    }*/
                 }
 
                 images.add(image)
@@ -125,33 +168,13 @@ class GameFragment : androidx.fragment.app.Fragment() {
 
             if (properties.all { prop -> prop.distinct().let { it.size == 1 || it.size == CARDS_IN_SET } }) {
                 score++
-                var changedBoardId = mutableListOf<Int>()
+                val changedBoardId = mutableListOf<Int>()
                 for (i in 0 until DEFAULT_COLUMNS * DEFAULT_ROWS) {
                     if (board[i].selected) {
-                        board[i] = deck[0]
                         changedBoardId.add(i)
-                        images[i].card_image.setImageDrawable(ResourcesCompat.getDrawable(resources, deck[0].drawable_id, null))
-                        images[i].card_frame.visibility = ImageView.GONE
-                        if (deck.size > 1) deck.removeAt(0) // check so we never crash because of pulling from empty deck
-                        else {
-                            //deck[0] = unselectable empty card
-                        }
                     }
                 }
-                var iterations = 5
-                while (iterations-- != 0 && !hasSets()) {
-                    Log.d("tg", "no sets here, but i will find")
-                    for (i in changedBoardId) {
-                        deck.add(board[i])
-                        board[i] = deck[0]
-                        images[i].card_image.setImageDrawable(ResourcesCompat.getDrawable(resources, deck[0].drawable_id, null))
-                        images[i].card_frame.visibility = ImageView.GONE
-                        if (deck.size > 1) deck.removeAt(0)
-                    }
-                }
-                if (!hasSets()) {
-                    (activity as GameActivity).showScore(score)
-                }
+                makeMove(changedBoardId.toIntArray())
             }
         }
     }
