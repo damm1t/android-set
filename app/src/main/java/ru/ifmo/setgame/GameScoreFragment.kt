@@ -1,5 +1,6 @@
 package ru.ifmo.setgame
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
 import androidx.fragment.app.Fragment
@@ -22,6 +23,7 @@ class GameScoreFragment : androidx.fragment.app.Fragment() {
     var playersArray = arrayOf<String>()
     var scoresArray = intArrayOf()
 
+    @SuppressLint("SetTextI18n")
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_score, container, false)
 

@@ -18,14 +18,14 @@ import kotlinx.android.synthetic.main.fragment_lobby_info.*
 import kotlinx.android.synthetic.main.fragment_lobby_info.view.*
 
 class LobbyInfoFragment : Fragment() {
-    val broadcastReceiver = object:BroadcastReceiver() {
+    val broadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             val json = intent?.extras?.getString("lobby")!!
             setDataFromJsonString(json, view!!)
         }
     }
 
-    fun setDataFromJsonString(string : String, fragment_view: View) {
+    fun setDataFromJsonString(string: String, fragment_view: View) {
         val lobby = jacksonObjectMapper().readValue<Lobby>(string)
         val playersArray = lobby.in_lobby
 
@@ -89,7 +89,7 @@ class LobbyInfoFragment : Fragment() {
                 }
 
         @JvmStatic
-        fun newInstanceCreate(maxPlayers : Int) =
+        fun newInstanceCreate(maxPlayers: Int) =
                 LobbyInfoFragment().apply {
                     arguments = Bundle().apply {
                         putBoolean("create", true)

@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:fab="http://schemas.android.com/tools">
+    xmlns:fab="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
 
-    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/swipe_refresh_lobbies"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
@@ -15,8 +14,8 @@
             android:id="@+id/recycler_view_lobbies"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:paddingBottom="82dp"
-            android:clipToPadding="false"/>
+            android:clipToPadding="false"
+            android:paddingBottom="82dp" />
 
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
@@ -24,8 +23,8 @@
         android:id="@+id/fab"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:src="@drawable/ic_add_white_24dp"
         android:layout_gravity="bottom|end"
         android:layout_margin="16dp"
-        app:fabSize="normal"/>
+        android:src="@drawable/ic_add_white_24dp"
+        app:fabSize="normal" />
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

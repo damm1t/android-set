@@ -6,4 +6,9 @@
     <string name="players_count_placeholder_long">Players: %d/%d</string>
     <string name="player_name_placeholder">Players #%d</string>
     <string name="btn_create_text">Create</string>
+    <string name="multiplayer">Multiplayer</string>
+    <string name="singleplayer">Singleplayer</string>
+    <string name="training">Training</string>
+    <string name="settings">Settings</string>
+    <string name="maximum_players">Maximum players:</string>
 </resources>

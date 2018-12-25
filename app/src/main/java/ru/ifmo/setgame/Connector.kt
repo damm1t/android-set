@@ -35,91 +35,103 @@ class Connector(context: Context) : AutoCloseable {
     private var gameId = -1
     private var status = "NEW"
 
-    fun requestLobbies() = GlobalScope.launch { mutex.withLock {
-        val request = """{"status": "$status",
+    fun requestLobbies() = GlobalScope.launch {
+        mutex.withLock {
+            val request = """{"status": "$status",
             |"player_id": $playerId,
             |"action": "refresh_list"}""".trimMargin()
 
-        writer.write(request)
-        writer.flush()
+            writer.write(request)
+            writer.flush()
 
-        val response = mapper.readTree(reader.readLine())
-        status = response.get("status").asText()
-        val lobbiesStr = mapper.writeValueAsString(response.get("lobbies_list"))
+            val response = mapper.readTree(reader.readLine())
+            status = response.get("status").asText()
+            val lobbiesStr = mapper.writeValueAsString(response.get("lobbies_list"))
 
-        localBroadcastManager.sendBroadcast(Intent(LOBBIES_LIST_BROADCAST).apply { putExtra("lobbies_list", lobbiesStr) })
-    }}
+            localBroadcastManager.sendBroadcast(Intent(LOBBIES_LIST_BROADCAST).apply { putExtra("lobbies_list", lobbiesStr) })
+        }
+    }
 
-    fun createLobby(maxPlayers: Int) = GlobalScope.launch { mutex.withLock {
-        val request = """{"status": "$status",
+    fun createLobby(maxPlayers: Int) = GlobalScope.launch {
+        mutex.withLock {
+            val request = """{"status": "$status",
             |"player_id": $playerId,
             |"action": "create_lobby",
             |"max_players": $maxPlayers}""".trimMargin()
 
-        writer.write(request)
-        writer.flush()
+            writer.write(request)
+            writer.flush()
 
-        val response = mapper.readTree(reader.readLine())
-        status = response.get("status").asText()
-        lobbyId = response.get("lobby_id").asInt()
-        val lobbyStr = mapper.writeValueAsString(response.get("lobby"))
+            val response = mapper.readTree(reader.readLine())
+            status = response.get("status").asText()
+            lobbyId = response.get("lobby_id").asInt()
+            val lobbyStr = mapper.writeValueAsString(response.get("lobby"))
 
-        localBroadcastManager.sendBroadcast(Intent(IN_LOBBY_BROADCAST).apply { putExtra("lobby", lobbyStr) })
-    } }
+            localBroadcastManager.sendBroadcast(Intent(IN_LOBBY_BROADCAST).apply { putExtra("lobby", lobbyStr) })
+        }
+    }
 
-    fun joinLobby(mLobbyId : Int) = GlobalScope.launch { mutex.withLock {
-        val request = """{"status": "$status",
+    fun joinLobby(mLobbyId: Int) = GlobalScope.launch {
+        mutex.withLock {
+            val request = """{"status": "$status",
             |"player_id": $playerId,
             |"action": "join_lobby",
             |"lobby_id": $mLobbyId}""".trimMargin()
 
-        writer.write(request)
-        writer.flush()
+            writer.write(request)
+            writer.flush()
 
-        val response = mapper.readTree(reader.readLine())
-        status = response.get("status").asText()
+            val response = mapper.readTree(reader.readLine())
+            status = response.get("status").asText()
 
-        if (status != "IN_LOBBY") { return@launch } // TODO doesn't work
+            if (status != "IN_LOBBY") {
+                return@launch
+            } // TODO doesn't work
 
-        lobbyId = response.get("lobby_id").asInt()
+            lobbyId = response.get("lobby_id").asInt()
 
-        val lobbyStr = mapper.writeValueAsString(response.get("lobby"))
+            val lobbyStr = mapper.writeValueAsString(response.get("lobby"))
 
-        localBroadcastManager.sendBroadcast(Intent(IN_LOBBY_BROADCAST).apply { putExtra("lobby", lobbyStr) })
-    } }
+            localBroadcastManager.sendBroadcast(Intent(IN_LOBBY_BROADCAST).apply { putExtra("lobby", lobbyStr) })
+        }
+    }
 
-    fun leaveLobby() = GlobalScope.launch { mutex.withLock {
-        val request = """{"status": "$status",
+    fun leaveLobby() = GlobalScope.launch {
+        mutex.withLock {
+            val request = """{"status": "$status",
             |"player_id": $playerId,
             |"action": "leave_lobby",
             |"lobby_id": $lobbyId}""".trimMargin()
 
-        writer.write(request)
-        writer.flush()
+            writer.write(request)
+            writer.flush()
 
-        val response = mapper.readTree(reader.readLine())
-        status = response.get("status").asText()
-        lobbyId = -1
+            val response = mapper.readTree(reader.readLine())
+            status = response.get("status").asText()
+            lobbyId = -1
 
-        assert(status == "SELECTING_LOBBY")
+            assert(status == "SELECTING_LOBBY")
 
-        val lobbiesStr = mapper.writeValueAsString(response.get("lobbies_list"))
+            val lobbiesStr = mapper.writeValueAsString(response.get("lobbies_list"))
 
-        localBroadcastManager.sendBroadcast(Intent(LOBBIES_LIST_BROADCAST).apply { putExtra("lobbies_list", lobbiesStr) })
-    } }
+            localBroadcastManager.sendBroadcast(Intent(LOBBIES_LIST_BROADCAST).apply { putExtra("lobbies_list", lobbiesStr) })
+        }
+    }
 
-    fun make_move(positions : IntArray) = GlobalScope.launch { mutex.withLock {
-        val request = """{"status": "$status",
+    fun make_move(positions: IntArray) = GlobalScope.launch {
+        mutex.withLock {
+            val request = """{"status": "$status",
             |"player_id": $playerId,
             |"action": "make_move",
             |"lobby_id": $lobbyId,
             |"game_id": $gameId,
             |"move_positions": ${mapper.writeValueAsString(positions)}}""".trimMargin()
 
-        writer.write(request)
-        writer.flush()
-        // we get no response after this
-    } }
+            writer.write(request)
+            writer.flush()
+            // we get no response after this
+        }
+    }
 
     // send default handshake and get player id and list of lobbies
     private suspend fun init() = mutex.withLock {

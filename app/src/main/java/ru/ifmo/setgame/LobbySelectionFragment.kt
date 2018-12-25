@@ -51,7 +51,7 @@ class LobbySelectionFragment : Fragment() {
             val nOfPlayers = tv.lobby_n_players!!
 
             init {
-                itemView.setOnClickListener{
+                itemView.setOnClickListener {
                     (tv.context as AppCompatActivity).supportFragmentManager.beginTransaction()
                             .replace(R.id.game_fragment, LobbyInfoFragment.newInstanceJoin(
                                     data[adapterPosition].lobby_id

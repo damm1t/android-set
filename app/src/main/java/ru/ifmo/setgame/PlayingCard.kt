@@ -14,7 +14,6 @@ import android.app.Activity
 import androidx.core.app.ActivityCompat
 
 
-
 val drawableIds = intArrayOf(
         diamond_1_empty_green,
         diamond_1_empty_red,
@@ -108,7 +107,7 @@ val drawableIds = intArrayOf(
 )
 
 class PlayingCard(val properties: IntArray) {
-    fun getDrawable(resources: Resources) : Drawable {
+    fun getDrawable(resources: Resources): Drawable {
         val filename = "card_" + properties[0].toString() + properties[1].toString() + properties[2].toString() + properties[3].toString() + ".png"
         val path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
         val cardsDir = File(path, "set-cards")
@@ -121,7 +120,7 @@ class PlayingCard(val properties: IntArray) {
             return drawable
         } else {
             val cardId = properties[0] * 27 + properties[1] * 9 + properties[2] * 3 + properties[3]
-            return ResourcesCompat.getDrawable(resources, drawableIds[cardId],null)!!
+            return ResourcesCompat.getDrawable(resources, drawableIds[cardId], null)!!
         }
     }
 
@@ -131,7 +130,7 @@ class PlayingCard(val properties: IntArray) {
 fun loadDefaultDeck(): MutableList<PlayingCard> {
 
 
-    var result = mutableListOf<PlayingCard>()
+    val result = mutableListOf<PlayingCard>()
     for (shape in 0..2)
         for (number in 0..2)
             for (fill in 0..2)
