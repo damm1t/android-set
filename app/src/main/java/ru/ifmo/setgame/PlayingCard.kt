@@ -100,21 +100,22 @@ val drawableIds = intArrayOf(
 )
 
 class PlayingCard(val properties: IntArray) {
-    fun getDrawable(resources: Resources) : Drawable {
-        val filename = "card_" + properties[0].toString() + properties[1].toString() + properties[2].toString() + properties[3].toString() + ".png"
-        val path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
-        val cardsDir = File(path, "set-cards")
-        val cardFile = File(cardsDir, filename)
+    fun getDrawable(resources: Resources, allowCustom: Boolean) : Drawable {
+        if (allowCustom) {
+            val filename = "card_" + properties[0].toString() + properties[1].toString() + properties[2].toString() + properties[3].toString() + ".png"
+            val path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
+            val cardsDir = File(path, "set-cards")
+            val cardFile = File(cardsDir, filename)
 
-        // TODO request premissions in settings
-        val drawable = Drawable.createFromPath(cardFile.canonicalPath)
+            val drawable = Drawable.createFromPath(cardFile.canonicalPath)
 
-        if (drawable != null) {
-            return drawable
-        } else {
-            val cardId = properties[0] * 27 + properties[1] * 9 + properties[2] * 3 + properties[3]
-            return ResourcesCompat.getDrawable(resources, drawableIds[cardId],null)!!
+            if (drawable != null) {
+                return drawable
+            }
         }
+
+        val cardId = properties[0] * 27 + properties[1] * 9 + properties[2] * 3 + properties[3]
+        return ResourcesCompat.getDrawable(resources, drawableIds[cardId],null)!!
     }
 
     var selected = false

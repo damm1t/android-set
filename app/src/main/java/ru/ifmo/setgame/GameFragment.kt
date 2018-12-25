@@ -26,7 +26,6 @@ import ru.ifmo.setgame.R.layout.fragment_game
 import java.util.*
 
 class GameFragment : androidx.fragment.app.Fragment() {
-
     private val DEFAULT_COLUMNS = 3
     private val DEFAULT_ROWS = 4
     private val CARDS_IN_SET = 3
@@ -42,6 +41,7 @@ class GameFragment : androidx.fragment.app.Fragment() {
 
     private var isMultiplayer = false
     private var isComputer = false
+    private var allowCustomCards = false
 
     private lateinit var timerComp: Timer
     private var timerGlobalStart: Long = 0
@@ -128,7 +128,7 @@ class GameFragment : androidx.fragment.app.Fragment() {
                 params.height = 0
 
                 val image = inflater.inflate(card_frame, gameView.game_grid, false) as FrameLayout
-                image.card_image.setImageDrawable(deck[0].getDrawable(resources))
+                image.card_image.setImageDrawable(deck[0].getDrawable(resources, allowCustomCards))
                 image.card_frame.setImageDrawable(ResourcesCompat.getDrawable(resources, card_frame_drawable, null))
 
                 image.setOnClickListener {
@@ -164,6 +164,8 @@ class GameFragment : androidx.fragment.app.Fragment() {
                 drawBoardFromJSON(getString("json")!!)
             }
         }
+
+        allowCustomCards = activity!!.getSharedPreferences("game_prefs", Context.MODE_PRIVATE).getBoolean("CUSTOM_CARDS", false)
 
         return gameView
     }
@@ -250,7 +252,7 @@ class GameFragment : androidx.fragment.app.Fragment() {
 
     private fun drawBoard() {
         for (i in 0 until 12) {
-            images[i].card_image.setImageDrawable(board[i].getDrawable(resources))
+            images[i].card_image.setImageDrawable(board[i].getDrawable(resources, allowCustomCards))
             images[i].card_frame.visibility = ImageView.GONE
         }
     }
