@@ -5,7 +5,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.Bundle
-import android.os.LocaleList
 import androidx.core.content.res.ResourcesCompat
 import android.util.Log
 import android.view.LayoutInflater
@@ -21,7 +20,6 @@ import kotlinx.android.synthetic.main.fragment_game.view.*
 import ru.ifmo.setgame.R.drawable.card_frame_drawable
 import ru.ifmo.setgame.R.layout.card_frame
 import ru.ifmo.setgame.R.layout.fragment_game
-import java.util.zip.Inflater
 
 class GameFragment : androidx.fragment.app.Fragment() {
 
@@ -40,7 +38,7 @@ class GameFragment : androidx.fragment.app.Fragment() {
     val receiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             val json = intent?.extras?.getString("game")!!
-            drawBoard(json)
+            drawBoardFromJSON(json)
         }
     }
 
@@ -94,7 +92,7 @@ class GameFragment : androidx.fragment.app.Fragment() {
         }
 
         arguments?.apply {
-            drawBoard(getString("json")!!)
+            drawBoardFromJSON(getString("json")!!)
         }
 
         return gameView
@@ -117,12 +115,20 @@ class GameFragment : androidx.fragment.app.Fragment() {
         }
     }
 
-    private fun drawBoard(json: String) {
-        val j_board = jacksonObjectMapper().readTree(json).get("board")
+    private fun drawBoardFromJSON(json: String) {
+        val jsonBoard = jacksonObjectMapper().readTree(json).get("board")
+
         for (i in 0 until 12) {
-            val tmp = j_board.get(i.toString())
-            val card_id = tmp[0].asInt() * 27 + tmp[1].asInt() * 9 + tmp[2].asInt() * 3 + tmp[3].asInt()
-            images[i].card_image.setImageDrawable(deck[card_id].getDrawable(resources))
+            val prop = jacksonObjectMapper().readValue<IntArray>(jsonBoard.get(i.toString()).toString())
+            board[i] = PlayingCard(prop)
+        }
+
+        drawBoard()
+    }
+
+    private fun drawBoard() {
+        for (i in 0 until 12) {
+            images[i].card_image.setImageDrawable(board[i].getDrawable(resources))
         }
     }
 
