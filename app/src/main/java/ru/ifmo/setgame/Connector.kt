@@ -140,7 +140,7 @@ class Connector(context: Context) : AutoCloseable {
     suspend fun connect() {
         init()
 
-        while (true) {
+        while (socket.isConnected) {
             if (reader.ready()) {
                 if (status == "SELECTING_LOBBY") {
                     assert(false)
@@ -191,6 +191,7 @@ class Connector(context: Context) : AutoCloseable {
                             putExtra("PLAYERS_TAG", players.toTypedArray())
                             putExtra("SCORES_TAG", scores.toIntArray())
                         })
+                        break
                     } else {
                         val gameStr = mapper.writeValueAsString(update.get("game"))
                         localBroadcastManager.sendBroadcast(Intent(IN_GAME_BROADCAST).apply { putExtra("game", gameStr) })
