@@ -5,6 +5,8 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import androidx.core.content.res.ResourcesCompat
 import android.util.Log
 import android.view.LayoutInflater
@@ -22,8 +24,6 @@ import ru.ifmo.setgame.R.drawable.card_frame_drawable
 import ru.ifmo.setgame.R.layout.card_frame
 import ru.ifmo.setgame.R.layout.fragment_game
 import java.util.*
-
-//TODO  fix computer calling ui from other thread
 
 class GameFragment : androidx.fragment.app.Fragment() {
 
@@ -58,11 +58,21 @@ class GameFragment : androidx.fragment.app.Fragment() {
         if (isMultiplayer) {
             LocalBroadcastManager.getInstance(context!!).registerReceiver(receiver, IntentFilter("ru.ifmo.setgame.IN_GAME"))
         }
+        if (isComputer) {
+            timerComp.scheduleAtFixedRate(object : TimerTask() {
+                override fun run() {
+                    Handler(Looper.getMainLooper()).post { makeMove(setOnBoard) }
+                }
+            }, 10_000, 10_000)
+        }
     }
 
     override fun onStop() {
         if (isMultiplayer) {
             LocalBroadcastManager.getInstance(context!!).unregisterReceiver(receiver)
+        }
+        if (isComputer) {
+            timerComp.cancel()
         }
         super.onStop()
     }
@@ -97,7 +107,7 @@ class GameFragment : androidx.fragment.app.Fragment() {
             if (!hasSets()) {
                 timerGlobalFinish = System.currentTimeMillis()
                 //ToDo
-                (activity as GameActivity).showScore("", timerGlobalFinish - timerGlobalStart, arrayOf("You"), intArrayOf(score))
+                (activity as GameActivity).showScore("", (timerGlobalFinish - timerGlobalStart) / 1000, arrayOf("You"), intArrayOf(score))
             }
         }
     }
@@ -147,12 +157,6 @@ class GameFragment : androidx.fragment.app.Fragment() {
                 timerGlobalStart = System.currentTimeMillis()
 
                 timerComp = Timer()
-                timerComp.scheduleAtFixedRate(object : TimerTask() {
-                    override fun run() {
-                        makeMove(setOnBoard)
-
-                    }
-                }, 10_000, 10_000)
             }
 
             if (isMultiplayer) {
