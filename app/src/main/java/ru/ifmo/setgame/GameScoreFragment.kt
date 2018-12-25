@@ -18,7 +18,7 @@ class GameScoreFragment : androidx.fragment.app.Fragment() {
 
 
     var title = ""
-    var time = 0
+    var time = 0L
     var playersArray = arrayOf<String>()
     var scoresArray = intArrayOf()
 
@@ -27,7 +27,7 @@ class GameScoreFragment : androidx.fragment.app.Fragment() {
 
         arguments?.let {
             title = it.getString(TITLE_TAG)!!
-            time = it.getInt(TIME_TAG)
+            time = it.getLong(TIME_TAG)
             playersArray = it.getStringArray(PLAYERS_TAG)!!
             scoresArray = it.getIntArray(SCORES_TAG)!!
         }
@@ -47,11 +47,11 @@ class GameScoreFragment : androidx.fragment.app.Fragment() {
 
     companion object {
         @JvmStatic
-        fun newInstance(title: String, time: Int, players: Array<String>, scores: IntArray) =
+        fun newInstance(title: String, time: Long, players: Array<String>, scores: IntArray) =
                 GameScoreFragment().apply {
                     arguments = Bundle().apply {
                         putString(TITLE_TAG, title)
-                        putInt(TIME_TAG, time)
+                        putLong(TIME_TAG, time)
                         putStringArray(PLAYERS_TAG, players)
                         putIntArray(SCORES_TAG, scores)
                     }

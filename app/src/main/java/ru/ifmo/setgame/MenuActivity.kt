@@ -11,7 +11,7 @@ class MenuActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_menu)
         button1.setOnClickListener {
-            val myIntent = Intent(this, MultiplayerGameActivity::class.java)
+            val myIntent = Intent(this, GameActivity::class.java)
             this.startActivity(myIntent)
         }
     }

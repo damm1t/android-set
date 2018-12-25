@@ -5,8 +5,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.Bundle
-import android.os.CountDownTimer
-import androidx.fragment.app.Fragment
 import androidx.core.content.res.ResourcesCompat
 import android.util.Log
 import android.view.LayoutInflater
@@ -14,6 +12,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
 import android.widget.ImageView
+import androidx.gridlayout.widget.GridLayout
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
@@ -22,8 +21,9 @@ import kotlinx.android.synthetic.main.fragment_game.view.*
 import ru.ifmo.setgame.R.drawable.card_frame_drawable
 import ru.ifmo.setgame.R.layout.card_frame
 import ru.ifmo.setgame.R.layout.fragment_game
-import java.time.Clock
 import java.util.*
+
+//TODO  fix computer calling ui from other thread
 
 class GameFragment : androidx.fragment.app.Fragment() {
 
@@ -39,10 +39,12 @@ class GameFragment : androidx.fragment.app.Fragment() {
     private lateinit var gameView: View
     private var setOnBoard = IntArray(3)
 
+    private var isMultiplayer = false
+    private var isComputer = false
+
     private lateinit var timerComp: Timer
     private var timerGlobalStart: Long = 0
     private var timerGlobalFinish: Long = 0
-
 
     val receiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
@@ -53,57 +55,54 @@ class GameFragment : androidx.fragment.app.Fragment() {
 
     override fun onStart() {
         super.onStart()
-        LocalBroadcastManager.getInstance(context!!).registerReceiver(receiver, IntentFilter("ru.ifmo.setgame.IN_GAME"))
+        if (isMultiplayer) {
+            LocalBroadcastManager.getInstance(context!!).registerReceiver(receiver, IntentFilter("ru.ifmo.setgame.IN_GAME"))
+        }
     }
 
     override fun onStop() {
-        LocalBroadcastManager.getInstance(context!!).unregisterReceiver(receiver)
+        if (isMultiplayer) {
+            LocalBroadcastManager.getInstance(context!!).unregisterReceiver(receiver)
+        }
         super.onStop()
     }
 
+    // if multiplayer game sends move to server
+    // otherwise makes move locally
     fun makeMove(selected: IntArray) {
         if (selected.size != 3)
             return
 
-        for (i in selected) {
-            board[i] = deck[0]
-            images[i].card_image.setImageDrawable(ResourcesCompat.getDrawable(resources, deck[0].drawable_id, null))
-            images[i].card_frame.visibility = ImageView.GONE
-            if (deck.size > 1) deck.removeAt(0)
-        }
-        var iterations = 5
-        while (iterations-- != 0 && !hasSets()) {
-            Log.d("tg", "set not found, reshuffle deck")
+        if (isMultiplayer) {
+            (activity as GameActivity).connector.make_move(selected)
+        } else {
             for (i in selected) {
-                deck.add(board[i])
                 board[i] = deck[0]
-                images[i].card_image.setImageDrawable(ResourcesCompat.getDrawable(resources, deck[0].drawable_id, null))
+                images[i].card_image.setImageDrawable(deck[0].getDrawable(resources))
                 images[i].card_frame.visibility = ImageView.GONE
                 if (deck.size > 1) deck.removeAt(0)
             }
+            var iterations = 5
+            while (iterations-- != 0 && !hasSets()) {
+                Log.d("tg", "set not found, reshuffle deck")
+                for (i in selected) {
+                    deck.add(board[i])
+                    board[i] = deck[0]
+                    images[i].card_image.setImageDrawable(deck[0].getDrawable(resources))
+                    images[i].card_frame.visibility = ImageView.GONE
+                    if (deck.size > 1) deck.removeAt(0)
+                }
+            }
+
+            if (!hasSets()) {
+                timerGlobalFinish = System.currentTimeMillis()
+                //ToDo
+                (activity as GameActivity).showScore("", timerGlobalFinish - timerGlobalStart, arrayOf("You"), intArrayOf(score))
+            }
         }
-
-        if (!hasSets()) {
-            timerGlobalFinish = System.currentTimeMillis()
-            //ToDo need to return game time: timerGlobalFinish - timerGlobalStart
-            (activity as GameActivity).showScore(score)
-        }
-
-
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        timerGlobalStart = System.currentTimeMillis()
-
-        timerComp = Timer()
-        timerComp.scheduleAtFixedRate(object : TimerTask() {
-
-            override fun run() {
-                makeMove(setOnBoard)
-
-            }
-        }, 10_000, 10_000)
-
         gameView = inflater.inflate(fragment_game, container, false)
 
         gameView.game_grid.rowCount = DEFAULT_ROWS
@@ -113,7 +112,7 @@ class GameFragment : androidx.fragment.app.Fragment() {
 
         for (i in 0 until DEFAULT_ROWS) {
             for (j in 0 until DEFAULT_COLUMNS) {
-                val params = androidx.gridlayout.widget.GridLayout.LayoutParams(androidx.gridlayout.widget.GridLayout.spec(i, androidx.gridlayout.widget.GridLayout.FILL, 1f), androidx.gridlayout.widget.GridLayout.spec(j, androidx.gridlayout.widget.GridLayout.FILL, 1f))
+                val params = GridLayout.LayoutParams(GridLayout.spec(i, GridLayout.FILL, 1f), GridLayout.spec(j, GridLayout.FILL, 1f))
                 params.width = 0
                 params.height = 0
 
@@ -132,14 +131,33 @@ class GameFragment : androidx.fragment.app.Fragment() {
                 }
 
                 images.add(image)
-                board.add(deck[i * 3 + j])
+                board.add(deck[0])
+                deck.removeAt(0)
 
                 gameView.game_grid.addView(image, params)
             }
         }
 
+
         arguments?.apply {
-            drawBoardFromJSON(getString("json")!!)
+            isMultiplayer = getBoolean("multiplayer")
+            isComputer = getBoolean("computer")
+
+            if (isComputer) {
+                timerGlobalStart = System.currentTimeMillis()
+
+                timerComp = Timer()
+                timerComp.scheduleAtFixedRate(object : TimerTask() {
+                    override fun run() {
+                        makeMove(setOnBoard)
+
+                    }
+                }, 10_000, 10_000)
+            }
+
+            if (isMultiplayer) {
+                drawBoardFromJSON(getString("json")!!)
+            }
         }
 
         return gameView
@@ -234,10 +252,12 @@ class GameFragment : androidx.fragment.app.Fragment() {
 
     companion object {
         @JvmStatic
-        fun newInstance(json: String) =
+        fun newInstance(json: String, isMultiplayer: Boolean, isComputer: Boolean) =
                 GameFragment().apply {
                     arguments = Bundle().apply {
                         putString("json", json)
+                        putBoolean("multiplayer", isMultiplayer)
+                        putBoolean("computer", isComputer)
                     }
                 }
     }

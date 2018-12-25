@@ -14,7 +14,6 @@ import androidx.fragment.app.Fragment
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
-import com.fasterxml.jackson.module.kotlin.readValues
 import kotlinx.android.synthetic.main.fragment_lobby_info.*
 import kotlinx.android.synthetic.main.fragment_lobby_info.view.*
 
@@ -64,15 +63,15 @@ class LobbyInfoFragment : Fragment() {
 
         arguments?.apply {
             if (getBoolean("create")) {
-                (activity as MultiplayerGameActivity).connector.createLobby(getInt("max_players"))
+                (activity as GameActivity).connector.createLobby(getInt("max_players"))
             } else {
-                (activity as MultiplayerGameActivity).connector.joinLobby(getInt("lobby_id"))
+                (activity as GameActivity).connector.joinLobby(getInt("lobby_id"))
             }
         }
 
         view.btn_leave.setOnClickListener {
-            (activity as MultiplayerGameActivity).connector.leaveLobby()
-            (activity as MultiplayerGameActivity).supportFragmentManager.beginTransaction()
+            (activity as GameActivity).connector.leaveLobby()
+            (activity as GameActivity).supportFragmentManager.beginTransaction()
                     .replace(R.id.game_fragment, LobbySelectionFragment()).commit()
         }
 

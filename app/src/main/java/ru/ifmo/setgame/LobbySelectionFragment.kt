@@ -35,7 +35,7 @@ class LobbyCreationDialog : DialogFragment() {
                     view.max_players_picker.visibility = View.INVISIBLE
                     view.max_players_text.visibility = View.INVISIBLE
 
-                    (activity as MultiplayerGameActivity).supportFragmentManager.beginTransaction()
+                    (activity as GameActivity).supportFragmentManager.beginTransaction()
                             .replace(R.id.game_fragment, LobbyInfoFragment.newInstanceCreate(view.max_players_picker.value))
                             .commit()
                 }.create()
@@ -106,7 +106,7 @@ class LobbySelectionFragment : Fragment() {
         view.recycler_view_lobbies.addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL))
 
         view.swipe_refresh_lobbies.setOnRefreshListener {
-            (activity as MultiplayerGameActivity).connector.requestLobbies()
+            (activity as GameActivity).connector.requestLobbies()
         }
 
         view.fab.setOnClickListener {

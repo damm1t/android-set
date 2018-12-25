@@ -13,7 +13,7 @@ import kotlinx.coroutines.launch
 interface GameInterface {
 
     fun startGame()
-    fun showScore(title:String, time: Int, players: Array<String>, scores: IntArray)
+    fun showScore(title:String, time: Long, players: Array<String>, scores: IntArray)
 }
 
 class Lobby(
@@ -26,7 +26,7 @@ class Lobby(
 const val SCORE_FRAGMENT_TAG = "SCORE_FRAGMENT_TAG"
 
 
-class MultiplayerGameActivity : AppCompatActivity(), GameInterface {
+class GameActivity : AppCompatActivity(), GameInterface {
     lateinit var connector : Connector
         private set
 
@@ -35,7 +35,7 @@ class MultiplayerGameActivity : AppCompatActivity(), GameInterface {
             val extras = intent?.extras!!
 
             val title = extras.getString("TITLE_TAG")!!
-            val time = extras.getInt("TIME_TAG")
+            val time = extras.getLong("TIME_TAG")
             val players = extras.getStringArray("PLAYERS_TAG")!!
             val scores = extras.getIntArray("SCORES_TAG")!!
 
@@ -46,11 +46,11 @@ class MultiplayerGameActivity : AppCompatActivity(), GameInterface {
     val goToGameReceiver = object :BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             val gameStr = intent?.extras?.getString("game")!!
-            supportFragmentManager.beginTransaction().apply { replace(R.id.game_fragment, GameFragment.newInstance(gameStr)); commit() }
+            supportFragmentManager.beginTransaction().apply { replace(R.id.game_fragment, GameFragment.newInstance(gameStr, true, false)); commit() }
         }
     }
 
-    override fun showScore(title:String, time: Int, players: Array<String>, scores: IntArray) {
+    override fun showScore(title:String, time: Long, players: Array<String>, scores: IntArray) {
         supportFragmentManager.beginTransaction().apply { replace(R.id.game_fragment, GameScoreFragment.newInstance(title, time, players, scores), SCORE_FRAGMENT_TAG); commit() }
     }
 
@@ -75,7 +75,7 @@ class MultiplayerGameActivity : AppCompatActivity(), GameInterface {
         setContentView(R.layout.activity_game)
 
         GlobalScope.launch {
-            connector = Connector(this@MultiplayerGameActivity)
+            connector = Connector(this@GameActivity)
             connector.connect()
             connector.close()
         }
