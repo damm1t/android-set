@@ -23,4 +23,7 @@
     <string name="title_activity_settings">Settings</string>
     <string name="title_activity_stats">Stats</string>
     <string name="stats">Stats</string>
+    <string name="stat_total_games">Total games: %d</string>
+    <string name="stat_avg_time">Average time: %f seconds</string>
+    <string name="stat_avg_score">Average score: %f</string>
 </resources>

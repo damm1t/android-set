@@ -17,8 +17,8 @@ class StatsActivity : AppCompatActivity() {
         val avgTime = preferences.getLong("TOTAL_TIME", 0).toFloat() / if (totalGames > 0) totalGames else 1
         val avgScore = preferences.getInt("TOTAL_SCORE", 0).toFloat() / if (totalGames > 0) totalGames else 1
 
-        tv_total_games.text = "Total games: $totalGames"
-        tv_average_time.text = "Average game time: $avgTime"
-        tv_average_score.text = "Average score: $avgScore"
+        tv_total_games.text = getString(R.string.stat_total_games, totalGames)
+        tv_average_time.text = getString(R.string.stat_avg_time, avgTime)
+        tv_average_score.text = getString(R.string.stat_avg_score, avgScore)
     }
 }

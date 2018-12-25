@@ -57,7 +57,7 @@ class GameFragment : androidx.fragment.app.Fragment() {
     override fun onStart() {
         super.onStart()
         if (isMultiplayer) {
-            LocalBroadcastManager.getInstance(context!!).registerReceiver(receiver, IntentFilter("ru.ifmo.setgame.IN_GAME"))
+            LocalBroadcastManager.getInstance(context!!).registerReceiver(receiver, IntentFilter(IN_GAME_BROADCAST))
         }
         if (isComputer) {
             timerComp.scheduleAtFixedRate(object : TimerTask() {
