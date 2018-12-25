@@ -15,6 +15,7 @@ import android.widget.FrameLayout
 import android.widget.ImageView
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
 import kotlinx.android.synthetic.main.card_frame.view.*
 import kotlinx.android.synthetic.main.fragment_game.view.*
 import ru.ifmo.setgame.R.drawable.card_frame_drawable
@@ -66,7 +67,7 @@ class GameFragment : androidx.fragment.app.Fragment() {
                 params.height = 0
 
                 val image = inflater.inflate(card_frame, gameView.game_grid, false) as FrameLayout
-                image.card_image.setImageDrawable(ResourcesCompat.getDrawable(resources, deck[0].drawable_id, null))
+                image.card_image.setImageDrawable(deck[0].getDrawable(resources))
                 image.card_frame.setImageDrawable(ResourcesCompat.getDrawable(resources, card_frame_drawable, null))
 
                 image.setOnClickListener {
@@ -121,7 +122,7 @@ class GameFragment : androidx.fragment.app.Fragment() {
         for (i in 0 until 12) {
             val tmp = j_board.get(i.toString())
             val card_id = tmp[0].asInt() * 27 + tmp[1].asInt() * 9 + tmp[2].asInt() * 3 + tmp[3].asInt()
-            images[i].card_image.setImageDrawable(ResourcesCompat.getDrawable(resources, deck[card_id].drawable_id, null))
+            images[i].card_image.setImageDrawable(deck[card_id].getDrawable(resources))
         }
     }
 
