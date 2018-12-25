@@ -22,7 +22,7 @@ import java.net.Socket
 interface GameInterface {
 
     fun startGame()
-    fun showScore(score: Int)
+    fun showScore(title:String, time: Int, players: Array<String>, scores: IntArray)
 }
 
 class Lobby(
@@ -79,6 +79,7 @@ class Connector(context: Context) : AutoCloseable {
 
         val response = mapper.readTree(reader.readLine())
         status = response.get("status").asText()
+        lobbyId = response.get("lobby_id").asInt()
         val lobbyStr = mapper.writeValueAsString(response.get("lobby"))
 
         localBroadcastManager.sendBroadcast(Intent(IN_LOBBY_BROADCAST).apply { putExtra("lobby", lobbyStr) })
@@ -185,12 +186,31 @@ class Connector(context: Context) : AutoCloseable {
                     status = update.get("status").asText()
 
                     if (status == "GAME_ENDED") {
-                        localBroadcastManager.sendBroadcast(Intent("GO_TO_SCORE"))
-                        continue
-                    }
+                        val trscores = update.get("score")
 
-                    val gameStr = mapper.writeValueAsString(update.get("game"))
-                    localBroadcastManager.sendBroadcast(Intent(IN_GAME_BROADCAST).apply { putExtra("game", gameStr) })
+                        localBroadcastManager.sendBroadcast(Intent("GO_TO_SCORE").apply {
+                            putExtra("TITLE_TAG", "Game #$lobbyId results")
+                            putExtra("TIME_TAG", 0) //TODO
+
+                            val players = mutableListOf<String>()
+                            val scores = mutableListOf<Int>()
+
+                            for (pr in trscores.fields()) {
+                                if (pr.key == playerId.toString()) {
+                                    players.add("You")
+                                } else {
+                                    players.add("Player #${pr.key}")
+                                }
+                                scores.add(pr.value.asInt())
+                            }
+
+                            putExtra("PLAYERS_TAG", players.toTypedArray())
+                            putExtra("SCORES_TAG", scores.toIntArray())
+                        })
+                    } else {
+                        val gameStr = mapper.writeValueAsString(update.get("game"))
+                        localBroadcastManager.sendBroadcast(Intent(IN_GAME_BROADCAST).apply { putExtra("game", gameStr) })
+                    }
                 }
             }
         }
@@ -208,21 +228,26 @@ class MultiplayerGameActivity : AppCompatActivity(), GameInterface {
     val goToScoreReceiver = object :BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             //TODO
-            showScore(0)
+            val extras = intent?.extras!!
+
+            val title = extras.getString("TITLE_TAG")!!
+            val time = extras.getInt("TIME_TAG")
+            val players = extras.getStringArray("PLAYERS_TAG")!!
+            val scores = extras.getIntArray("SCORES_TAG")!!
+
+            showScore(title, time, players, scores)
         }
     }
 
     val goToGameReceiver = object :BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
-            val gameStr = intent!!.extras!!.getString("game")!!
+            val gameStr = intent?.extras?.getString("game")!!
             supportFragmentManager.beginTransaction().apply { replace(R.id.game_fragment, GameFragment.newInstance(gameStr)); commit() }
-            //LocalBroadcastManager.getInstance(this@MultiplayerGameActivity).sendBroadcast(Intent(connector.IN_GAME_BROADCAST).apply { putExtra("game", gameStr) })
         }
     }
 
-    override fun showScore(score: Int) {
-        //TODO
-        supportFragmentManager.beginTransaction().apply { replace(R.id.game_fragment, GameScoreFragment.newInstance("Game finished", 999, arrayOf("You"), intArrayOf(score)), SCORE_FRAGMENT_TAG); commit() }
+    override fun showScore(title:String, time: Int, players: Array<String>, scores: IntArray) {
+        supportFragmentManager.beginTransaction().apply { replace(R.id.game_fragment, GameScoreFragment.newInstance(title, time, players, scores), SCORE_FRAGMENT_TAG); commit() }
     }
 
     override fun startGame() {

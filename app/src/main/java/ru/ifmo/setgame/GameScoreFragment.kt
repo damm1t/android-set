@@ -38,6 +38,7 @@ class GameScoreFragment : androidx.fragment.app.Fragment() {
         for (i in 0 until playersArray.size) {
             val tv = TextView(context)
             tv.text = "${playersArray[i]}: ${scoresArray[i]}"
+            tv.textSize = 16f
             view.ll_score_list.addView(tv)
         }
 
