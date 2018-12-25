@@ -19,7 +19,7 @@ class MenuActivity : AppCompatActivity() {
             this.startActivity(myIntent)
         }
 
-        btn_singleplayer.setOnClickListener{
+        btn_singleplayer.setOnClickListener {
             val myIntent = Intent(this, GameActivity::class.java).apply {
                 putExtra("multiplayer", false)
                 putExtra("computer", true)

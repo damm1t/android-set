@@ -11,7 +11,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
 interface GameInterface {
-    fun showScore(title:String, time: Long, players: Array<String>, scores: IntArray)
+    fun showScore(title: String, time: Long, players: Array<String>, scores: IntArray)
     fun startMultiplayerGame(json: String)
     fun startSingleplayerGame()
     fun startTrainingGame()
@@ -28,10 +28,10 @@ const val SCORE_FRAGMENT_TAG = "SCORE_FRAGMENT_TAG"
 
 
 class GameActivity : AppCompatActivity(), GameInterface {
-    lateinit var connector : Connector
+    lateinit var connector: Connector
         private set
 
-    val goToScoreReceiver = object :BroadcastReceiver() {
+    val goToScoreReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             val extras = intent?.extras!!
 
@@ -44,14 +44,14 @@ class GameActivity : AppCompatActivity(), GameInterface {
         }
     }
 
-    val goToGameReceiver = object :BroadcastReceiver() {
+    val goToGameReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             val gameStr = intent?.extras?.getString("game")!!
             startMultiplayerGame(gameStr)
         }
     }
 
-    override fun showScore(title:String, time: Long, players: Array<String>, scores: IntArray) {
+    override fun showScore(title: String, time: Long, players: Array<String>, scores: IntArray) {
         supportFragmentManager.beginTransaction().apply { replace(R.id.game_fragment, GameScoreFragment.newInstance(title, time, players, scores), SCORE_FRAGMENT_TAG); commit() }
     }
 
