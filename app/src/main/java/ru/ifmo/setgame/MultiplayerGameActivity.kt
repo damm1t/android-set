@@ -160,7 +160,7 @@ class Connector(context: Context) : AutoCloseable {
                 if (status == "SELECTING_LOBBY") {
                     assert(false)
                 } else if (status == "IN_LOBBY") {
-                    val tmp_str = reader.readLine();
+                    val tmp_str = reader.readLine()
                     Log.d("TG_connect_loop", tmp_str)
 
                     val update = mapper.readTree(tmp_str)
@@ -177,7 +177,10 @@ class Connector(context: Context) : AutoCloseable {
                         localBroadcastManager.sendBroadcast(Intent(IN_LOBBY_BROADCAST).apply { putExtra("lobby", lobbyStr) })
                     }
                 } else if (status == "IN_GAME") {
-                    val update = mapper.readTree(reader.readLine())
+                    val tmp_str = reader.readLine()
+                    Log.d("TG_connect_loop", tmp_str)
+
+                    val update = mapper.readTree(tmp_str)
 
                     status = update.get("status").asText()
 
@@ -202,6 +205,21 @@ class MultiplayerGameActivity : AppCompatActivity(), GameInterface {
     lateinit var connector : Connector
         private set
 
+    val goToScoreReceiver = object :BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            //TODO
+            showScore(0)
+        }
+    }
+
+    val goToGameReceiver = object :BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            val gameStr = intent!!.extras!!.getString("game")!!
+            supportFragmentManager.beginTransaction().apply { replace(R.id.game_fragment, GameFragment.newInstance(gameStr)); commit() }
+            //LocalBroadcastManager.getInstance(this@MultiplayerGameActivity).sendBroadcast(Intent(connector.IN_GAME_BROADCAST).apply { putExtra("game", gameStr) })
+        }
+    }
+
     override fun showScore(score: Int) {
         //TODO
         supportFragmentManager.beginTransaction().apply { replace(R.id.game_fragment, GameScoreFragment.newInstance("Game finished", 999, arrayOf("You"), intArrayOf(score)), SCORE_FRAGMENT_TAG); commit() }
@@ -209,6 +227,18 @@ class MultiplayerGameActivity : AppCompatActivity(), GameInterface {
 
     override fun startGame() {
         supportFragmentManager.beginTransaction().apply { replace(R.id.game_fragment, GameFragment()); commit() }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        LocalBroadcastManager.getInstance(this).registerReceiver(goToGameReceiver, IntentFilter("GO_TO_GAME"))
+        LocalBroadcastManager.getInstance(this).registerReceiver(goToScoreReceiver, IntentFilter("GO_TO_SCORE"))
+    }
+
+    override fun onStop() {
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(goToGameReceiver)
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(goToScoreReceiver)
+        super.onStop()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -222,20 +252,5 @@ class MultiplayerGameActivity : AppCompatActivity(), GameInterface {
         }
 
         supportFragmentManager.beginTransaction().apply { replace(R.id.game_fragment, LobbySelectionFragment()); commit() }
-
-        LocalBroadcastManager.getInstance(this).registerReceiver(object :BroadcastReceiver() {
-            override fun onReceive(context: Context?, intent: Intent?) {
-                val gameStr = intent!!.extras!!.getString("game")!!
-                supportFragmentManager.beginTransaction().apply { replace(R.id.game_fragment, GameFragment.newInstance(gameStr)); commit() }
-                //LocalBroadcastManager.getInstance(this@MultiplayerGameActivity).sendBroadcast(Intent(connector.IN_GAME_BROADCAST).apply { putExtra("game", gameStr) })
-            }
-        }, IntentFilter("GO_TO_GAME"))
-
-        LocalBroadcastManager.getInstance(this).registerReceiver(object :BroadcastReceiver() {
-            override fun onReceive(context: Context?, intent: Intent?) {
-                //TODO
-                showScore(0)
-            }
-        }, IntentFilter("GO_TO_SCORE"))
     }
 }
