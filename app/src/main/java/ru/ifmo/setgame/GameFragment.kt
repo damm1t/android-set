@@ -129,6 +129,7 @@ class GameFragment : androidx.fragment.app.Fragment() {
     private fun drawBoard() {
         for (i in 0 until 12) {
             images[i].card_image.setImageDrawable(board[i].getDrawable(resources))
+            images[i].card_frame.visibility = ImageView.GONE
         }
     }
 
