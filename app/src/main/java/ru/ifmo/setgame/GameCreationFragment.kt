@@ -10,10 +10,9 @@ import android.view.ViewGroup
 import android.widget.TextView
 
 class GameCreationFragment : androidx.fragment.app.Fragment() {
-    @SuppressLint("SetTextI18n")
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
             TextView(activity).apply {
-                text = "Default deck"
+                text = getString(R.string.default_deck)
                 textSize = 32f
                 gravity = Gravity.CENTER
                 //setOnClickListener { (activity as GameInterface).startGame() }

@@ -24,7 +24,6 @@ class GameScoreFragment : androidx.fragment.app.Fragment() {
     var playersArray = arrayOf<String>()
     var scoresArray = intArrayOf()
 
-    @SuppressLint("SetTextI18n")
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_score, container, false)
 
@@ -36,13 +35,15 @@ class GameScoreFragment : androidx.fragment.app.Fragment() {
         }
 
         view.tv_score_title.text = title
-        view.tv_score_time.text = "Game time: ${time.toString()} seconds"
+        view.tv_score_time.text = getString(R.string.game_time, time)
+        //"Game time: ${time.toString()} seconds"
 
         var thisScore = 0
 
         for (i in 0 until playersArray.size) {
             val tv = TextView(context)
-            tv.text = "${playersArray[i]}: ${scoresArray[i]}"
+            tv.text = getString(R.string.player_score, playersArray[i], scoresArray[i])
+            //"${playersArray[i]}: ${scoresArray[i]}"
             tv.textSize = 16f
             view.ll_score_list.addView(tv)
 

@@ -1,9 +1,12 @@
 <resources>
     <string name="app_name">Set game</string>
+    <string name="default_deck">Default deck</string>
     <string name="btn_leave_text">LEAVE</string>
     <string name="lobby_name_placeholder">Lobby #%d</string>
     <string name="players_count_placeholder">%d/%d</string>
     <string name="players_count_placeholder_long">Players: %d/%d</string>
+    <string name="game_time">Game time: %ld seconds</string>
+    <string name="player_score">%s: %d</string>
     <string name="player_name_placeholder">Players #%d</string>
     <string name="btn_create_text">Create</string>
     <string name="multiplayer">Multiplayer</string>
