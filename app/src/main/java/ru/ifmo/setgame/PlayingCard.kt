@@ -1,19 +1,11 @@
 package ru.ifmo.setgame
 
-import android.Manifest
 import android.content.res.Resources
 import android.graphics.drawable.Drawable
 import android.os.Environment
-import android.util.Log
 import androidx.core.content.res.ResourcesCompat
 import ru.ifmo.setgame.R.drawable.*
 import java.io.File
-import android.Manifest.permission
-import android.Manifest.permission.READ_EXTERNAL_STORAGE
-import android.app.Activity
-import androidx.core.app.ActivityCompat
-
-
 
 val drawableIds = intArrayOf(
         diamond_1_empty_green,
@@ -129,9 +121,7 @@ class PlayingCard(val properties: IntArray) {
 }
 
 fun loadDefaultDeck(): MutableList<PlayingCard> {
-
-
-    var result = mutableListOf<PlayingCard>()
+    val result = mutableListOf<PlayingCard>()
     for (shape in 0..2)
         for (number in 0..2)
             for (fill in 0..2)

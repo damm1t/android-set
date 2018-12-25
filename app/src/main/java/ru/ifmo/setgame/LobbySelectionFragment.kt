@@ -88,7 +88,7 @@ class LobbySelectionFragment : Fragment() {
 
     override fun onStart() {
         super.onStart()
-        LocalBroadcastManager.getInstance(context!!).registerReceiver(broadcastReceiver, IntentFilter("ru.ifmo.setgame.LOBBIES_LIST"))
+        LocalBroadcastManager.getInstance(context!!).registerReceiver(broadcastReceiver, IntentFilter(LOBBIES_LIST_BROADCAST))
     }
 
     override fun onStop() {

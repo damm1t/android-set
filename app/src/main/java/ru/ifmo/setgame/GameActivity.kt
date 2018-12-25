@@ -69,8 +69,8 @@ class GameActivity : AppCompatActivity(), GameInterface {
 
     override fun onStart() {
         super.onStart()
-        LocalBroadcastManager.getInstance(this).registerReceiver(goToGameReceiver, IntentFilter("GO_TO_GAME"))
-        LocalBroadcastManager.getInstance(this).registerReceiver(goToScoreReceiver, IntentFilter("GO_TO_SCORE"))
+        LocalBroadcastManager.getInstance(this).registerReceiver(goToGameReceiver, IntentFilter(TO_GAME))
+        LocalBroadcastManager.getInstance(this).registerReceiver(goToScoreReceiver, IntentFilter(TO_GAME))
     }
 
     override fun onStop() {

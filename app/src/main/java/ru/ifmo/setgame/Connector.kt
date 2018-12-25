@@ -15,12 +15,13 @@ import java.io.InputStreamReader
 import java.io.OutputStreamWriter
 import java.net.Socket
 
+const val LOBBIES_LIST_BROADCAST = "ru.ifmo.setgame.LOBBIES_LIST"
+const val IN_LOBBY_BROADCAST = "ru.ifmo.setgame.IN_LOBBY"
+const val IN_GAME_BROADCAST = "ru.ifmo.setgame.IN_GAME"
+const val TO_GAME = "ru.ifmo.setgame.TO_GAME"
+const val TO_SCORE = "ru.ifmo.setgame.TO_SCORE"
 
 class Connector(context: Context) : AutoCloseable {
-    val LOBBIES_LIST_BROADCAST = "ru.ifmo.setgame.LOBBIES_LIST"
-    val IN_LOBBY_BROADCAST = "ru.ifmo.setgame.IN_LOBBY"
-    val IN_GAME_BROADCAST = "ru.ifmo.setgame.IN_GAME"
-
     private val mutex = Mutex()
     private val hostAddress = "18.222.225.249"
     private val hostPort = 3691
@@ -155,7 +156,7 @@ class Connector(context: Context) : AutoCloseable {
 
                         gameId = update.get("game_id").asInt()
                         val gameStr = mapper.writeValueAsString(update.get("game"))
-                        localBroadcastManager.sendBroadcast(Intent("GO_TO_GAME").apply { putExtra("game", gameStr) })
+                        localBroadcastManager.sendBroadcast(Intent(TO_GAME).apply { putExtra("game", gameStr) })
                     } else {
                         val lobbyStr = mapper.writeValueAsString(update.get("lobby"))
                         localBroadcastManager.sendBroadcast(Intent(IN_LOBBY_BROADCAST).apply { putExtra("lobby", lobbyStr) })
@@ -171,7 +172,7 @@ class Connector(context: Context) : AutoCloseable {
                     if (status == "GAME_ENDED") {
                         val trscores = update.get("score")
 
-                        localBroadcastManager.sendBroadcast(Intent("GO_TO_SCORE").apply {
+                        localBroadcastManager.sendBroadcast(Intent(TO_SCORE).apply {
                             putExtra("TITLE_TAG", "Game #$lobbyId results")
                             putExtra("TIME_TAG", 0) //TODO
 

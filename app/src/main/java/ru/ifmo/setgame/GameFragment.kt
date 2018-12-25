@@ -36,6 +36,7 @@ class GameFragment : androidx.fragment.app.Fragment() {
 
     private val deck = loadDefaultDeck()
     private var score = 0
+    private var computerScore = 0
     private lateinit var gameView: View
     private var setOnBoard = IntArray(3)
 
@@ -62,6 +63,7 @@ class GameFragment : androidx.fragment.app.Fragment() {
             timerComp.scheduleAtFixedRate(object : TimerTask() {
                 override fun run() {
                     Handler(Looper.getMainLooper()).post { makeMove(setOnBoard) }
+                    computerScore++
                 }
             }, 10_000, 10_000)
         }
@@ -88,8 +90,6 @@ class GameFragment : androidx.fragment.app.Fragment() {
         } else {
             for (i in selected) {
                 board[i] = deck[0]
-                images[i].card_image.setImageDrawable(deck[0].getDrawable(resources))
-                images[i].card_frame.visibility = ImageView.GONE
                 if (deck.size > 1) deck.removeAt(0)
             }
             var iterations = 5
@@ -98,16 +98,17 @@ class GameFragment : androidx.fragment.app.Fragment() {
                 for (i in selected) {
                     deck.add(board[i])
                     board[i] = deck[0]
-                    images[i].card_image.setImageDrawable(deck[0].getDrawable(resources))
-                    images[i].card_frame.visibility = ImageView.GONE
                     if (deck.size > 1) deck.removeAt(0)
                 }
             }
+            drawBoard()
 
             if (!hasSets()) {
                 timerGlobalFinish = System.currentTimeMillis()
-                //ToDo
-                (activity as GameActivity).showScore("", (timerGlobalFinish - timerGlobalStart) / 1000, arrayOf("You"), intArrayOf(score))
+                val playersArray = if (isComputer) { arrayOf(getString(R.string.player_you), getString(R.string.player_computer)) } else { arrayOf(getString(R.string.player_you)) }
+                val scoresArray = if (isComputer) { intArrayOf(score, computerScore) } else { intArrayOf(score) }
+                val title = if (isComputer) getString(R.string.singleplayer_over) else getString(R.string.training_over)
+                (activity as GameActivity).showScore(title, (timerGlobalFinish - timerGlobalStart) / 1000, playersArray, scoresArray)
             }
         }
     }

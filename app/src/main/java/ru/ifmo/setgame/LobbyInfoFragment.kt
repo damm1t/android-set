@@ -50,7 +50,7 @@ class LobbyInfoFragment : Fragment() {
 
     override fun onStart() {
         super.onStart()
-        LocalBroadcastManager.getInstance(context!!).registerReceiver(broadcastReceiver, IntentFilter("ru.ifmo.setgame.IN_LOBBY"))
+        LocalBroadcastManager.getInstance(context!!).registerReceiver(broadcastReceiver, IntentFilter(IN_LOBBY_BROADCAST))
     }
 
     override fun onStop() {
