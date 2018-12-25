@@ -14,6 +14,6 @@ class GameCreationFragment : androidx.fragment.app.Fragment() {
                 text = "Default deck"
                 textSize = 32f
                 gravity = Gravity.CENTER
-                setOnClickListener { (activity as GameInterface).startGame() }
+                //setOnClickListener { (activity as GameInterface).startGame() }
             }
 }

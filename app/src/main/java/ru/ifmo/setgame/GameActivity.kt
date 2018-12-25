@@ -11,9 +11,10 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
 interface GameInterface {
-
-    fun startGame()
     fun showScore(title:String, time: Long, players: Array<String>, scores: IntArray)
+    fun startMultiplayerGame(json: String)
+    fun startSingleplayerGame()
+    fun startTrainingGame()
 }
 
 class Lobby(
@@ -46,7 +47,7 @@ class GameActivity : AppCompatActivity(), GameInterface {
     val goToGameReceiver = object :BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             val gameStr = intent?.extras?.getString("game")!!
-            supportFragmentManager.beginTransaction().apply { replace(R.id.game_fragment, GameFragment.newInstance(gameStr, true, false)); commit() }
+            startMultiplayerGame(gameStr)
         }
     }
 
@@ -54,8 +55,16 @@ class GameActivity : AppCompatActivity(), GameInterface {
         supportFragmentManager.beginTransaction().apply { replace(R.id.game_fragment, GameScoreFragment.newInstance(title, time, players, scores), SCORE_FRAGMENT_TAG); commit() }
     }
 
-    override fun startGame() {
-        supportFragmentManager.beginTransaction().apply { replace(R.id.game_fragment, GameFragment()); commit() }
+    override fun startMultiplayerGame(json: String) {
+        supportFragmentManager.beginTransaction().apply { replace(R.id.game_fragment, GameFragment.newInstance(json, true, false)); commit() }
+    }
+
+    override fun startSingleplayerGame() {
+        supportFragmentManager.beginTransaction().apply { replace(R.id.game_fragment, GameFragment.newInstance("", false, true)); commit() }
+    }
+
+    override fun startTrainingGame() {
+        supportFragmentManager.beginTransaction().apply { replace(R.id.game_fragment, GameFragment.newInstance("", false, false)); commit() }
     }
 
     override fun onStart() {
@@ -74,12 +83,23 @@ class GameActivity : AppCompatActivity(), GameInterface {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_game)
 
-        GlobalScope.launch {
-            connector = Connector(this@GameActivity)
-            connector.connect()
-            connector.close()
-        }
+        intent.extras?.apply {
+            val isMultiplayer = getBoolean("multiplayer")
+            val isComputer = getBoolean("computer")
 
-        supportFragmentManager.beginTransaction().apply { replace(R.id.game_fragment, LobbySelectionFragment()); commit() }
+            when {
+                isMultiplayer -> {
+                    GlobalScope.launch {
+                        connector = Connector(this@GameActivity)
+                        connector.connect()
+                        connector.close()
+                    }
+
+                    supportFragmentManager.beginTransaction().apply { replace(R.id.game_fragment, LobbySelectionFragment()); commit() }
+                }
+                isComputer -> startSingleplayerGame()
+                else -> startTrainingGame()
+            }
+        }
     }
 }

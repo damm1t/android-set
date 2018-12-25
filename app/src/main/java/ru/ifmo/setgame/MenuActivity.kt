@@ -11,9 +11,30 @@ class MenuActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_menu)
         btn_multiplayer.setOnClickListener {
-            val myIntent = Intent(this, GameActivity::class.java)
+            val myIntent = Intent(this, GameActivity::class.java).apply {
+                putExtra("multiplayer", true)
+                putExtra("computer", false)
+            }
+
+            this.startActivity(myIntent)
+        }
+
+        btn_singleplayer.setOnClickListener{
+            val myIntent = Intent(this, GameActivity::class.java).apply {
+                putExtra("multiplayer", false)
+                putExtra("computer", true)
+            }
+
+            this.startActivity(myIntent)
+        }
+
+        btn_training.setOnClickListener {
+            val myIntent = Intent(this, GameActivity::class.java).apply {
+                putExtra("multiplayer", false)
+                putExtra("computer", false)
+            }
+
             this.startActivity(myIntent)
         }
     }
-
 }
