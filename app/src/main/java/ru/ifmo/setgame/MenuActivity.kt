@@ -37,6 +37,10 @@ class MenuActivity : AppCompatActivity() {
             this.startActivity(myIntent)
         }
 
+        btn_stats.setOnClickListener{
+            this.startActivity(Intent(this, StatsActivity::class.java))
+        }
+
         btn_settings.setOnClickListener{
             this.startActivity(Intent(this, SettingsActivity::class.java))
         }

@@ -1,6 +1,7 @@
 package ru.ifmo.setgame
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import androidx.fragment.app.Fragment
@@ -37,12 +38,25 @@ class GameScoreFragment : androidx.fragment.app.Fragment() {
         view.tv_score_title.text = title
         view.tv_score_time.text = "Game time: ${time.toString()} seconds"
 
+        var thisScore = 0
+
         for (i in 0 until playersArray.size) {
             val tv = TextView(context)
             tv.text = "${playersArray[i]}: ${scoresArray[i]}"
             tv.textSize = 16f
             view.ll_score_list.addView(tv)
+
+            if (playersArray[i] == getString(R.string.player_you)) {
+                thisScore = scoresArray[i]
+            }
         }
+
+        val preferences = activity!!.getSharedPreferences("game_prefs", Context.MODE_PRIVATE)
+        preferences.edit()
+                .putInt("TOTAL_GAMES", preferences.getInt("TOTAL_GAMES", 0) + 1)
+                .putLong("TOTAL_TIME", preferences.getLong("TOTAL_TIME", 0) + time)
+                .putInt("TOTAL_SCORE", preferences.getInt("TOTAL_SCORE", 0) + thisScore)
+                .apply()
 
         return view
     }

@@ -13,7 +13,7 @@
         android:id="@+id/btn_reset_stats"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/reset_statistics"
+        android:text="@string/reset_stats"
         android:textSize="24sp"
         android:textColor="#000"/>
 
@@ -24,6 +24,5 @@
         android:text="@string/enable_custom_cards"
         android:textSize="24sp"
         android:layout_marginTop="16dp"/>
-
 
 </LinearLayout>

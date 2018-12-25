@@ -9,6 +9,7 @@ import android.os.Bundle
 import android.widget.CompoundButton
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import kotlinx.android.synthetic.main.activity_menu.*
 import kotlinx.android.synthetic.main.activity_settings.*
 
 class SettingsActivity : AppCompatActivity() {
@@ -29,6 +30,14 @@ class SettingsActivity : AppCompatActivity() {
         setContentView(R.layout.activity_settings)
 
         preferences = getSharedPreferences("game_prefs", Context.MODE_PRIVATE)
+
+        btn_reset_stats.setOnClickListener {
+            preferences.edit()
+                    .putInt("TOTAL_GAMES", 0)
+                    .putLong("TOTAL_TIME", 0)
+                    .putInt("TOTAL_SCORE", 0)
+                    .apply()
+        }
 
         switch_custom_cards.setOnCheckedChangeListener { compoundButton: CompoundButton, isChecked: Boolean ->
             if (isChecked) {

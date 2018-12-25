@@ -15,4 +15,9 @@
     <string name="training_over">Training over</string>
     <string name="player_you">You</string>
     <string name="player_computer">Computer</string>
+    <string name="reset_stats">Reset stats</string>
+    <string name="enable_custom_cards">Enable custom cards</string>
+    <string name="title_activity_settings">Settings</string>
+    <string name="title_activity_stats">Stats</string>
+    <string name="stats">Stats</string>
 </resources>
