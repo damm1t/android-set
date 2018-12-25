@@ -10,7 +10,7 @@ class MenuActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_menu)
-        button1.setOnClickListener {
+        btn_multiplayer.setOnClickListener {
             val myIntent = Intent(this, GameActivity::class.java)
             this.startActivity(myIntent)
         }

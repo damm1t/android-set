@@ -7,45 +7,44 @@
     tools:context=".MenuActivity">
 
     <Button
-        android:id="@+id/button1"
+        android:id="@+id/btn_multiplayer"
         android:layout_width="250dp"
         android:layout_height="70dp"
         android:layout_marginTop="8dp"
         android:text="Multiplayer"
-        app:layout_constraintBottom_toTopOf="@id/button2"
+        app:layout_constraintBottom_toTopOf="@id/btn_singleplayer"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <Button
-        android:id="@+id/button2"
+        android:id="@+id/btn_singleplayer"
         android:layout_width="0dp"
         android:layout_height="70dp"
         android:text="Singleplayer"
-        app:layout_constraintBottom_toTopOf="@id/button3"
-        app:layout_constraintEnd_toEndOf="@+id/button1"
-        app:layout_constraintHorizontal_bias="1.0"
-        app:layout_constraintStart_toStartOf="@+id/button1"
-        app:layout_constraintTop_toBottomOf="@+id/button1" />
+        app:layout_constraintBottom_toTopOf="@id/btn_training"
+        app:layout_constraintEnd_toEndOf="@id/btn_multiplayer"
+        app:layout_constraintStart_toStartOf="@id/btn_multiplayer"
+        app:layout_constraintTop_toBottomOf="@id/btn_multiplayer" />
 
     <Button
-        android:id="@+id/button3"
+        android:id="@+id/btn_training"
         android:layout_width="0dp"
         android:layout_height="70dp"
         android:text="Training"
-        app:layout_constraintBottom_toTopOf="@+id/button4"
-        app:layout_constraintEnd_toEndOf="@+id/button2"
-        app:layout_constraintStart_toStartOf="@+id/button2"
-        app:layout_constraintTop_toBottomOf="@+id/button2" />
+        app:layout_constraintBottom_toTopOf="@id/btn_settings"
+        app:layout_constraintEnd_toEndOf="@id/btn_singleplayer"
+        app:layout_constraintStart_toStartOf="@id/btn_singleplayer"
+        app:layout_constraintTop_toBottomOf="@id/btn_singleplayer" />
 
     <Button
-        android:id="@+id/button4"
+        android:id="@+id/btn_settings"
         android:layout_width="0dp"
         android:layout_height="70dp"
         android:layout_marginBottom="8dp"
         android:text="Settings"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="@+id/button3"
-        app:layout_constraintStart_toStartOf="@+id/button3"
-        app:layout_constraintTop_toBottomOf="@+id/button3" />
+        app:layout_constraintEnd_toEndOf="@id/btn_training"
+        app:layout_constraintStart_toStartOf="@id/btn_training"
+        app:layout_constraintTop_toBottomOf="@id/btn_training" />
 </androidx.constraintlayout.widget.ConstraintLayout>
