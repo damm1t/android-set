@@ -203,7 +203,8 @@ class MultiplayerGameActivity : AppCompatActivity(), GameInterface {
         private set
 
     override fun showScore(score: Int) {
-        supportFragmentManager.beginTransaction().apply { replace(R.id.game_fragment, GameScoreFragment.newInstance(score), SCORE_FRAGMENT_TAG); commit() }
+        //TODO
+        supportFragmentManager.beginTransaction().apply { replace(R.id.game_fragment, GameScoreFragment.newInstance("Game finished", 999, arrayOf("You"), intArrayOf(score)), SCORE_FRAGMENT_TAG); commit() }
     }
 
     override fun startGame() {
@@ -224,7 +225,7 @@ class MultiplayerGameActivity : AppCompatActivity(), GameInterface {
 
         LocalBroadcastManager.getInstance(this).registerReceiver(object :BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent?) {
-                val gameStr = intent!!.extras!!.getString("game")
+                val gameStr = intent!!.extras!!.getString("game")!!
                 supportFragmentManager.beginTransaction().apply { replace(R.id.game_fragment, GameFragment.newInstance(gameStr)); commit() }
                 //LocalBroadcastManager.getInstance(this@MultiplayerGameActivity).sendBroadcast(Intent(connector.IN_GAME_BROADCAST).apply { putExtra("game", gameStr) })
             }
@@ -232,7 +233,8 @@ class MultiplayerGameActivity : AppCompatActivity(), GameInterface {
 
         LocalBroadcastManager.getInstance(this).registerReceiver(object :BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent?) {
-                supportFragmentManager.beginTransaction().apply { replace(R.id.game_fragment, GameScoreFragment.newInstance(0)); commit() }
+                //TODO
+                showScore(0)
             }
         }, IntentFilter("GO_TO_SCORE"))
     }

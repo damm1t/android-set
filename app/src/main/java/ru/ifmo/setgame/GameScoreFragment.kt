@@ -8,36 +8,52 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import kotlinx.android.synthetic.main.fragment_score.view.*
 
 class GameScoreFragment : androidx.fragment.app.Fragment() {
-    private val SCORE_TAG = "SCORE_TAG"
+    private val TITLE_TAG = "TITLE_TAG"
+    private val TIME_TAG = "TIME_TAG"
+    private val PLAYERS_TAG = "PLAYERS_TAG"
+    private val SCORES_TAG = "SCORES_TAG"
 
-    var score = 0
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        score = arguments?.getInt(SCORE_TAG) ?: 0
-    }
+
+    var title = ""
+    var time = 0
+    var playersArray = arrayOf<String>()
+    var scoresArray = intArrayOf()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        val view = inflater.inflate(R.layout.fragment_score, container, false)
+
         arguments?.let {
-            score = it.getInt(SCORE_TAG)
+            title = it.getString(TITLE_TAG)!!
+            time = it.getInt(TIME_TAG)
+            playersArray = it.getStringArray(PLAYERS_TAG)!!
+            scoresArray = it.getIntArray(SCORES_TAG)!!
         }
-        return TextView(activity).apply {
-            text = "Your score: $score"
-            textSize = 32f
-            gravity = Gravity.CENTER
-            setOnClickListener {
-                var mainIntent = Intent(context, MenuActivity::class.java)
-                context.startActivity(mainIntent)
-            }
+
+        view.tv_score_title.text = title
+        view.tv_score_time.text = "Game time: ${time.toString()} seconds"
+
+        for (i in 0 until playersArray.size) {
+            val tv = TextView(context)
+            tv.text = "${playersArray[i]}: ${scoresArray[i]}"
+            view.ll_score_list.addView(tv)
         }
+
+        return view
     }
 
     companion object {
         @JvmStatic
-        fun newInstance(param1: Int) =
+        fun newInstance(title: String, time: Int, players: Array<String>, scores: IntArray) =
                 GameScoreFragment().apply {
-                    arguments = Bundle().apply { putInt(SCORE_TAG, param1) }
+                    arguments = Bundle().apply {
+                        putString(TITLE_TAG, title)
+                        putInt(TIME_TAG, time)
+                        putStringArray(PLAYERS_TAG, players)
+                        putIntArray(SCORES_TAG, scores)
+                    }
                 }
     }
 }
