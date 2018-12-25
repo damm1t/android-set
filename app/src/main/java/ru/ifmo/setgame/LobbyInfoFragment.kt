@@ -14,6 +14,7 @@ import androidx.fragment.app.Fragment
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
+import com.fasterxml.jackson.module.kotlin.readValues
 import kotlinx.android.synthetic.main.fragment_lobby_info.*
 import kotlinx.android.synthetic.main.fragment_lobby_info.view.*
 
@@ -26,11 +27,11 @@ class LobbyInfoFragment : Fragment() {
     }
 
     fun setDataFromJsonString(string : String, fragment_view: View) {
-        val lobby = jacksonObjectMapper().readTree(string)
-        val playersArray = jacksonObjectMapper().readValue<IntArray>(jacksonObjectMapper().writeValueAsString(lobby.get("in_lobby"))) // TODO
+        val lobby = jacksonObjectMapper().readValue<Lobby>(string)
+        val playersArray = lobby.in_lobby
 
-        info_lobby_name.text = getString(R.string.lobby_name_placeholder, lobby.get("lobby_id").asInt())
-        info_max_players.text = getString(R.string.players_count_placeholder_long, playersArray.size, lobby.get("max_players").asInt())
+        info_lobby_name.text = getString(R.string.lobby_name_placeholder, lobby.lobby_id)
+        info_max_players.text = getString(R.string.players_count_placeholder_long, playersArray.size, lobby.max_players)
         players_in_lobby.removeAllViews()
 
         info_lobby_name.visibility = View.VISIBLE
