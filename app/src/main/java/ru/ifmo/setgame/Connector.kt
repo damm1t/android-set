@@ -201,7 +201,7 @@ class Connector(context: Context) : AutoCloseable {
 
                         localBroadcastManager.sendBroadcast(GameActivity.intentScore(
                                 "Game #$lobbyId results",
-                                0,
+                                update.get("time").asLong(),
                                 players.toTypedArray(),
                                 scores.toIntArray()))
                         break
