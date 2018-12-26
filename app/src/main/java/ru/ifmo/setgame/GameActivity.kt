@@ -24,10 +24,8 @@ class Lobby(
         val in_lobby: Array<Int>
 )
 
-const val SCORE_FRAGMENT_TAG = "SCORE_FRAGMENT_TAG"
-
-
 class GameActivity : AppCompatActivity(), GameInterface {
+
     lateinit var connector: Connector
         private set
 
@@ -35,10 +33,10 @@ class GameActivity : AppCompatActivity(), GameInterface {
         override fun onReceive(context: Context?, intent: Intent?) {
             val extras = intent?.extras!!
 
-            val title = extras.getString("TITLE_TAG")!!
-            val time = extras.getLong("TIME_TAG")
-            val players = extras.getStringArray("PLAYERS_TAG")!!
-            val scores = extras.getIntArray("SCORES_TAG")!!
+            val title = extras.getString(INTENT_KEY_TITLE)!!
+            val time = extras.getLong(INTENT_KEY_TIME)
+            val players = extras.getStringArray(INTENT_KEY_PLAYERS)!!
+            val scores = extras.getIntArray(INTENT_KEY_SCORES)!!
 
             showScore(title, time, players, scores)
         }
@@ -52,7 +50,7 @@ class GameActivity : AppCompatActivity(), GameInterface {
     }
 
     override fun showScore(title: String, time: Long, players: Array<String>, scores: IntArray) {
-        supportFragmentManager.beginTransaction().apply { replace(R.id.game_fragment, GameScoreFragment.newInstance(title, time, players, scores), SCORE_FRAGMENT_TAG); commit() }
+        supportFragmentManager.beginTransaction().apply { replace(R.id.game_fragment, GameScoreFragment.newInstance(title, time, players, scores)); commit() }
     }
 
     override fun startMultiplayerGame(json: String) {
@@ -70,7 +68,7 @@ class GameActivity : AppCompatActivity(), GameInterface {
     override fun onStart() {
         super.onStart()
         LocalBroadcastManager.getInstance(this).registerReceiver(goToGameReceiver, IntentFilter(TO_GAME))
-        LocalBroadcastManager.getInstance(this).registerReceiver(goToScoreReceiver, IntentFilter(TO_GAME))
+        LocalBroadcastManager.getInstance(this).registerReceiver(goToScoreReceiver, IntentFilter(TO_SCORE))
     }
 
     override fun onStop() {
@@ -84,8 +82,8 @@ class GameActivity : AppCompatActivity(), GameInterface {
         setContentView(R.layout.activity_game)
 
         intent.extras?.apply {
-            val isMultiplayer = getBoolean("multiplayer")
-            val isComputer = getBoolean("computer")
+            val isMultiplayer = getBoolean(INTENT_KEY_MULTIPLAYER)
+            val isComputer = getBoolean(INTENT_KEY_SINGLEPLAYER)
 
             when {
                 isMultiplayer -> {
@@ -100,6 +98,40 @@ class GameActivity : AppCompatActivity(), GameInterface {
                 isComputer -> startSingleplayerGame()
                 else -> startTrainingGame()
             }
+        }
+    }
+
+    companion object {
+        private const val INTENT_KEY_MULTIPLAYER = "multiplayer"
+        private const val INTENT_KEY_SINGLEPLAYER = "singleplayer"
+        private const val INTENT_KEY_TITLE = "title"
+        private const val INTENT_KEY_TIME = "time"
+        private const val INTENT_KEY_PLAYERS = "players"
+        private const val INTENT_KEY_SCORES = "scores"
+
+        @JvmStatic
+        fun intentMultiplayer(context: Context) : Intent = Intent(context, GameActivity::class.java).apply {
+            putExtra(INTENT_KEY_MULTIPLAYER, true)
+            putExtra(INTENT_KEY_SINGLEPLAYER, false)
+        }
+
+        @JvmStatic
+        fun intentSingleplayer(context: Context) : Intent = Intent(context, GameActivity::class.java).apply {
+            putExtra(INTENT_KEY_MULTIPLAYER, false)
+            putExtra(INTENT_KEY_SINGLEPLAYER, true)
+        }
+
+        @JvmStatic
+        fun intentTraining(context: Context) : Intent = Intent(context, GameActivity::class.java).apply {
+            putExtra(INTENT_KEY_MULTIPLAYER, false)
+            putExtra(INTENT_KEY_SINGLEPLAYER, false)
+        }
+
+        fun intentScore(title: String, time: Long, players: Array<String>, scores: IntArray) :Intent = Intent(TO_SCORE).apply {
+            putExtra(INTENT_KEY_TITLE, title)
+            putExtra(INTENT_KEY_TIME, time)
+            putExtra(INTENT_KEY_PLAYERS, players)
+            putExtra(INTENT_KEY_SCORES, scores)
         }
     }
 }

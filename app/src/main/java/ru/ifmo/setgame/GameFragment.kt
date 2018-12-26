@@ -165,7 +165,7 @@ class GameFragment : androidx.fragment.app.Fragment() {
             }
         }
 
-        allowCustomCards = activity!!.getSharedPreferences("game_prefs", Context.MODE_PRIVATE).getBoolean("CUSTOM_CARDS", false)
+        allowCustomCards = activity!!.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE).getBoolean(PREFERENCE_CUSTOM_CARDS, false)
 
         return gameView
     }

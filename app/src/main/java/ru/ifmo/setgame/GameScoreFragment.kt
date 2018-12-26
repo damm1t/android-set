@@ -52,11 +52,11 @@ class GameScoreFragment : androidx.fragment.app.Fragment() {
             }
         }
 
-        val preferences = activity!!.getSharedPreferences("game_prefs", Context.MODE_PRIVATE)
+        val preferences = activity!!.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE)
         preferences.edit()
-                .putInt("TOTAL_GAMES", preferences.getInt("TOTAL_GAMES", 0) + 1)
-                .putLong("TOTAL_TIME", preferences.getLong("TOTAL_TIME", 0) + time)
-                .putInt("TOTAL_SCORE", preferences.getInt("TOTAL_SCORE", 0) + thisScore)
+                .putInt(STAT_TOTAL_GAMES, preferences.getInt(STAT_TOTAL_GAMES, 0) + 1)
+                .putLong(STAT_TOTAL_TIME, preferences.getLong(STAT_TOTAL_TIME, 0) + time)
+                .putInt(STAT_TOTAL_SCORE, preferences.getInt(STAT_TOTAL_SCORE, 0) + thisScore)
                 .apply()
 
         return view

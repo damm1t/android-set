@@ -184,25 +184,23 @@ class Connector(context: Context) : AutoCloseable {
                     if (status == "GAME_ENDED") {
                         val trscores = update.get("score")
 
-                        localBroadcastManager.sendBroadcast(Intent(TO_SCORE).apply {
-                            putExtra("TITLE_TAG", "Game #$lobbyId results")
-                            putExtra("TIME_TAG", 0) //TODO
+                        val players = mutableListOf<String>()
+                        val scores = mutableListOf<Int>()
 
-                            val players = mutableListOf<String>()
-                            val scores = mutableListOf<Int>()
-
-                            for (pr in trscores.fields()) {
-                                if (pr.key == playerId.toString()) {
-                                    players.add("You")
-                                } else {
-                                    players.add("Player #${pr.key}")
-                                }
-                                scores.add(pr.value.asInt())
+                        for (pr in trscores.fields()) {
+                            if (pr.key == playerId.toString()) {
+                                players.add("You")
+                            } else {
+                                players.add("Player #${pr.key}")
                             }
+                            scores.add(pr.value.asInt())
+                        }
 
-                            putExtra("PLAYERS_TAG", players.toTypedArray())
-                            putExtra("SCORES_TAG", scores.toIntArray())
-                        })
+                        localBroadcastManager.sendBroadcast(GameActivity.intentScore(
+                                "Game #$lobbyId results",
+                                0,
+                                players.toTypedArray(),
+                                scores.toIntArray()))
                         break
                     } else {
                         val gameStr = mapper.writeValueAsString(update.get("game"))
