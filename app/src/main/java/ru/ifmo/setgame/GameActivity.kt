@@ -15,6 +15,7 @@ interface GameInterface {
     fun startMultiplayerGame(json: String)
     fun startSingleplayerGame()
     fun startTrainingGame()
+    fun showLobbiesList()
 }
 
 class Lobby(
@@ -49,6 +50,12 @@ class GameActivity : AppCompatActivity(), GameInterface {
         }
     }
 
+    val goToLobbiesReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            showLobbiesList()
+        }
+    }
+
     override fun showScore(title: String, time: Long, players: Array<String>, scores: IntArray) {
         supportFragmentManager.beginTransaction().apply { replace(R.id.game_fragment, GameScoreFragment.newInstance(title, time, players, scores)); commit() }
     }
@@ -65,15 +72,21 @@ class GameActivity : AppCompatActivity(), GameInterface {
         supportFragmentManager.beginTransaction().apply { replace(R.id.game_fragment, GameFragment.newInstance("", false, false)); commit() }
     }
 
+    override fun showLobbiesList() {
+        supportFragmentManager.beginTransaction().apply { replace(R.id.game_fragment, LobbySelectionFragment()); commit() }
+    }
+
     override fun onStart() {
         super.onStart()
         LocalBroadcastManager.getInstance(this).registerReceiver(goToGameReceiver, IntentFilter(TO_GAME))
         LocalBroadcastManager.getInstance(this).registerReceiver(goToScoreReceiver, IntentFilter(TO_SCORE))
+        LocalBroadcastManager.getInstance(this).registerReceiver(goToLobbiesReceiver, IntentFilter(TO_LOBBIES))
     }
 
     override fun onStop() {
         LocalBroadcastManager.getInstance(this).unregisterReceiver(goToGameReceiver)
         LocalBroadcastManager.getInstance(this).unregisterReceiver(goToScoreReceiver)
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(goToLobbiesReceiver)
         super.onStop()
     }
 
@@ -93,7 +106,7 @@ class GameActivity : AppCompatActivity(), GameInterface {
                         connector.close()
                     }
 
-                    supportFragmentManager.beginTransaction().apply { replace(R.id.game_fragment, LobbySelectionFragment()); commit() }
+                    showLobbiesList()
                 }
                 isComputer -> startSingleplayerGame()
                 else -> startTrainingGame()

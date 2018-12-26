@@ -20,6 +20,7 @@ const val IN_LOBBY_BROADCAST = "ru.ifmo.setgame.IN_LOBBY"
 const val IN_GAME_BROADCAST = "ru.ifmo.setgame.IN_GAME"
 const val TO_GAME = "ru.ifmo.setgame.TO_GAME"
 const val TO_SCORE = "ru.ifmo.setgame.TO_SCORE"
+const val TO_LOBBIES = "ru.ifmo.setgame.TO_LOBBIES"
 
 class Connector(context: Context) : AutoCloseable {
     private val mutex = Mutex()
@@ -85,9 +86,11 @@ class Connector(context: Context) : AutoCloseable {
             val response = mapper.readTree(reader.readLine())
             status = response.get("status").asText()
 
+            // somthing went wrong, return to lobbies list
             if (status != "IN_LOBBY") {
+                localBroadcastManager.sendBroadcast(Intent(TO_LOBBIES))
                 return@launch
-            } // TODO doesn't work
+            }
 
             lobbyId = response.get("lobby_id").asInt()
 
