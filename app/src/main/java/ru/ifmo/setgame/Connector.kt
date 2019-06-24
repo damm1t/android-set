@@ -24,7 +24,7 @@ const val TO_LOBBIES = "ru.ifmo.setgame.TO_LOBBIES"
 
 class Connector(context: Context) : AutoCloseable {
     private val mutex = Mutex()
-    private val hostAddress = "18.222.225.249"
+    private val hostAddress = "18.197.57.64"
     private val hostPort = 3691
     private val socket = Socket(hostAddress, hostPort)
     private val reader = BufferedReader(InputStreamReader(socket.getInputStream()))
