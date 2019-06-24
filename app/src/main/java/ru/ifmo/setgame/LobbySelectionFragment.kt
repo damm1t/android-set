@@ -75,7 +75,7 @@ class LobbySelectionFragment : Fragment() {
     }
 
     lateinit var adapter: LobbyAdapter
-    val broadcastReceiver = object : BroadcastReceiver() {
+    private val broadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             val str = intent?.extras?.getString("lobbies_list")!!
             val lobbies = jacksonObjectMapper().readValue<Array<Lobby>>(str)
@@ -110,7 +110,7 @@ class LobbySelectionFragment : Fragment() {
         }
 
         view.fab.setOnClickListener {
-            LobbyCreationDialog().show(fragmentManager, "create_lobby")
+            LobbyCreationDialog().show(fragmentManager!!, "create_lobby")
         }
         return view
     }

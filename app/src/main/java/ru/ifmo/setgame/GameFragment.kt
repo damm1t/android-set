@@ -18,6 +18,7 @@ import androidx.gridlayout.widget.GridLayout
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
+import com.fasterxml.jackson.module.kotlin.treeToValue
 import kotlinx.android.synthetic.main.card_frame.view.*
 import kotlinx.android.synthetic.main.fragment_game.view.*
 import ru.ifmo.setgame.R.drawable.card_frame_drawable
@@ -47,7 +48,7 @@ class GameFragment : androidx.fragment.app.Fragment() {
     private var timerGlobalStart: Long = 0
     private var timerGlobalFinish: Long = 0
 
-    val receiver = object : BroadcastReceiver() {
+    private val receiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             val json = intent?.extras?.getString("game")!!
             drawBoardFromJSON(json)
@@ -240,11 +241,12 @@ class GameFragment : androidx.fragment.app.Fragment() {
     }
 
     private fun drawBoardFromJSON(json: String) {
-        val jsonBoard = jacksonObjectMapper().readTree(json).get("board")
+        val objectMapper = jacksonObjectMapper()
+        val jsonBoard = objectMapper.readTree(json).get("board")
 
         for (i in 0 until 12) {
-            val prop = jacksonObjectMapper().readValue<IntArray>(jsonBoard.get(i.toString()).toString())
-            board[i] = PlayingCard(prop)
+            val features = objectMapper.treeToValue<IntArray>(jsonBoard.get(i.toString()))
+            board[i] = PlayingCard(features)
         }
 
         drawBoard()
