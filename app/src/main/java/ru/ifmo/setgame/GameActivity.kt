@@ -7,8 +7,6 @@ import android.content.IntentFilter
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 
 interface GameInterface {
     fun showScore(title: String, time: Long, players: Array<String>, scores: IntArray)
@@ -27,10 +25,10 @@ class Lobby(
 
 class GameActivity : AppCompatActivity(), GameInterface {
 
-    lateinit var connector: Connector
+    lateinit var connector : Connector
         private set
 
-    val goToScoreReceiver = object : BroadcastReceiver() {
+    private val goToScoreReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             val extras = intent?.extras!!
 
@@ -43,14 +41,14 @@ class GameActivity : AppCompatActivity(), GameInterface {
         }
     }
 
-    val goToGameReceiver = object : BroadcastReceiver() {
+    private val goToGameReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             val gameStr = intent?.extras?.getString("game")!!
             startMultiplayerGame(gameStr)
         }
     }
 
-    val goToLobbiesReceiver = object : BroadcastReceiver() {
+    private val goToLobbiesReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             showLobbiesList()
         }
@@ -100,11 +98,8 @@ class GameActivity : AppCompatActivity(), GameInterface {
 
             when {
                 isMultiplayer -> {
-                    GlobalScope.launch {
-                        connector = Connector(this@GameActivity)
-                        connector.connect()
-                        connector.close()
-                    }
+                    connector = Connector(this@GameActivity)
+                    connector.connect()
 
                     showLobbiesList()
                 }
@@ -112,6 +107,13 @@ class GameActivity : AppCompatActivity(), GameInterface {
                 else -> startTrainingGame()
             }
         }
+    }
+
+    override fun onDestroy() {
+        if (::connector.isInitialized) {
+            connector.close()
+        }
+        super.onDestroy()
     }
 
     companion object {
@@ -140,6 +142,7 @@ class GameActivity : AppCompatActivity(), GameInterface {
             putExtra(INTENT_KEY_SINGLEPLAYER, false)
         }
 
+        @JvmStatic
         fun intentScore(title: String, time: Long, players: Array<String>, scores: IntArray) :Intent = Intent(TO_SCORE).apply {
             putExtra(INTENT_KEY_TITLE, title)
             putExtra(INTENT_KEY_TIME, time)

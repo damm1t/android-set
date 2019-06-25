@@ -5,8 +5,7 @@ import android.content.Intent
 import android.util.Log
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import java.io.BufferedReader
@@ -14,6 +13,7 @@ import java.io.BufferedWriter
 import java.io.InputStreamReader
 import java.io.OutputStreamWriter
 import java.net.Socket
+import kotlin.coroutines.CoroutineContext
 
 const val LOBBIES_LIST_BROADCAST = "ru.ifmo.setgame.LOBBIES_LIST"
 const val IN_LOBBY_BROADCAST = "ru.ifmo.setgame.IN_LOBBY"
@@ -22,13 +22,18 @@ const val TO_GAME = "ru.ifmo.setgame.TO_GAME"
 const val TO_SCORE = "ru.ifmo.setgame.TO_SCORE"
 const val TO_LOBBIES = "ru.ifmo.setgame.TO_LOBBIES"
 
-class Connector(context: Context) : AutoCloseable {
+class Connector(context: Context) : AutoCloseable, CoroutineScope {
+    private val job = SupervisorJob()
+
+    override val coroutineContext: CoroutineContext
+        get() = Dispatchers.IO + job
+
     private val mutex = Mutex()
     private val hostAddress = "18.197.57.64"
     private val hostPort = 3691
-    private val socket = Socket(hostAddress, hostPort)
-    private val reader = BufferedReader(InputStreamReader(socket.getInputStream()))
-    private val writer = BufferedWriter(OutputStreamWriter(socket.getOutputStream(), "UTF-8"))
+    private lateinit var socket : Socket// = Socket(hostAddress, hostPort)
+    private lateinit var reader : BufferedReader// = BufferedReader(InputStreamReader(socket.getInputStream()))
+    private lateinit var writer : BufferedWriter// = BufferedWriter(OutputStreamWriter(socket.getOutputStream(), "UTF-8"))
     private val localBroadcastManager = LocalBroadcastManager.getInstance(context)
     private val mapper = jacksonObjectMapper()
 
@@ -37,7 +42,7 @@ class Connector(context: Context) : AutoCloseable {
     private var gameId = -1
     private var status = "NEW"
 
-    fun requestLobbies() = GlobalScope.launch {
+    fun requestLobbies() = launch {
         mutex.withLock {
             val request = """{"status": "$status",
             |"player_id": $playerId,
@@ -54,7 +59,7 @@ class Connector(context: Context) : AutoCloseable {
         }
     }
 
-    fun createLobby(maxPlayers: Int) = GlobalScope.launch {
+    fun createLobby(maxPlayers: Int) = launch {
         mutex.withLock {
             val request = """{"status": "$status",
             |"player_id": $playerId,
@@ -73,7 +78,7 @@ class Connector(context: Context) : AutoCloseable {
         }
     }
 
-    fun joinLobby(mLobbyId: Int) = GlobalScope.launch {
+    fun joinLobby(mLobbyId: Int) = launch {
         mutex.withLock {
             val request = """{"status": "$status",
             |"player_id": $playerId,
@@ -86,7 +91,7 @@ class Connector(context: Context) : AutoCloseable {
             val response = mapper.readTree(reader.readLine())
             status = response.get("status").asText()
 
-            // somthing went wrong, return to lobbies list
+            // something went wrong, return to lobbies list
             if (status != "IN_LOBBY") {
                 localBroadcastManager.sendBroadcast(Intent(TO_LOBBIES))
                 return@launch
@@ -100,7 +105,7 @@ class Connector(context: Context) : AutoCloseable {
         }
     }
 
-    fun leaveLobby() = GlobalScope.launch {
+    fun leaveLobby() = launch {
         mutex.withLock {
             val request = """{"status": "$status",
             |"player_id": $playerId,
@@ -122,7 +127,7 @@ class Connector(context: Context) : AutoCloseable {
         }
     }
 
-    fun make_move(positions: IntArray) = GlobalScope.launch {
+    fun make_move(positions: IntArray) = launch {
         mutex.withLock {
             val request = """{"status": "$status",
             |"player_id": $playerId,
@@ -139,6 +144,10 @@ class Connector(context: Context) : AutoCloseable {
 
     // send default handshake and get player id and list of lobbies
     private suspend fun init() = mutex.withLock {
+        socket = Socket(hostAddress, hostPort)
+        reader = BufferedReader(InputStreamReader(socket.getInputStream()))
+        writer = BufferedWriter(OutputStreamWriter(socket.getOutputStream(), "UTF-8"))
+
         val request = """{"status": "$status"}"""
 
         writer.write(request)
@@ -152,7 +161,7 @@ class Connector(context: Context) : AutoCloseable {
         localBroadcastManager.sendBroadcast(Intent(LOBBIES_LIST_BROADCAST).apply { putExtra("lobbies_list", lobbiesStr) })
     }
 
-    suspend fun connect() {
+    fun connect() = launch {
         init()
 
         while (socket.isConnected) {
@@ -216,5 +225,10 @@ class Connector(context: Context) : AutoCloseable {
 
     fun ready() = reader.ready()
 
-    override fun close() = socket.close()
+    override fun close() {
+        if (::socket.isInitialized) {
+            socket.close()
+        }
+        job.cancelChildren()
+    }
 }
