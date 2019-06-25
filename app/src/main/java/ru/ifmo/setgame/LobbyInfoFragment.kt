@@ -18,7 +18,7 @@ import kotlinx.android.synthetic.main.fragment_lobby_info.*
 import kotlinx.android.synthetic.main.fragment_lobby_info.view.*
 
 class LobbyInfoFragment : Fragment() {
-    val broadcastReceiver = object : BroadcastReceiver() {
+    private val broadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             val json = intent?.extras?.getString("lobby")!!
             setDataFromJsonString(json, view!!)

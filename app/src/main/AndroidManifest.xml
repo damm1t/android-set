@@ -29,7 +29,7 @@
             android:label="@string/title_activity_settings" />
         <activity
             android:name=".StatsActivity"
-            android:label="@string/title_activity_stats"></activity>
+            android:label="@string/title_activity_stats"/>
     </application>
 
 </manifest>

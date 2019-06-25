@@ -7,7 +7,7 @@
     <string name="players_count_placeholder_long">Players: %d/%d</string>
     <string name="game_time">Game time: %d seconds</string>
     <string name="player_score">%s: %d</string>
-    <string name="player_name_placeholder">Players #%d</string>
+    <string name="player_name_placeholder">Player #%d</string>
     <string name="btn_create_text">Create</string>
     <string name="multiplayer">Multiplayer</string>
     <string name="singleplayer">Singleplayer</string>
