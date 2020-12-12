@@ -132,6 +132,7 @@ class GameFragment : androidx.fragment.app.Fragment(), GameController.ViewCallba
 
         for (i in 0 until 12) {
             val features = objectMapper.treeToValue<IntArray>(jsonBoard.get(i.toString()))
+            controller.setCard(i, PlayingCard(features))
             if (features != null) {
                 controller.setCard(i, PlayingCard(features))
             } else {
