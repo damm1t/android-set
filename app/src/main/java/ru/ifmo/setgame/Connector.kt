@@ -3,6 +3,7 @@ package ru.ifmo.setgame
 import android.content.Context
 import android.content.Intent
 import android.util.Log
+import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
@@ -14,22 +15,24 @@ import java.io.BufferedReader
 import java.io.BufferedWriter
 import java.io.InputStreamReader
 import java.io.OutputStreamWriter
+import java.net.InetSocketAddress
 import java.net.Socket
 import kotlin.coroutines.CoroutineContext
 
 const val IN_GAME_BROADCAST = "ru.ifmo.setgame.IN_GAME"
 
-class Connector(context: Context) : AutoCloseable, CoroutineScope {
+class Connector @VisibleForTesting constructor(
+        private val socket: Socket,
+        private val localBroadcastManager: LocalBroadcastManager
+        ) : AutoCloseable, CoroutineScope {
     private val job = SupervisorJob()
 
     override val coroutineContext: CoroutineContext
         get() = Dispatchers.IO + job
 
     private val mutex = Mutex()
-    private lateinit var socket : Socket// = Socket(hostAddress, hostPort)
-    private lateinit var reader : BufferedReader// = BufferedReader(InputStreamReader(socket.getInputStream()))
-    private lateinit var writer : BufferedWriter// = BufferedWriter(OutputStreamWriter(socket.getOutputStream(), "UTF-8"))
-    private val localBroadcastManager = LocalBroadcastManager.getInstance(context)
+    private lateinit var reader: BufferedReader // = BufferedReader(InputStreamReader(socket.getInputStream()))
+    private lateinit var writer: BufferedWriter // = BufferedWriter(OutputStreamWriter(socket.getOutputStream(), "UTF-8"))
     private val mapper = jacksonObjectMapper()
 
     var gameNavigation: GameNavigation? = null
@@ -143,10 +146,6 @@ class Connector(context: Context) : AutoCloseable, CoroutineScope {
 
     // send default handshake and get player id and list of lobbies
     private suspend fun init() = mutex.withLock {
-        socket = Socket(HOST_ADDRESS, HOST_PORT)
-        reader = BufferedReader(InputStreamReader(socket.getInputStream()))
-        writer = BufferedWriter(OutputStreamWriter(socket.getOutputStream(), "UTF-8"))
-
         val request = """{"status": "$status"}"""
 
         writer.write(request)
@@ -160,6 +159,10 @@ class Connector(context: Context) : AutoCloseable, CoroutineScope {
     }
 
     fun connect() = launch {
+        socket.connect(InetSocketAddress(HOST_ADDRESS, HOST_PORT))
+        reader = BufferedReader(InputStreamReader(socket.getInputStream()))
+        writer = BufferedWriter(OutputStreamWriter(socket.getOutputStream(), "UTF-8"))
+
         init()
 
         while (socket.isConnected) {
@@ -225,14 +228,19 @@ class Connector(context: Context) : AutoCloseable, CoroutineScope {
     fun ready() = reader.ready()
 
     override fun close() {
-        if (::socket.isInitialized) {
-            socket.close()
-        }
+        socket.close()
         job.cancelChildren()
     }
 
-    private companion object {
+    companion object {
         private const val HOST_ADDRESS = "rsbat.dev"
         private const val HOST_PORT = 3691
+
+        fun createConnector(context: Context): Connector {
+            val socket = Socket()
+            val localBroadcastManager = LocalBroadcastManager.getInstance(context)
+
+            return Connector(socket, localBroadcastManager)
+        }
     }
 }
