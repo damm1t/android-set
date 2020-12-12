@@ -18,6 +18,7 @@ class GameController(private val viewCallback: ViewCallback) {
     val columnCount: Int = DEFAULT_COLUMNS
     private val cardsInSet: Int = CARDS_IN_SET
 
+    private val board = mutableListOf<PlayingCard>()
     private val deck = loadDefaultDeck()
 
     private var score = 0
