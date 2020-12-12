@@ -17,8 +17,10 @@ class GameController(private val viewCallback: ViewCallback) {
     val rowCount: Int = DEFAULT_ROWS
     val columnCount: Int = DEFAULT_COLUMNS
     private val cardsInSet: Int = CARDS_IN_SET
+
     private val board = mutableListOf<PlayingCard>()
     private val deck = loadDefaultDeck()
+
     var score = 0
     var computerScore = 0
     var setOnBoard = IntArray(3)
@@ -113,7 +115,8 @@ class GameController(private val viewCallback: ViewCallback) {
             if (!hasSets()) {
                 timerGlobalFinish = System.currentTimeMillis()
                 val playersArray = if (isComputer) {
-                    arrayOf(viewCallback.getStringById(R.string.player_you), viewCallback.getStringById(R.string.player_computer))
+                    arrayOf(viewCallback.getStringById(R.string.player_you),
+                            viewCallback.getStringById(R.string.player_computer))
                 } else {
                     arrayOf(viewCallback.getStringById(R.string.player_you))
                 }
@@ -210,7 +213,11 @@ class GameController(private val viewCallback: ViewCallback) {
                         }
                     }
 
-                    if (properties.all { prop -> prop.distinct().let { it.size == 1 || it.size == cardsInSet } }) {
+                    if (properties.all { prop ->
+                                prop.distinct().let {
+                                    it.size == 1 || it.size == cardsInSet
+                                }
+                            }) {
                         has = true
                         setOnBoard[0] = i
                         setOnBoard[1] = j
