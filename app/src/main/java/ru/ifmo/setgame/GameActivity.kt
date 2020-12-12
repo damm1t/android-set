@@ -8,14 +8,6 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 
-interface GameInterface {
-    fun showScore(title: String, time: Long, players: Array<String>, scores: IntArray)
-    fun startMultiplayerGame(json: String)
-    fun startSingleplayerGame()
-    fun startTrainingGame()
-    fun showLobbiesList()
-}
-
 class Lobby(
         val lobby_id: Int,
         val max_players: Int,
@@ -23,7 +15,8 @@ class Lobby(
         val in_lobby: Array<Int>
 )
 
-class GameActivity : AppCompatActivity(), GameInterface {
+class GameActivity : AppCompatActivity() {
+    val gameNavigation: GameNavigation = GameNavigationImpl()
 
     lateinit var connector : Connector
         private set
@@ -37,41 +30,21 @@ class GameActivity : AppCompatActivity(), GameInterface {
             val players = extras.getStringArray(INTENT_KEY_PLAYERS)!!
             val scores = extras.getIntArray(INTENT_KEY_SCORES)!!
 
-            showScore(title, time, players, scores)
+            gameNavigation.showScore(title, time, players, scores)
         }
     }
 
     private val goToGameReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             val gameStr = intent?.extras?.getString("game")!!
-            startMultiplayerGame(gameStr)
+            gameNavigation.startMultiplayerGame(gameStr)
         }
     }
 
     private val goToLobbiesReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
-            showLobbiesList()
+            gameNavigation.showLobbiesList()
         }
-    }
-
-    override fun showScore(title: String, time: Long, players: Array<String>, scores: IntArray) {
-        supportFragmentManager.beginTransaction().apply { replace(R.id.game_fragment, GameScoreFragment.newInstance(title, time, players, scores)); commit() }
-    }
-
-    override fun startMultiplayerGame(json: String) {
-        supportFragmentManager.beginTransaction().apply { replace(R.id.game_fragment, GameFragment.newInstance(json, true, false)); commit() }
-    }
-
-    override fun startSingleplayerGame() {
-        supportFragmentManager.beginTransaction().apply { replace(R.id.game_fragment, GameFragment.newInstance("", false, true)); commit() }
-    }
-
-    override fun startTrainingGame() {
-        supportFragmentManager.beginTransaction().apply { replace(R.id.game_fragment, GameFragment.newInstance("", false, false)); commit() }
-    }
-
-    override fun showLobbiesList() {
-        supportFragmentManager.beginTransaction().apply { replace(R.id.game_fragment, LobbySelectionFragment()); commit() }
     }
 
     override fun onStart() {
@@ -101,10 +74,10 @@ class GameActivity : AppCompatActivity(), GameInterface {
                     connector = Connector(this@GameActivity)
                     connector.connect()
 
-                    showLobbiesList()
+                    gameNavigation.showLobbiesList()
                 }
-                isComputer -> startSingleplayerGame()
-                else -> startTrainingGame()
+                isComputer -> gameNavigation.startSingleplayerGame()
+                else -> gameNavigation.startTrainingGame()
             }
         }
     }
@@ -114,6 +87,43 @@ class GameActivity : AppCompatActivity(), GameInterface {
             connector.close()
         }
         super.onDestroy()
+    }
+
+    private inner class GameNavigationImpl: GameNavigation {
+        override fun showScore(title: String, time: Long, players: Array<String>, scores: IntArray) {
+            supportFragmentManager.beginTransaction().apply {
+                replace(R.id.game_fragment, GameScoreFragment.newInstance(title, time, players, scores))
+                commit()
+            }
+        }
+
+        override fun startMultiplayerGame(json: String) {
+            supportFragmentManager.beginTransaction().apply {
+                replace(R.id.game_fragment, GameFragment.newInstance(json, true, false))
+                commit()
+            }
+        }
+
+        override fun startSingleplayerGame() {
+            supportFragmentManager.beginTransaction().apply {
+                replace(R.id.game_fragment, GameFragment.newInstance("", false, true))
+                commit()
+            }
+        }
+
+        override fun startTrainingGame() {
+            supportFragmentManager.beginTransaction().apply {
+                replace(R.id.game_fragment, GameFragment.newInstance("", false, false))
+                commit()
+            }
+        }
+
+        override fun showLobbiesList() {
+            supportFragmentManager.beginTransaction().apply {
+                replace(R.id.game_fragment, LobbySelectionFragment());
+                commit()
+            }
+        }
     }
 
     companion object {

@@ -37,6 +37,8 @@ class Connector(context: Context) : AutoCloseable, CoroutineScope {
     private val localBroadcastManager = LocalBroadcastManager.getInstance(context)
     private val mapper = jacksonObjectMapper()
 
+    var gameNavigation: GameNavigation? = null
+
     private var playerId = -1
     private var lobbyId = -1
     private var gameId = -1

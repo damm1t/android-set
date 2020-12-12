@@ -147,6 +147,6 @@ class GameFragment : androidx.fragment.app.Fragment(), GameController.ViewCallba
     }
 
     override fun showScore(title: String, time: Long, players: Array<String>, scores: IntArray) {
-        (activity as GameActivity).showScore(title, time, players, scores)
+        (activity as GameActivity).gameNavigation.showScore(title, time, players, scores)
     }
 }
