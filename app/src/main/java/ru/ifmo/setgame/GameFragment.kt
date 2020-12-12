@@ -22,7 +22,6 @@ import kotlinx.android.synthetic.main.fragment_game.view.*
 import ru.ifmo.setgame.R.drawable.card_frame_drawable
 import ru.ifmo.setgame.R.layout.card_frame
 import ru.ifmo.setgame.R.layout.fragment_game
-import java.util.*
 
 class GameFragment : androidx.fragment.app.Fragment(), GameController.ViewCallback {
 
@@ -139,7 +138,6 @@ class GameFragment : androidx.fragment.app.Fragment(), GameController.ViewCallba
                 Log.d("GameFragment", "Could not get data for card $i")
                 controller.setCard(i, PlayingCard(intArrayOf(), isValid = false))
             }
-            controller.setCard(i, PlayingCard(features))
         }
 
         drawBoard()
