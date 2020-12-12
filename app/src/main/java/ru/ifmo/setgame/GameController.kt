@@ -21,13 +21,13 @@ class GameController(private val viewCallback: ViewCallback) {
     private val board = mutableListOf<PlayingCard>()
     private val deck = loadDefaultDeck()
 
-    var score = 0
-    var computerScore = 0
-    var setOnBoard = IntArray(3)
+    private var score = 0
+    private var computerScore = 0
+    private var setOnBoard = IntArray(3)
 
     var isMultiplayer = false
     var isComputer = false
-    var allowCustomCards = false
+
     private var connector: Connector? = null
     private lateinit var timerComp: Timer
     var timerGlobalStart: Long = 0
@@ -120,11 +120,12 @@ class GameController(private val viewCallback: ViewCallback) {
                 } else {
                     arrayOf(viewCallback.getStringById(R.string.player_you))
                 }
-                val scoresArray = if (isComputer) {
-                    intArrayOf(score, computerScore)
-                } else {
-                    intArrayOf(score)
-                }
+                val scoresArray =
+                        if (isComputer) {
+                            intArrayOf(score, computerScore)
+                        } else {
+                            intArrayOf(score)
+                        }
                 val title =
                         if (isComputer) viewCallback.getStringById(R.string.singleplayer_over)
                         else viewCallback.getStringById(R.string.training_over)
