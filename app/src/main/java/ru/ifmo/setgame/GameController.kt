@@ -1,21 +1,24 @@
 package ru.ifmo.setgame
 
-import android.app.Activity
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.module.kotlin.treeToValue
 import java.util.*
 
 
-const val DEFAULT_COLUMNS = 3
-const val DEFAULT_ROWS = 4
-const val CARDS_IN_SET = 3
+private const val DEFAULT_COLUMNS = 3
+private const val DEFAULT_ROWS = 4
+private const val CARDS_IN_SET = 3
 
 
-class GameController(val rowCount: Int, val columnCount: Int, private val viewCallback: ViewCallback) {
-    val cardsInSet = 3
+class GameController(private val viewCallback: ViewCallback) {
+    val rowCount: Int = DEFAULT_ROWS
+    val columnCount: Int = DEFAULT_COLUMNS
+    private val cardsInSet: Int = CARDS_IN_SET
     private val board = mutableListOf<PlayingCard>()
-    val deck = loadDefaultDeck()
+    private val deck = loadDefaultDeck()
     var score = 0
     var computerScore = 0
     var setOnBoard = IntArray(3)
@@ -30,13 +33,17 @@ class GameController(val rowCount: Int, val columnCount: Int, private val viewCa
 
 
     interface ViewCallback {
-        fun onBoardUpdated(board: MutableList<PlayingCard>)
-        fun onGetString(resId: Int): String
-        fun onShowScore(title: String, time: Long, players: Array<String>, scores: IntArray)
+        fun boardUpdated(board: MutableList<PlayingCard>)
+        fun getStringById(resId: Int): String
+        fun showScore(title: String, time: Long, players: Array<String>, scores: IntArray)
     }
 
-    fun setCard(i: Int, value: PlayingCard) {
-        board[i] = value
+    fun shuffleDeck() {
+        deck.shuffle()
+    }
+
+    fun getTopDeck(): PlayingCard {
+        return deck[0]
     }
 
     fun getCard(i: Int): PlayingCard {
@@ -47,6 +54,7 @@ class GameController(val rowCount: Int, val columnCount: Int, private val viewCa
         board[i].selected = !board[i].selected
     }
 
+    // ToDo wat is update
     fun updateBoard() {
         board.add(deck[0])
         deck.removeAt(0)
@@ -56,8 +64,8 @@ class GameController(val rowCount: Int, val columnCount: Int, private val viewCa
         timerComp = Timer()
     }
 
-    fun setConnector(activity: Activity) {
-        this.connector = (activity as GameActivity).connector
+    fun setConnector(connector: Connector) {
+        this.connector = connector
     }
 
     fun removeConnector() {
@@ -81,7 +89,7 @@ class GameController(val rowCount: Int, val columnCount: Int, private val viewCa
     // otherwise makes move locally
     fun makeMove(selected: IntArray) {
 
-        if (selected.size != 3)
+        if (selected.size != cardsInSet)
             return
 
         if (isMultiplayer) {
@@ -100,25 +108,44 @@ class GameController(val rowCount: Int, val columnCount: Int, private val viewCa
                     if (deck.size > 1) deck.removeAt(0)
                 }
             }
-            viewCallback.onBoardUpdated(board) //drawBoard()
+            viewCallback.boardUpdated(board) //drawBoard()
 
             if (!hasSets()) {
                 timerGlobalFinish = System.currentTimeMillis()
                 val playersArray = if (isComputer) {
-                    arrayOf(viewCallback.onGetString(R.string.player_you), viewCallback.onGetString(R.string.player_computer))
+                    arrayOf(viewCallback.getStringById(R.string.player_you), viewCallback.getStringById(R.string.player_computer))
                 } else {
-                    arrayOf(viewCallback.onGetString(R.string.player_you))
+                    arrayOf(viewCallback.getStringById(R.string.player_you))
                 }
                 val scoresArray = if (isComputer) {
                     intArrayOf(score, computerScore)
                 } else {
                     intArrayOf(score)
                 }
-                val title = if (isComputer) viewCallback.onGetString(R.string.singleplayer_over) else viewCallback.onGetString(R.string.training_over)
-                viewCallback.onShowScore(title, (timerGlobalFinish - timerGlobalStart) / 1000, playersArray, scoresArray)
-                //(activity as GameActivity).showScore(title, (timerGlobalFinish - timerGlobalStart) / 1000, playersArray, scoresArray)
+                val title =
+                        if (isComputer) viewCallback.getStringById(R.string.singleplayer_over)
+                        else viewCallback.getStringById(R.string.training_over)
+                viewCallback.showScore(title, (timerGlobalFinish - timerGlobalStart) / 1000,
+                        playersArray, scoresArray)
             }
         }
+    }
+
+    fun drawBoardFromJSON(json: String) {
+        val objectMapper = jacksonObjectMapper()
+        val jsonBoard = objectMapper.readTree(json).get("board")
+
+        for (i in 0 until 12) {
+            val features = objectMapper.treeToValue<IntArray>(jsonBoard.get(i.toString()))
+            if (features != null) {
+                board[i] = PlayingCard(features)
+            } else {
+                Log.d("GameFragment", "Could not get data for card $i")
+                board[i] = PlayingCard(intArrayOf(), isValid = false)
+            }
+        }
+
+        viewCallback.boardUpdated(board) //drawBoard()
     }
 
 

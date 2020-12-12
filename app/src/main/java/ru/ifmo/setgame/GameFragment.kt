@@ -15,8 +15,6 @@ import android.widget.ImageView
 import androidx.core.content.res.ResourcesCompat
 import androidx.gridlayout.widget.GridLayout
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.fasterxml.jackson.module.kotlin.treeToValue
 import kotlinx.android.synthetic.main.card_frame.view.*
 import kotlinx.android.synthetic.main.fragment_game.view.*
 import ru.ifmo.setgame.R.drawable.card_frame_drawable
@@ -26,21 +24,21 @@ import ru.ifmo.setgame.R.layout.fragment_game
 class GameFragment : androidx.fragment.app.Fragment(), GameController.ViewCallback {
 
     private val images = mutableListOf<FrameLayout>()
-    private val controller = GameController(DEFAULT_ROWS, DEFAULT_COLUMNS, this)
+    private val controller = GameController(this)
     private lateinit var gameView: View
 
 
     private val receiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             val json = intent?.extras?.getString("game")!!
-            drawBoardFromJSON(json)
+            controller.drawBoardFromJSON(json)
         }
     }
 
     override fun onAttach(activity: Activity) {
         super.onAttach(activity)
         if (controller.isMultiplayer) {
-            controller.setConnector(activity)
+            controller.setConnector((activity as GameActivity).connector)
         }
     }
 
@@ -75,7 +73,7 @@ class GameFragment : androidx.fragment.app.Fragment(), GameController.ViewCallba
         gameView.game_grid.rowCount = controller.rowCount
         gameView.game_grid.columnCount = controller.columnCount
 
-        controller.deck.shuffle()
+        controller.shuffleDeck()
 
         for (i in 0 until controller.rowCount) {
             for (j in 0 until controller.columnCount) {
@@ -84,7 +82,7 @@ class GameFragment : androidx.fragment.app.Fragment(), GameController.ViewCallba
                 params.height = 0
 
                 val image = inflater.inflate(card_frame, gameView.game_grid, false) as FrameLayout
-                image.card_image.setImageDrawable(controller.deck[0].getDrawable(resources, controller.allowCustomCards))
+                image.card_image.setImageDrawable(controller.getTopDeck().getDrawable(resources, controller.allowCustomCards))
                 image.card_frame.setImageDrawable(ResourcesCompat.getDrawable(resources, card_frame_drawable, null))
 
                 image.setOnClickListener {
@@ -116,31 +114,13 @@ class GameFragment : androidx.fragment.app.Fragment(), GameController.ViewCallba
             }
 
             if (controller.isMultiplayer) {
-                drawBoardFromJSON(getString("json")!!)
+                controller.drawBoardFromJSON(getString("json")!!)
             }
         }
 
         controller.allowCustomCards = activity!!.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE).getBoolean(PREFERENCE_CUSTOM_CARDS, false)
 
         return gameView
-    }
-
-
-    private fun drawBoardFromJSON(json: String) {
-        val objectMapper = jacksonObjectMapper()
-        val jsonBoard = objectMapper.readTree(json).get("board")
-
-        for (i in 0 until 12) {
-            val features = objectMapper.treeToValue<IntArray>(jsonBoard.get(i.toString()))
-            if (features != null) {
-                controller.setCard(i, PlayingCard(features))
-            } else {
-                Log.d("GameFragment", "Could not get data for card $i")
-                controller.setCard(i, PlayingCard(intArrayOf(), isValid = false))
-            }
-        }
-
-        drawBoard()
     }
 
     private fun drawBoard() {
@@ -162,18 +142,18 @@ class GameFragment : androidx.fragment.app.Fragment(), GameController.ViewCallba
                 }
     }
 
-    override fun onBoardUpdated(board: MutableList<PlayingCard>) {
+    override fun boardUpdated(board: MutableList<PlayingCard>) {
         for (i in 0 until 12) {
             images[i].card_image.setImageDrawable(board[i].getDrawable(resources, controller.allowCustomCards))
             images[i].card_frame.visibility = ImageView.GONE
         }
     }
 
-    override fun onGetString(resId: Int): String {
-        return getString(resId)
+    override fun getStringById(resId: Int): String {
+        return getStringById(resId)
     }
 
-    override fun onShowScore(title: String, time: Long, players: Array<String>, scores: IntArray) {
+    override fun showScore(title: String, time: Long, players: Array<String>, scores: IntArray) {
         (activity as GameActivity).showScore(title, time, players, scores)
     }
 }
