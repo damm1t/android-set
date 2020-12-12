@@ -35,7 +35,7 @@ class GameController(private val viewCallback: ViewCallback) {
 
 
     interface ViewCallback {
-        fun boardUpdated(board: MutableList<PlayingCard>)
+        fun onBoardUpdated(board: MutableList<PlayingCard>)
         fun getStringById(resId: Int): String
         fun showScore(title: String, time: Long, players: Array<String>, scores: IntArray)
     }
@@ -103,14 +103,14 @@ class GameController(private val viewCallback: ViewCallback) {
             }
             var iterations = 5
             while (iterations-- != 0 && !hasSets()) {
-                Log.d("tg", "set not found, reshuffle deck")
+                Log.d("GameController", "set not found, reshuffle deck")
                 for (i in selected) {
                     deck.add(board[i])
                     board[i] = deck[0]
                     if (deck.size > 1) deck.removeAt(0)
                 }
             }
-            viewCallback.boardUpdated(board) //drawBoard()
+            viewCallback.onBoardUpdated(board) //drawBoard()
 
             if (!hasSets()) {
                 timerGlobalFinish = System.currentTimeMillis()
@@ -143,12 +143,12 @@ class GameController(private val viewCallback: ViewCallback) {
             if (features != null) {
                 board[i] = PlayingCard(features)
             } else {
-                Log.d("GameFragment", "Could not get data for card $i")
+                Log.d("GameController", "Could not get data for card $i")
                 board[i] = PlayingCard(intArrayOf(), isValid = false)
             }
         }
 
-        viewCallback.boardUpdated(board) //drawBoard()
+        viewCallback.onBoardUpdated(board) //drawBoard()
     }
 
 

@@ -142,7 +142,7 @@ class GameFragment : androidx.fragment.app.Fragment(), GameController.ViewCallba
                 }
     }
 
-    override fun boardUpdated(board: MutableList<PlayingCard>) {
+    override fun onBoardUpdated(board: MutableList<PlayingCard>) {
         for (i in 0 until 12) {
             images[i].card_image.setImageDrawable(board[i].getDrawable(resources, controller.allowCustomCards))
             images[i].card_frame.visibility = ImageView.GONE
