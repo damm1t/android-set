@@ -45,6 +45,4 @@ before_script:
 
 script:
   - ./gradlew clean
-  - ./gradlew compileApp
-  - ./gradlew runUnitTests
-  - ./gradlew runTestCoverage
+  - ./gradlew build
