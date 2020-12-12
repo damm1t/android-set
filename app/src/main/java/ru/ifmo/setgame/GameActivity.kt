@@ -34,13 +34,6 @@ class GameActivity : AppCompatActivity() {
         }
     }
 
-    private val goToGameReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context?, intent: Intent?) {
-            val gameStr = intent?.extras?.getString("game")!!
-            gameNavigation.startMultiplayerGame(gameStr)
-        }
-    }
-
     private val goToLobbiesReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             gameNavigation.showLobbiesList()
@@ -49,13 +42,17 @@ class GameActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-        LocalBroadcastManager.getInstance(this).registerReceiver(goToGameReceiver, IntentFilter(TO_GAME))
+        if (::connector.isInitialized) {
+            connector.gameNavigation = gameNavigation
+        }
         LocalBroadcastManager.getInstance(this).registerReceiver(goToScoreReceiver, IntentFilter(TO_SCORE))
         LocalBroadcastManager.getInstance(this).registerReceiver(goToLobbiesReceiver, IntentFilter(TO_LOBBIES))
     }
 
     override fun onStop() {
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(goToGameReceiver)
+        if (::connector.isInitialized) {
+            connector.gameNavigation = null
+        }
         LocalBroadcastManager.getInstance(this).unregisterReceiver(goToScoreReceiver)
         LocalBroadcastManager.getInstance(this).unregisterReceiver(goToLobbiesReceiver)
         super.onStop()
@@ -97,9 +94,9 @@ class GameActivity : AppCompatActivity() {
             }
         }
 
-        override fun startMultiplayerGame(json: String) {
+        override fun startMultiplayerGame(gameJson: String) {
             supportFragmentManager.beginTransaction().apply {
-                replace(R.id.game_fragment, GameFragment.newInstance(json, true, false))
+                replace(R.id.game_fragment, GameFragment.newInstance(gameJson, true, false))
                 commit()
             }
         }

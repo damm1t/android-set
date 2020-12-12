@@ -18,7 +18,6 @@ import kotlin.coroutines.CoroutineContext
 const val LOBBIES_LIST_BROADCAST = "ru.ifmo.setgame.LOBBIES_LIST"
 const val IN_LOBBY_BROADCAST = "ru.ifmo.setgame.IN_LOBBY"
 const val IN_GAME_BROADCAST = "ru.ifmo.setgame.IN_GAME"
-const val TO_GAME = "ru.ifmo.setgame.TO_GAME"
 const val TO_SCORE = "ru.ifmo.setgame.TO_SCORE"
 const val TO_LOBBIES = "ru.ifmo.setgame.TO_LOBBIES"
 
@@ -181,8 +180,8 @@ class Connector(context: Context) : AutoCloseable, CoroutineScope {
                     if (status == "IN_GAME") {
 
                         gameId = update.get("game_id").asInt()
-                        val gameStr = mapper.writeValueAsString(update.get("game"))
-                        localBroadcastManager.sendBroadcast(Intent(TO_GAME).apply { putExtra("game", gameStr) })
+                        val gameJson = mapper.writeValueAsString(update.get("game"))
+                        gameNavigation?.startMultiplayerGame(gameJson)
                     } else {
                         val lobbyStr = mapper.writeValueAsString(update.get("lobby"))
                         localBroadcastManager.sendBroadcast(Intent(IN_LOBBY_BROADCAST).apply { putExtra("lobby", lobbyStr) })
