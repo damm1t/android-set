@@ -164,7 +164,11 @@ class GameController(private val viewCallback: ViewCallback) {
                 }
             }
 
-            if (properties.all { prop -> prop.distinct().let { it.size == 1 || it.size == cardsInSet } }) {
+            if (properties.all { prop ->
+                        prop.distinct().let {
+                            it.size == 1 || it.size == cardsInSet
+                        }
+                    }) {
                 score++
                 val changedBoardId = mutableListOf<Int>()
                 for (i in 0 until columnCount * rowCount) {
