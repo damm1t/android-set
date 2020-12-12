@@ -42,7 +42,9 @@ class GameFragment : androidx.fragment.app.Fragment(), GameController.ViewCallba
 
     override fun onAttach(activity: Activity) {
         super.onAttach(activity)
-        controller.setConnector(activity)
+        if (controller.isMultiplayer) {
+            controller.setConnector(activity)
+        }
     }
 
     override fun onDetach() {
