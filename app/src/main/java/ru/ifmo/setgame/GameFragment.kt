@@ -123,13 +123,6 @@ class GameFragment : androidx.fragment.app.Fragment(), GameController.ViewCallba
         return gameView
     }
 
-    private fun drawBoard() {
-        for (i in 0 until 12) {
-            images[i].card_image.setImageDrawable(controller.getCard(i).getDrawable(resources, controller.allowCustomCards))
-            images[i].card_frame.visibility = ImageView.GONE
-        }
-    }
-
     companion object {
         @JvmStatic
         fun newInstance(json: String, isMultiplayer: Boolean, isComputer: Boolean) =
