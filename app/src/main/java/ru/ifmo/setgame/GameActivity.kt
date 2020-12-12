@@ -21,19 +21,6 @@ class GameActivity : AppCompatActivity() {
     lateinit var connector : Connector
         private set
 
-    private val goToScoreReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context?, intent: Intent?) {
-            val extras = intent?.extras!!
-
-            val title = extras.getString(INTENT_KEY_TITLE)!!
-            val time = extras.getLong(INTENT_KEY_TIME)
-            val players = extras.getStringArray(INTENT_KEY_PLAYERS)!!
-            val scores = extras.getIntArray(INTENT_KEY_SCORES)!!
-
-            gameNavigation.showScore(title, time, players, scores)
-        }
-    }
-
     private val goToLobbiesReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             gameNavigation.showLobbiesList()
@@ -45,7 +32,6 @@ class GameActivity : AppCompatActivity() {
         if (::connector.isInitialized) {
             connector.gameNavigation = gameNavigation
         }
-        LocalBroadcastManager.getInstance(this).registerReceiver(goToScoreReceiver, IntentFilter(TO_SCORE))
         LocalBroadcastManager.getInstance(this).registerReceiver(goToLobbiesReceiver, IntentFilter(TO_LOBBIES))
     }
 
@@ -53,7 +39,6 @@ class GameActivity : AppCompatActivity() {
         if (::connector.isInitialized) {
             connector.gameNavigation = null
         }
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(goToScoreReceiver)
         LocalBroadcastManager.getInstance(this).unregisterReceiver(goToLobbiesReceiver)
         super.onStop()
     }
@@ -147,14 +132,6 @@ class GameActivity : AppCompatActivity() {
         fun intentTraining(context: Context) : Intent = Intent(context, GameActivity::class.java).apply {
             putExtra(INTENT_KEY_MULTIPLAYER, false)
             putExtra(INTENT_KEY_SINGLEPLAYER, false)
-        }
-
-        @JvmStatic
-        fun intentScore(title: String, time: Long, players: Array<String>, scores: IntArray) :Intent = Intent(TO_SCORE).apply {
-            putExtra(INTENT_KEY_TITLE, title)
-            putExtra(INTENT_KEY_TIME, time)
-            putExtra(INTENT_KEY_PLAYERS, players)
-            putExtra(INTENT_KEY_SCORES, scores)
         }
     }
 }

@@ -18,7 +18,6 @@ import kotlin.coroutines.CoroutineContext
 const val LOBBIES_LIST_BROADCAST = "ru.ifmo.setgame.LOBBIES_LIST"
 const val IN_LOBBY_BROADCAST = "ru.ifmo.setgame.IN_LOBBY"
 const val IN_GAME_BROADCAST = "ru.ifmo.setgame.IN_GAME"
-const val TO_SCORE = "ru.ifmo.setgame.TO_SCORE"
 const val TO_LOBBIES = "ru.ifmo.setgame.TO_LOBBIES"
 
 class Connector(context: Context) : AutoCloseable, CoroutineScope {
@@ -209,11 +208,12 @@ class Connector(context: Context) : AutoCloseable, CoroutineScope {
                             scores.add(pr.value.asInt())
                         }
 
-                        localBroadcastManager.sendBroadcast(GameActivity.intentScore(
+                        gameNavigation?.showScore(
                                 "Game #$lobbyId results",
                                 update.get("time").asLong(),
                                 players.toTypedArray(),
-                                scores.toIntArray()))
+                                scores.toIntArray()
+                        )
                         break
                     } else {
                         val gameStr = mapper.writeValueAsString(update.get("game"))
