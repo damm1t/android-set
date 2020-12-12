@@ -21,25 +21,17 @@ class GameActivity : AppCompatActivity() {
     lateinit var connector : Connector
         private set
 
-    private val goToLobbiesReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context?, intent: Intent?) {
-            gameNavigation.showLobbiesList()
-        }
-    }
-
     override fun onStart() {
         super.onStart()
         if (::connector.isInitialized) {
             connector.gameNavigation = gameNavigation
         }
-        LocalBroadcastManager.getInstance(this).registerReceiver(goToLobbiesReceiver, IntentFilter(TO_LOBBIES))
     }
 
     override fun onStop() {
         if (::connector.isInitialized) {
             connector.gameNavigation = null
         }
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(goToLobbiesReceiver)
         super.onStop()
     }
 
@@ -111,10 +103,6 @@ class GameActivity : AppCompatActivity() {
     companion object {
         private const val INTENT_KEY_MULTIPLAYER = "multiplayer"
         private const val INTENT_KEY_SINGLEPLAYER = "singleplayer"
-        private const val INTENT_KEY_TITLE = "title"
-        private const val INTENT_KEY_TIME = "time"
-        private const val INTENT_KEY_PLAYERS = "players"
-        private const val INTENT_KEY_SCORES = "scores"
 
         @JvmStatic
         fun intentMultiplayer(context: Context) : Intent = Intent(context, GameActivity::class.java).apply {

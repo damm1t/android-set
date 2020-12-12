@@ -18,7 +18,6 @@ import kotlin.coroutines.CoroutineContext
 const val LOBBIES_LIST_BROADCAST = "ru.ifmo.setgame.LOBBIES_LIST"
 const val IN_LOBBY_BROADCAST = "ru.ifmo.setgame.IN_LOBBY"
 const val IN_GAME_BROADCAST = "ru.ifmo.setgame.IN_GAME"
-const val TO_LOBBIES = "ru.ifmo.setgame.TO_LOBBIES"
 
 class Connector(context: Context) : AutoCloseable, CoroutineScope {
     private val job = SupervisorJob()
@@ -93,7 +92,7 @@ class Connector(context: Context) : AutoCloseable, CoroutineScope {
 
             // something went wrong, return to lobbies list
             if (status != "IN_LOBBY") {
-                localBroadcastManager.sendBroadcast(Intent(TO_LOBBIES))
+                gameNavigation?.showLobbiesList()
                 return@launch
             }
 
