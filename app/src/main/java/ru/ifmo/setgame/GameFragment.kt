@@ -6,8 +6,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -136,10 +134,10 @@ class GameFragment : androidx.fragment.app.Fragment(), GameController.ViewCallba
         for (i in 0 until 12) {
             val features = objectMapper.treeToValue<IntArray>(jsonBoard.get(i.toString()))
             if (features != null) {
-                board[i] = PlayingCard(features)
+                controller.setCard(i, PlayingCard(features))
             } else {
                 Log.d("GameFragment", "Could not get data for card $i")
-                board[i] = PlayingCard(intArrayOf(), isValid = false)
+                controller.setCard(i, PlayingCard(intArrayOf(), isValid = false))
             }
             controller.setCard(i, PlayingCard(features))
         }
