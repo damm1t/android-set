@@ -8,14 +8,6 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 
-interface GameInterface {
-    fun showScore(title: String, time: Long, players: Array<String>, scores: IntArray)
-    fun startMultiplayerGame(json: String)
-    fun startSingleplayerGame()
-    fun startTrainingGame()
-    fun showLobbiesList()
-}
-
 class Lobby(
         val lobby_id: Int,
         val max_players: Int,
@@ -23,68 +15,23 @@ class Lobby(
         val in_lobby: Array<Int>
 )
 
-class GameActivity : AppCompatActivity(), GameInterface {
+class GameActivity : AppCompatActivity() {
+    val gameNavigation: GameNavigation = GameNavigationImpl()
 
     lateinit var connector : Connector
         private set
 
-    private val goToScoreReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context?, intent: Intent?) {
-            val extras = intent?.extras!!
-
-            val title = extras.getString(INTENT_KEY_TITLE)!!
-            val time = extras.getLong(INTENT_KEY_TIME)
-            val players = extras.getStringArray(INTENT_KEY_PLAYERS)!!
-            val scores = extras.getIntArray(INTENT_KEY_SCORES)!!
-
-            showScore(title, time, players, scores)
-        }
-    }
-
-    private val goToGameReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context?, intent: Intent?) {
-            val gameStr = intent?.extras?.getString("game")!!
-            startMultiplayerGame(gameStr)
-        }
-    }
-
-    private val goToLobbiesReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context?, intent: Intent?) {
-            showLobbiesList()
-        }
-    }
-
-    override fun showScore(title: String, time: Long, players: Array<String>, scores: IntArray) {
-        supportFragmentManager.beginTransaction().apply { replace(R.id.game_fragment, GameScoreFragment.newInstance(title, time, players, scores)); commit() }
-    }
-
-    override fun startMultiplayerGame(json: String) {
-        supportFragmentManager.beginTransaction().apply { replace(R.id.game_fragment, GameFragment.newInstance(json, true, false)); commit() }
-    }
-
-    override fun startSingleplayerGame() {
-        supportFragmentManager.beginTransaction().apply { replace(R.id.game_fragment, GameFragment.newInstance("", false, true)); commit() }
-    }
-
-    override fun startTrainingGame() {
-        supportFragmentManager.beginTransaction().apply { replace(R.id.game_fragment, GameFragment.newInstance("", false, false)); commit() }
-    }
-
-    override fun showLobbiesList() {
-        supportFragmentManager.beginTransaction().apply { replace(R.id.game_fragment, LobbySelectionFragment()); commit() }
-    }
-
     override fun onStart() {
         super.onStart()
-        LocalBroadcastManager.getInstance(this).registerReceiver(goToGameReceiver, IntentFilter(TO_GAME))
-        LocalBroadcastManager.getInstance(this).registerReceiver(goToScoreReceiver, IntentFilter(TO_SCORE))
-        LocalBroadcastManager.getInstance(this).registerReceiver(goToLobbiesReceiver, IntentFilter(TO_LOBBIES))
+        if (::connector.isInitialized) {
+            connector.gameNavigation = gameNavigation
+        }
     }
 
     override fun onStop() {
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(goToGameReceiver)
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(goToScoreReceiver)
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(goToLobbiesReceiver)
+        if (::connector.isInitialized) {
+            connector.gameNavigation = null
+        }
         super.onStop()
     }
 
@@ -101,10 +48,10 @@ class GameActivity : AppCompatActivity(), GameInterface {
                     connector = Connector(this@GameActivity)
                     connector.connect()
 
-                    showLobbiesList()
+                    gameNavigation.showLobbiesList()
                 }
-                isComputer -> startSingleplayerGame()
-                else -> startTrainingGame()
+                isComputer -> gameNavigation.startSingleplayerGame()
+                else -> gameNavigation.startTrainingGame()
             }
         }
     }
@@ -116,13 +63,46 @@ class GameActivity : AppCompatActivity(), GameInterface {
         super.onDestroy()
     }
 
+    private inner class GameNavigationImpl: GameNavigation {
+        override fun showScore(title: String, time: Long, players: Array<String>, scores: IntArray) {
+            supportFragmentManager.beginTransaction().apply {
+                replace(R.id.game_fragment, GameScoreFragment.newInstance(title, time, players, scores))
+                commit()
+            }
+        }
+
+        override fun startMultiplayerGame(gameJson: String) {
+            supportFragmentManager.beginTransaction().apply {
+                replace(R.id.game_fragment, GameFragment.newInstance(gameJson, true, false))
+                commit()
+            }
+        }
+
+        override fun startSingleplayerGame() {
+            supportFragmentManager.beginTransaction().apply {
+                replace(R.id.game_fragment, GameFragment.newInstance("", false, true))
+                commit()
+            }
+        }
+
+        override fun startTrainingGame() {
+            supportFragmentManager.beginTransaction().apply {
+                replace(R.id.game_fragment, GameFragment.newInstance("", false, false))
+                commit()
+            }
+        }
+
+        override fun showLobbiesList() {
+            supportFragmentManager.beginTransaction().apply {
+                replace(R.id.game_fragment, LobbySelectionFragment());
+                commit()
+            }
+        }
+    }
+
     companion object {
         private const val INTENT_KEY_MULTIPLAYER = "multiplayer"
         private const val INTENT_KEY_SINGLEPLAYER = "singleplayer"
-        private const val INTENT_KEY_TITLE = "title"
-        private const val INTENT_KEY_TIME = "time"
-        private const val INTENT_KEY_PLAYERS = "players"
-        private const val INTENT_KEY_SCORES = "scores"
 
         @JvmStatic
         fun intentMultiplayer(context: Context) : Intent = Intent(context, GameActivity::class.java).apply {
@@ -140,14 +120,6 @@ class GameActivity : AppCompatActivity(), GameInterface {
         fun intentTraining(context: Context) : Intent = Intent(context, GameActivity::class.java).apply {
             putExtra(INTENT_KEY_MULTIPLAYER, false)
             putExtra(INTENT_KEY_SINGLEPLAYER, false)
-        }
-
-        @JvmStatic
-        fun intentScore(title: String, time: Long, players: Array<String>, scores: IntArray) :Intent = Intent(TO_SCORE).apply {
-            putExtra(INTENT_KEY_TITLE, title)
-            putExtra(INTENT_KEY_TIME, time)
-            putExtra(INTENT_KEY_PLAYERS, players)
-            putExtra(INTENT_KEY_SCORES, scores)
         }
     }
 }

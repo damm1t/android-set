@@ -18,9 +18,6 @@ import kotlin.coroutines.CoroutineContext
 const val LOBBIES_LIST_BROADCAST = "ru.ifmo.setgame.LOBBIES_LIST"
 const val IN_LOBBY_BROADCAST = "ru.ifmo.setgame.IN_LOBBY"
 const val IN_GAME_BROADCAST = "ru.ifmo.setgame.IN_GAME"
-const val TO_GAME = "ru.ifmo.setgame.TO_GAME"
-const val TO_SCORE = "ru.ifmo.setgame.TO_SCORE"
-const val TO_LOBBIES = "ru.ifmo.setgame.TO_LOBBIES"
 
 class Connector(context: Context) : AutoCloseable, CoroutineScope {
     private val job = SupervisorJob()
@@ -36,6 +33,8 @@ class Connector(context: Context) : AutoCloseable, CoroutineScope {
     private lateinit var writer : BufferedWriter// = BufferedWriter(OutputStreamWriter(socket.getOutputStream(), "UTF-8"))
     private val localBroadcastManager = LocalBroadcastManager.getInstance(context)
     private val mapper = jacksonObjectMapper()
+
+    var gameNavigation: GameNavigation? = null
 
     private var playerId = -1
     private var lobbyId = -1
@@ -93,7 +92,7 @@ class Connector(context: Context) : AutoCloseable, CoroutineScope {
 
             // something went wrong, return to lobbies list
             if (status != "IN_LOBBY") {
-                localBroadcastManager.sendBroadcast(Intent(TO_LOBBIES))
+                gameNavigation?.showLobbiesList()
                 return@launch
             }
 
@@ -179,8 +178,8 @@ class Connector(context: Context) : AutoCloseable, CoroutineScope {
                     if (status == "IN_GAME") {
 
                         gameId = update.get("game_id").asInt()
-                        val gameStr = mapper.writeValueAsString(update.get("game"))
-                        localBroadcastManager.sendBroadcast(Intent(TO_GAME).apply { putExtra("game", gameStr) })
+                        val gameJson = mapper.writeValueAsString(update.get("game"))
+                        gameNavigation?.startMultiplayerGame(gameJson)
                     } else {
                         val lobbyStr = mapper.writeValueAsString(update.get("lobby"))
                         localBroadcastManager.sendBroadcast(Intent(IN_LOBBY_BROADCAST).apply { putExtra("lobby", lobbyStr) })
@@ -208,11 +207,12 @@ class Connector(context: Context) : AutoCloseable, CoroutineScope {
                             scores.add(pr.value.asInt())
                         }
 
-                        localBroadcastManager.sendBroadcast(GameActivity.intentScore(
+                        gameNavigation?.showScore(
                                 "Game #$lobbyId results",
                                 update.get("time").asLong(),
                                 players.toTypedArray(),
-                                scores.toIntArray()))
+                                scores.toIntArray()
+                        )
                         break
                     } else {
                         val gameStr = mapper.writeValueAsString(update.get("game"))
