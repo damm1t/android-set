@@ -6,6 +6,7 @@ import android.os.Environment
 import androidx.core.content.res.ResourcesCompat
 import ru.ifmo.setgame.R.drawable.*
 import java.io.File
+import java.lang.IllegalStateException
 
 val drawableIds = intArrayOf(
         diamond_1_empty_green,
@@ -99,8 +100,13 @@ val drawableIds = intArrayOf(
         wave_3_stripes_violet
 )
 
-class PlayingCard(val properties: IntArray) {
+class PlayingCard(val properties: IntArray, val isValid: Boolean = true) {
     fun getDrawable(resources: Resources, allowCustom: Boolean) : Drawable {
+        if (!isValid) {
+            // TODO support this case
+            throw IllegalStateException("Cannot draw invalid card")
+        }
+
         if (allowCustom) {
             val filename = "card_" + properties[0].toString() + properties[1].toString() + properties[2].toString() + properties[3].toString() + ".png"
             val path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)

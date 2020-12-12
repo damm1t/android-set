@@ -245,7 +245,12 @@ class GameFragment : androidx.fragment.app.Fragment() {
 
         for (i in 0 until 12) {
             val features = objectMapper.treeToValue<IntArray>(jsonBoard.get(i.toString()))
-            board[i] = PlayingCard(features)
+            if (features != null) {
+                board[i] = PlayingCard(features)
+            } else {
+                Log.d("GameFragment", "Could not get data for card $i")
+                board[i] = PlayingCard(intArrayOf(), isValid = false)
+            }
         }
 
         drawBoard()
