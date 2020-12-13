@@ -12,8 +12,7 @@ private const val DEFAULT_COLUMNS = 3
 private const val DEFAULT_ROWS = 4
 private const val CARDS_IN_SET = 3
 
-
-class GameController(private val viewCallback: ViewCallback) {
+class GameController(private val viewCallback: ViewCallback, val viewModel : GameViewModel) {
     val rowCount: Int = DEFAULT_ROWS
     val columnCount: Int = DEFAULT_COLUMNS
     private val cardsInSet: Int = CARDS_IN_SET
@@ -32,7 +31,8 @@ class GameController(private val viewCallback: ViewCallback) {
     private lateinit var timerComp: Timer
     var timerGlobalStart: Long = 0
     var timerGlobalFinish: Long = 0
-
+    var liveBoard = viewModel.getBoard()
+    var liveDeck = viewModel.getDeck()
 
     interface ViewCallback {
         fun onBoardUpdated(board: MutableList<PlayingCard>)
@@ -48,18 +48,22 @@ class GameController(private val viewCallback: ViewCallback) {
         return deck[0]
     }
 
-    fun getCard(i: Int): PlayingCard {
-        return board[i]
+    fun getCard(i: Int): PlayingCard? {
+        return liveBoard.value?.get(i)
+    }
+
+    fun setCard(i: Int, value: PlayingCard) {
+        liveBoard.value?.set(i, value)
     }
 
     fun onSelectCard(i: Int) {
-        board[i].selected = !board[i].selected
+        liveBoard.value?.get(i)?.selected  = !liveBoard.value?.get(i)?.selected!!
     }
 
     // ToDo wat is update
     fun updateBoard() {
-        board.add(deck[0])
-        deck.removeAt(0)
+        liveDeck.value?.get(0)?.let { liveBoard.value?.add(it) }
+        liveDeck.value?.removeAt(0)
     }
 
     fun setTimer() {
@@ -98,19 +102,19 @@ class GameController(private val viewCallback: ViewCallback) {
             connector!!.make_move(selected)
         } else {
             for (i in selected) {
-                board[i] = deck[0]
-                if (deck.size > 1) deck.removeAt(0)
+                liveDeck.value?.get(0)?.let { liveBoard.value?.set(i, it) }
+                if (liveDeck.value?.size ?: 0 > 1) liveDeck.value?.removeAt(0)
             }
             var iterations = 5
             while (iterations-- != 0 && !hasSets()) {
                 Log.d("GameController", "set not found, reshuffle deck")
                 for (i in selected) {
-                    deck.add(board[i])
-                    board[i] = deck[0]
-                    if (deck.size > 1) deck.removeAt(0)
+                    liveBoard.value?.get(i)?.let { liveDeck.value?.add(it) }
+                    liveDeck.value?.get(0)?.let { liveBoard.value?.set(i, it) }
+                    if (liveDeck.value?.size ?: 0 > 1) liveDeck.value?.removeAt(0)
                 }
             }
-            viewCallback.onBoardUpdated(board) //drawBoard()
+            viewCallback.onBoardUpdated(liveBoard.value!!) //drawBoard()
 
             if (!hasSets()) {
                 timerGlobalFinish = System.currentTimeMillis()
@@ -154,75 +158,71 @@ class GameController(private val viewCallback: ViewCallback) {
 
 
     fun checkSets() {
-        val selectedCount = board.count { it.selected }
-        val propertiesSize = board[0].properties.size
+        val selectedCount = liveBoard.value?.count { it.selected }
+        val propertiesSize = liveBoard.value?.get(0)?.properties?.size
 
         if (selectedCount == cardsInSet) {
-            val properties = Array(propertiesSize) { mutableListOf<Int>() }
+            val properties = propertiesSize?.let { Array(it) { mutableListOf<Int>() } }
 
-            for (card in board) {
+            for (card in liveBoard.value!!) {
                 if (card.selected) {
-                    for (i in 0 until propertiesSize) {
-                        properties[i].add(card.properties[i])
+                    for (i in 0 until propertiesSize!!) {
+                        properties?.get(i)?.add(card.properties[i])
                     }
                 }
             }
 
-            if (properties.all { prop ->
-                        prop.distinct().let {
-                            it.size == 1 || it.size == cardsInSet
+            if (properties != null) {
+                if (properties.all { prop -> prop.distinct().let { it.size == 1 || it.size == cardsInSet } }) {
+                    score++
+                    val changedBoardId = mutableListOf<Int>()
+                    for (i in 0 until columnCount * rowCount) {
+                        if (liveBoard.value!![i].selected) {
+                            changedBoardId.add(i)
                         }
-                    }) {
-                score++
-                val changedBoardId = mutableListOf<Int>()
-                for (i in 0 until columnCount * rowCount) {
-                    if (board[i].selected) {
-                        changedBoardId.add(i)
                     }
+                    makeMove(changedBoardId.toIntArray())
                 }
-                makeMove(changedBoardId.toIntArray())
             }
         }
     }
 
     private fun hasSets(): Boolean {
-        if (deck.size == 1) return false
+        if (liveDeck.value?.size ?: 0 == 1) return false
 
         var has = false
-        val propertiesSize = board[0].properties.size
+        val propertiesSize = liveBoard.value?.get(0)?.properties?.size
 
         for (i in 0 until columnCount * rowCount)
             for (j in i + 1 until columnCount * rowCount)
                 for (k in j + 1 until columnCount * rowCount) {
-                    val properties = Array(propertiesSize) { mutableListOf<Int>() }
+                    val properties = propertiesSize?.let { Array(it) { mutableListOf<Int>() } }
 
-                    board[i].let {
-                        for (t in 0 until propertiesSize) {
-                            properties[t].add(it.properties[t])
+                    liveBoard.value?.get(i)?.let {
+                        for (t in 0 until propertiesSize!!) {
+                            properties?.get(t)?.add(it.properties[t])
                         }
                     }
 
-                    board[j].let {
-                        for (t in 0 until propertiesSize) {
-                            properties[t].add(it.properties[t])
+                    liveBoard.value?.get(j)?.let {
+                        for (t in 0 until propertiesSize!!) {
+                            properties?.get(t)?.add(it.properties[t])
                         }
                     }
 
-                    board[k].let {
-                        for (t in 0 until propertiesSize) {
-                            properties[t].add(it.properties[t])
+                    liveBoard.value?.get(k)?.let {
+                        for (t in 0 until propertiesSize!!) {
+                            properties?.get(t)?.add(it.properties[t])
                         }
                     }
 
-                    if (properties.all { prop ->
-                                prop.distinct().let {
-                                    it.size == 1 || it.size == cardsInSet
-                                }
-                            }) {
-                        has = true
-                        setOnBoard[0] = i
-                        setOnBoard[1] = j
-                        setOnBoard[2] = k
+                    if (properties != null) {
+                        if (properties.all { prop -> prop.distinct().let { it.size == 1 || it.size == cardsInSet } }) {
+                            has = true
+                            setOnBoard[0] = i
+                            setOnBoard[1] = j
+                            setOnBoard[2] = k
+                        }
                     }
                 }
 

@@ -14,6 +14,9 @@ import android.widget.FrameLayout
 import android.widget.ImageView
 import androidx.core.content.res.ResourcesCompat
 import androidx.gridlayout.widget.GridLayout
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import kotlinx.android.synthetic.main.card_frame.view.*
 import kotlinx.android.synthetic.main.fragment_game.view.*
@@ -24,8 +27,9 @@ import ru.ifmo.setgame.R.layout.fragment_game
 class GameFragment : androidx.fragment.app.Fragment(), GameController.ViewCallback {
 
     private val images = mutableListOf<FrameLayout>()
-    private val controller = GameController(this)
+    private lateinit var controller: GameController
     private lateinit var gameView: View
+    private lateinit var viewModel : GameViewModel
     private var allowCustomCards = false
 
     private val receiver = object : BroadcastReceiver() {
@@ -35,22 +39,11 @@ class GameFragment : androidx.fragment.app.Fragment(), GameController.ViewCallba
         }
     }
 
-    override fun onAttach(activity: Activity) {
-        super.onAttach(activity)
-        if (controller.isMultiplayer) {
-            controller.setConnector((activity as GameActivity).connector)
-        }
-    }
-
-    override fun onDetach() {
-        super.onDetach()
-        controller.removeConnector()
-    }
-
     override fun onStart() {
         super.onStart()
         if (controller.isMultiplayer) {
             LocalBroadcastManager.getInstance(context!!).registerReceiver(receiver, IntentFilter(IN_GAME_BROADCAST))
+            controller.setConnector((activity as GameActivity).connector)
         }
         if (controller.isComputer) {
             controller.scheduleRate()
@@ -60,6 +53,7 @@ class GameFragment : androidx.fragment.app.Fragment(), GameController.ViewCallba
     override fun onStop() {
         if (controller.isMultiplayer) {
             LocalBroadcastManager.getInstance(context!!).unregisterReceiver(receiver)
+            controller.removeConnector()
         }
         if (controller.isComputer) {
             controller.stopRate()
@@ -68,6 +62,19 @@ class GameFragment : androidx.fragment.app.Fragment(), GameController.ViewCallba
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        viewModel = ViewModelProvider(activity!!,
+                GameViewModelFactory(activity!!.application,
+                        arrayListOf<PlayingCard>(),
+                        loadDefaultDeck() as ArrayList<PlayingCard>)).get(GameViewModel::class.java)
+        viewModel.observableBoard.observe(activity!!, Observer {
+            drawBoard()
+        })
+        viewModel.observableDeck.observe(activity!!, Observer {
+            drawBoard()
+        })
+
+        controller = GameController(this, viewModel)
+
         gameView = inflater.inflate(fragment_game, container, false)
 
         gameView.game_grid.rowCount = controller.rowCount
@@ -89,7 +96,7 @@ class GameFragment : androidx.fragment.app.Fragment(), GameController.ViewCallba
                     val index = i * controller.columnCount + j
                     controller.onSelectCard(index)
 
-                    it.card_frame.visibility = if (controller.getCard(index).selected) ImageView.VISIBLE else ImageView.GONE
+                    it.card_frame.visibility = if (controller.getCard(index)?.selected!!) ImageView.VISIBLE else ImageView.GONE
 
                     Log.d("TG", index.toString())
                     controller.checkSets()
@@ -122,6 +129,14 @@ class GameFragment : androidx.fragment.app.Fragment(), GameController.ViewCallba
         allowCustomCards = activity!!.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE).getBoolean(PREFERENCE_CUSTOM_CARDS, false)
 
         return gameView
+    }
+
+
+    private fun drawBoard() {
+        for (i in 0 until 12) {
+            images[i].card_image.setImageDrawable(controller.getCard(i)?.getDrawable(resources, allowCustomCards))
+            images[i].card_frame.visibility = ImageView.GONE
+        }
     }
 
     companion object {
