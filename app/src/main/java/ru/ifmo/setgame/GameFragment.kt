@@ -109,11 +109,12 @@ class GameFragment : androidx.fragment.app.Fragment(), GameController.ViewCallba
             controller.timerGlobalStart = System.currentTimeMillis()
 
             if (controller.isComputer) {
-
                 controller.setTimer()
             }
 
             if (controller.isMultiplayer) {
+                //todo investigate where we need to set connector
+                controller.setConnector((activity as GameActivity).connector)
                 controller.drawBoardFromJSON(getString("json")!!)
             }
         }

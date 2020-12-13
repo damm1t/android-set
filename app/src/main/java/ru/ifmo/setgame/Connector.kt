@@ -26,8 +26,6 @@ class Connector(context: Context) : AutoCloseable, CoroutineScope {
         get() = Dispatchers.IO + job
 
     private val mutex = Mutex()
-    private val hostAddress = "18.197.57.64"
-    private val hostPort = 3691
     private lateinit var socket : Socket// = Socket(hostAddress, hostPort)
     private lateinit var reader : BufferedReader// = BufferedReader(InputStreamReader(socket.getInputStream()))
     private lateinit var writer : BufferedWriter// = BufferedWriter(OutputStreamWriter(socket.getOutputStream(), "UTF-8"))
@@ -143,7 +141,7 @@ class Connector(context: Context) : AutoCloseable, CoroutineScope {
 
     // send default handshake and get player id and list of lobbies
     private suspend fun init() = mutex.withLock {
-        socket = Socket(hostAddress, hostPort)
+        socket = Socket(HOST_ADDRESS, HOST_PORT)
         reader = BufferedReader(InputStreamReader(socket.getInputStream()))
         writer = BufferedWriter(OutputStreamWriter(socket.getOutputStream(), "UTF-8"))
 
@@ -230,5 +228,10 @@ class Connector(context: Context) : AutoCloseable, CoroutineScope {
             socket.close()
         }
         job.cancelChildren()
+    }
+
+    private companion object {
+        private const val HOST_ADDRESS = "rsbat.dev"
+        private const val HOST_PORT = 3691
     }
 }
