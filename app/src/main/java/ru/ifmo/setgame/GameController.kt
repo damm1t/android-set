@@ -46,6 +46,7 @@ class GameController(private val viewCallback: ViewCallback) {
         fun onBoardUpdated(board: MutableList<PlayingCard>)
         fun getStringById(resId: Int): String
         fun showScore(title: String, time: Long, players: Array<String>, scores: IntArray)
+        fun vibrate(int: Int)
     }
 
     fun shuffleDeck() {
@@ -118,7 +119,8 @@ class GameController(private val viewCallback: ViewCallback) {
                     if (deckLiveData.value?.size ?: 0 > 1) deckLiveData.value?.removeAt(0)
                 }
             }
-            viewCallback.onBoardUpdated(boardLiveData.value!!) //drawBoard()
+
+            viewCallback.onBoardUpdated(boardLiveData.value!!)
 
             if (!hasSets()) {
                 timerGlobalFinish = System.currentTimeMillis()
@@ -186,6 +188,11 @@ class GameController(private val viewCallback: ViewCallback) {
                         }
                     }
                     makeMove(changedBoardId.toIntArray())
+                }
+                else {
+                    viewCallback.vibrate(1)
+                    boardLiveData.value!!.forEach({ it -> it.selected = false})
+                    viewCallback.onBoardUpdated(boardLiveData.value!!)
                 }
             }
         }

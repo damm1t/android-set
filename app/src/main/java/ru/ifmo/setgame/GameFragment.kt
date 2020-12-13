@@ -1,11 +1,13 @@
 package ru.ifmo.setgame
 
-import android.app.Activity
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.os.Build
 import android.os.Bundle
+import android.os.VibrationEffect
+import android.os.Vibrator
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -15,8 +17,6 @@ import android.widget.ImageView
 import androidx.core.content.res.ResourcesCompat
 import androidx.gridlayout.widget.GridLayout
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import kotlinx.android.synthetic.main.card_frame.view.*
 import kotlinx.android.synthetic.main.fragment_game.view.*
@@ -64,17 +64,6 @@ class GameFragment : androidx.fragment.app.Fragment(), GameController.ViewCallba
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         controller = GameController(this)
         viewModel = GameViewModel(controller)
-        /*viewModel = ViewModelProvider(activity!!,
-                GameViewModelFactory(activity!!.application,
-                        arrayListOf<PlayingCard>(),
-                        loadDefaultDeck() as ArrayList<PlayingCard>)).get(GameViewModel::class.java)*/
-
-        viewModel.boardLiveData.observe(activity!!, Observer {
-            drawBoard()
-        })
-        viewModel.deckLiveData.observe(activity!!, Observer {
-            drawBoard()
-        })
 
         gameView = inflater.inflate(fragment_game, container, false)
 
@@ -129,6 +118,10 @@ class GameFragment : androidx.fragment.app.Fragment(), GameController.ViewCallba
 
         allowCustomCards = activity!!.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE).getBoolean(PREFERENCE_CUSTOM_CARDS, false)
 
+        viewModel.boardLiveData.observe(activity!!, Observer {
+            onBoardUpdated(controller.getBoardLiveData().value!!)
+        })
+
         return gameView
     }
 
@@ -137,6 +130,27 @@ class GameFragment : androidx.fragment.app.Fragment(), GameController.ViewCallba
         for (i in 0 until 12) {
             images[i].card_image.setImageDrawable(controller.getCard(i)?.getDrawable(resources, allowCustomCards))
             images[i].card_frame.visibility = ImageView.GONE
+        }
+    }
+
+    override fun vibrate(secs : Int) {
+        val vibrator : Vibrator = activity?.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+        val canVibrate: Boolean = vibrator.hasVibrator()
+        val milliseconds = 1000L * secs
+
+        if (canVibrate) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                // API 26
+                vibrator.vibrate(
+                        VibrationEffect.createOneShot(
+                                milliseconds,
+                                VibrationEffect.DEFAULT_AMPLITUDE
+                        )
+                )
+            } else {
+                // This method was deprecated in API level 26
+                vibrator.vibrate(milliseconds)
+            }
         }
     }
 
