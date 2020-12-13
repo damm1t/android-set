@@ -17,8 +17,6 @@ import java.io.OutputStreamWriter
 import java.net.Socket
 import kotlin.coroutines.CoroutineContext
 
-const val LOBBIES_LIST_BROADCAST = "ru.ifmo.setgame.LOBBIES_LIST"
-const val IN_LOBBY_BROADCAST = "ru.ifmo.setgame.IN_LOBBY"
 const val IN_GAME_BROADCAST = "ru.ifmo.setgame.IN_GAME"
 
 class Connector(context: Context) : AutoCloseable, CoroutineScope {
@@ -60,8 +58,6 @@ class Connector(context: Context) : AutoCloseable, CoroutineScope {
             status = response.get("status").asText()
             val lobbiesListJson = mapper.writeValueAsString(response.get("lobbies_list"))
             lobbiesListLiveData.postValue(lobbiesListJson)
-
-            localBroadcastManager.sendBroadcast(Intent(LOBBIES_LIST_BROADCAST).apply { putExtra("lobbies_list", lobbiesListJson) })
         }
     }
 
@@ -80,8 +76,6 @@ class Connector(context: Context) : AutoCloseable, CoroutineScope {
             lobbyId = response.get("lobby_id").asInt()
             val lobbyInfoJson = mapper.writeValueAsString(response.get("lobby"))
             lobbyInfoLiveData.postValue(lobbyInfoJson)
-
-            localBroadcastManager.sendBroadcast(Intent(IN_LOBBY_BROADCAST).apply { putExtra("lobby", lobbyInfoJson) })
         }
     }
 
@@ -108,8 +102,6 @@ class Connector(context: Context) : AutoCloseable, CoroutineScope {
 
             val lobbyInfoJson = mapper.writeValueAsString(response.get("lobby"))
             lobbyInfoLiveData.postValue(lobbyInfoJson)
-
-            localBroadcastManager.sendBroadcast(Intent(IN_LOBBY_BROADCAST).apply { putExtra("lobby", lobbyInfoJson) })
         }
     }
 
@@ -131,8 +123,6 @@ class Connector(context: Context) : AutoCloseable, CoroutineScope {
 
             val lobbiesListJson = mapper.writeValueAsString(response.get("lobbies_list"))
             lobbiesListLiveData.postValue(lobbiesListJson)
-
-            localBroadcastManager.sendBroadcast(Intent(LOBBIES_LIST_BROADCAST).apply { putExtra("lobbies_list", lobbiesListJson) })
         }
     }
 
@@ -167,8 +157,6 @@ class Connector(context: Context) : AutoCloseable, CoroutineScope {
         status = response.get("status").asText()
         val lobbiesListJson = mapper.writeValueAsString(response.get("lobbies_list"))
         lobbiesListLiveData.postValue(lobbiesListJson)
-
-        localBroadcastManager.sendBroadcast(Intent(LOBBIES_LIST_BROADCAST).apply { putExtra("lobbies_list", lobbiesListJson) })
     }
 
     fun connect() = launch {
@@ -192,8 +180,8 @@ class Connector(context: Context) : AutoCloseable, CoroutineScope {
                         val gameJson = mapper.writeValueAsString(update.get("game"))
                         gameNavigation?.startMultiplayerGame(gameJson)
                     } else {
-                        val lobbyStr = mapper.writeValueAsString(update.get("lobby"))
-                        localBroadcastManager.sendBroadcast(Intent(IN_LOBBY_BROADCAST).apply { putExtra("lobby", lobbyStr) })
+                        val lobbyInfoJson = mapper.writeValueAsString(update.get("lobby"))
+                        lobbyInfoLiveData.postValue(lobbyInfoJson)
                     }
                 } else if (status == "IN_GAME") {
                     val tmp_str = reader.readLine()
