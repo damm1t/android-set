@@ -113,6 +113,7 @@ class GameFragment : androidx.fragment.app.Fragment(), GameController.ViewCallba
             }
 
             if (controller.isMultiplayer) {
+                //todo investigate where we need to set connector
                 controller.setConnector((activity as GameActivity).connector)
                 controller.drawBoardFromJSON(getString("json")!!)
             }
