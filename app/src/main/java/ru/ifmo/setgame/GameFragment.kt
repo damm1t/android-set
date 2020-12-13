@@ -144,7 +144,7 @@ class GameFragment : androidx.fragment.app.Fragment(), GameController.ViewCallba
     }
 
     override fun getStringById(resId: Int): String {
-        return getStringById(resId)
+        return getString(resId)
     }
 
     override fun showScore(title: String, time: Long, players: Array<String>, scores: IntArray) {
