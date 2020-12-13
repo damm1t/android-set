@@ -15,11 +15,11 @@ import java.util.*
  */
 // TODO maybe split in two
 class LobbyInfoViewModel(connector: Connector, objectMapper: ObjectMapper) {
-    val lobbiesListLiveData =
+    val lobbiesListLiveData: LiveData<Array<Lobby>> =
             Transformations.map(connector.getLobbiesListLiveData()) { lobbiesListJson ->
         objectMapper.readValue<Array<Lobby>>(lobbiesListJson)
     }
-    val lobbyInfoLiveData =
+    val lobbyInfoLiveData: LiveData<Lobby> =
             Transformations.map(connector.getLobbyInfoLiveData()) { lobbyJson ->
         objectMapper.readValue<Lobby>(lobbyJson)
     }

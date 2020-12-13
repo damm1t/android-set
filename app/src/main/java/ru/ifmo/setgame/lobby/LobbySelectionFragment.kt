@@ -10,17 +10,14 @@ import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
-import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
 import kotlinx.android.synthetic.main.dialog_create_lobby.view.*
 import kotlinx.android.synthetic.main.fragment_lobby_selection.view.*
 import kotlinx.android.synthetic.main.item_lobby.view.*
 import ru.ifmo.setgame.GameActivity
-import ru.ifmo.setgame.LOBBIES_LIST_BROADCAST
 import ru.ifmo.setgame.Lobby
 import ru.ifmo.setgame.R
 
@@ -47,6 +44,7 @@ class LobbyCreationDialog : DialogFragment() {
 }
 
 class LobbySelectionFragment : Fragment() {
+    private lateinit var viewModel: LobbyInfoViewModel
 
     class LobbyAdapter(var data: Array<Lobby>) : RecyclerView.Adapter<LobbyAdapter.VH>() {
 
@@ -79,25 +77,12 @@ class LobbySelectionFragment : Fragment() {
     }
 
     lateinit var adapter: LobbyAdapter
-    private val broadcastReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context?, intent: Intent?) {
-            val str = intent?.extras?.getString("lobbies_list")!!
-            val lobbies = jacksonObjectMapper().readValue<Array<Lobby>>(str)
-            adapter.data = lobbies
-            adapter.notifyDataSetChanged()
 
-            view?.swipe_refresh_lobbies?.isRefreshing = false
-        }
-    }
+    private fun setLobbiesList(lobbiesList: Array<Lobby>) {
+        adapter.data = lobbiesList
+        adapter.notifyDataSetChanged()
 
-    override fun onStart() {
-        super.onStart()
-        LocalBroadcastManager.getInstance(context!!).registerReceiver(broadcastReceiver, IntentFilter(LOBBIES_LIST_BROADCAST))
-    }
-
-    override fun onStop() {
-        LocalBroadcastManager.getInstance(context!!).unregisterReceiver(broadcastReceiver)
-        super.onStop()
+        view?.swipe_refresh_lobbies?.isRefreshing = false
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -116,6 +101,10 @@ class LobbySelectionFragment : Fragment() {
         view.fab.setOnClickListener {
             LobbyCreationDialog().show(fragmentManager!!, "create_lobby")
         }
+
+        viewModel = LobbyInfoViewModel((activity as GameActivity).connector, jacksonObjectMapper())
+        viewModel.lobbiesListLiveData.observe(viewLifecycleOwner, ::setLobbiesList)
+
         return view
     }
 }
