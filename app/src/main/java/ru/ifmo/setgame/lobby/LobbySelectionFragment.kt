@@ -1,4 +1,4 @@
-package ru.ifmo.setgame
+package ru.ifmo.setgame.lobby
 
 import android.app.AlertDialog
 import android.app.Dialog
@@ -19,6 +19,10 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import kotlinx.android.synthetic.main.dialog_create_lobby.view.*
 import kotlinx.android.synthetic.main.fragment_lobby_selection.view.*
 import kotlinx.android.synthetic.main.item_lobby.view.*
+import ru.ifmo.setgame.GameActivity
+import ru.ifmo.setgame.LOBBIES_LIST_BROADCAST
+import ru.ifmo.setgame.Lobby
+import ru.ifmo.setgame.R
 
 class LobbyCreationDialog : DialogFragment() {
 

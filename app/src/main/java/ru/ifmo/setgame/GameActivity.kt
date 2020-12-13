@@ -1,12 +1,10 @@
 package ru.ifmo.setgame
 
-import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.content.IntentFilter
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import ru.ifmo.setgame.lobby.LobbySelectionFragment
 
 class Lobby(
         val lobby_id: Int,
