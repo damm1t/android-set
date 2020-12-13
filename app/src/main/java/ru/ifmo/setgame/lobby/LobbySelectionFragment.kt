@@ -7,16 +7,13 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import kotlinx.android.synthetic.main.dialog_create_lobby.view.*
 import kotlinx.android.synthetic.main.fragment_lobby_selection.view.*
-import kotlinx.android.synthetic.main.item_lobby.view.*
 import ru.ifmo.setgame.GameActivity
 import ru.ifmo.setgame.Lobby
 import ru.ifmo.setgame.R
@@ -46,37 +43,7 @@ class LobbyCreationDialog : DialogFragment() {
 class LobbySelectionFragment : Fragment() {
     private lateinit var viewModel: LobbyInfoViewModel
 
-    class LobbyAdapter(var data: Array<Lobby>) : RecyclerView.Adapter<LobbyAdapter.VH>() {
-
-        inner class VH(tv: View) : RecyclerView.ViewHolder(tv) {
-            val name = tv.lobby_name!!
-            val nOfPlayers = tv.lobby_n_players!!
-
-            init {
-                itemView.setOnClickListener {
-                    (tv.context as AppCompatActivity).supportFragmentManager.beginTransaction()
-                            .replace(R.id.game_fragment, LobbyInfoFragment.newInstanceJoin(
-                                    data[adapterPosition].lobby_id
-                            )).commit()
-                }
-            }
-        }
-
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {
-            val tv = LayoutInflater.from(parent.context).inflate(R.layout.item_lobby, parent, false)
-            return VH(tv)
-        }
-
-        override fun getItemCount(): Int = data.size
-
-        override fun onBindViewHolder(holder: VH, position: Int) {
-            val context = holder.itemView.context
-            holder.nOfPlayers.text = context.getString(R.string.players_count_placeholder, data[position].in_lobby.size, data[position].max_players)
-            holder.name.text = data[position].lobby_id.toString()
-        }
-    }
-
-    lateinit var adapter: LobbyAdapter
+    private lateinit var adapter: LobbyListAdapter
 
     private fun setLobbiesList(lobbiesList: Array<Lobby>) {
         adapter.data = lobbiesList
@@ -88,7 +55,7 @@ class LobbySelectionFragment : Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_lobby_selection, container, false)
 
-        adapter = LobbyAdapter(arrayOf())
+        adapter = LobbyListAdapter(arrayOf())
 
         view.recycler_view_lobbies.adapter = adapter
         view.recycler_view_lobbies.layoutManager = LinearLayoutManager(activity)
