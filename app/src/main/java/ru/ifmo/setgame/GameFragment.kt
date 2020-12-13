@@ -62,18 +62,19 @@ class GameFragment : androidx.fragment.app.Fragment(), GameController.ViewCallba
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        viewModel = ViewModelProvider(activity!!,
+        controller = GameController(this)
+        viewModel = GameViewModel(controller)
+        /*viewModel = ViewModelProvider(activity!!,
                 GameViewModelFactory(activity!!.application,
                         arrayListOf<PlayingCard>(),
-                        loadDefaultDeck() as ArrayList<PlayingCard>)).get(GameViewModel::class.java)
-        viewModel.observableBoard.observe(activity!!, Observer {
-            drawBoard()
-        })
-        viewModel.observableDeck.observe(activity!!, Observer {
-            drawBoard()
-        })
+                        loadDefaultDeck() as ArrayList<PlayingCard>)).get(GameViewModel::class.java)*/
 
-        controller = GameController(this, viewModel)
+        viewModel.boardLiveData.observe(activity!!, Observer {
+            drawBoard()
+        })
+        viewModel.deckLiveData.observe(activity!!, Observer {
+            drawBoard()
+        })
 
         gameView = inflater.inflate(fragment_game, container, false)
 
