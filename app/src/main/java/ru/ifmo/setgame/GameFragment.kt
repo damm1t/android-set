@@ -32,17 +32,9 @@ class GameFragment : androidx.fragment.app.Fragment(), GameController.ViewCallba
     private lateinit var viewModel : GameViewModel
     private var allowCustomCards = false
 
-    private val receiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context?, intent: Intent?) {
-            val json = intent?.extras?.getString("game")!!
-            controller.drawBoardFromJSON(json)
-        }
-    }
-
     override fun onStart() {
         super.onStart()
         if (controller.isMultiplayer) {
-            LocalBroadcastManager.getInstance(context!!).registerReceiver(receiver, IntentFilter(IN_GAME_BROADCAST))
             controller.setConnector((activity as GameActivity).connector)
         }
         if (controller.isComputer) {
@@ -52,7 +44,6 @@ class GameFragment : androidx.fragment.app.Fragment(), GameController.ViewCallba
 
     override fun onStop() {
         if (controller.isMultiplayer) {
-            LocalBroadcastManager.getInstance(context!!).unregisterReceiver(receiver)
             controller.removeConnector()
         }
         if (controller.isComputer) {
@@ -108,14 +99,14 @@ class GameFragment : androidx.fragment.app.Fragment(), GameController.ViewCallba
             if (controller.isMultiplayer) {
                 //todo investigate where we need to set connector
                 controller.setConnector((activity as GameActivity).connector)
-                controller.drawBoardFromJSON(getString("json")!!)
+                controller.createBoardFromJSON(getString("json")!!)
             }
         }
 
         allowCustomCards = activity!!.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE).getBoolean(PREFERENCE_CUSTOM_CARDS, false)
 
-        viewModel.getBoard().observe(activity!!, Observer {
-            onBoardUpdated(controller.getBoardLiveData().value!!)
+        viewModel.getBoard().observe(viewLifecycleOwner, Observer { board ->
+            onBoardUpdated(board)
         })
 
         return gameView
@@ -154,7 +145,7 @@ class GameFragment : androidx.fragment.app.Fragment(), GameController.ViewCallba
                 }
     }
 
-    override fun onBoardUpdated(board: MutableList<PlayingCard>) {
+    private fun onBoardUpdated(board: List<PlayingCard>) {
         for (i in 0 until 12) {
             images[i].card_image.setImageDrawable(board[i].getDrawable(resources, allowCustomCards))
             images[i].card_frame.visibility = ImageView.GONE
