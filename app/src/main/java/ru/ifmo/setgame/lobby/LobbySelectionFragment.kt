@@ -65,7 +65,7 @@ class LobbySelectionFragment : Fragment() {
         view.recycler_view_lobbies.addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL))
 
         view.swipe_refresh_lobbies.setOnRefreshListener {
-            (activity as GameActivity).connector.requestLobbies()
+            viewModel.refreshLobbiesList()
         }
 
         view.fab.setOnClickListener {

@@ -40,4 +40,8 @@ class LobbyInfoViewModel(
     fun createLobby(maxPlayers: Int) {
         navigation.createLobby(maxPlayers)
     }
+
+    fun refreshLobbiesList() {
+        connector.requestLobbies()
+    }
 }
