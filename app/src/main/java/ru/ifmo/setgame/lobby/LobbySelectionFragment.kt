@@ -22,7 +22,7 @@ class LobbyCreationDialog(private val viewModel: LobbyInfoViewModel) : DialogFra
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val view = LayoutInflater.from(context).inflate(R.layout.dialog_create_lobby, null)
-        view.max_players_picker.minValue = 1 // cannot set these from xml :(
+        view.max_players_picker.minValue = 2 // cannot set these from xml :(
         view.max_players_picker.maxValue = 10
         view.max_players_picker.value = 2 // default value
 
