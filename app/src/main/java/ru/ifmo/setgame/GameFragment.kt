@@ -1,11 +1,13 @@
 package ru.ifmo.setgame
 
-import android.app.Activity
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.os.Build
 import android.os.Bundle
+import android.os.VibrationEffect
+import android.os.Vibrator
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -14,6 +16,7 @@ import android.widget.FrameLayout
 import android.widget.ImageView
 import androidx.core.content.res.ResourcesCompat
 import androidx.gridlayout.widget.GridLayout
+import androidx.lifecycle.Observer
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import kotlinx.android.synthetic.main.card_frame.view.*
 import kotlinx.android.synthetic.main.fragment_game.view.*
@@ -24,8 +27,9 @@ import ru.ifmo.setgame.R.layout.fragment_game
 class GameFragment : androidx.fragment.app.Fragment(), GameController.ViewCallback {
 
     private val images = mutableListOf<FrameLayout>()
-    private val controller = GameController(this)
+    private lateinit var controller: GameController
     private lateinit var gameView: View
+    private lateinit var viewModel : GameViewModel
     private var allowCustomCards = false
 
     private val receiver = object : BroadcastReceiver() {
@@ -35,22 +39,11 @@ class GameFragment : androidx.fragment.app.Fragment(), GameController.ViewCallba
         }
     }
 
-    override fun onAttach(activity: Activity) {
-        super.onAttach(activity)
-        if (controller.isMultiplayer) {
-            controller.setConnector((activity as GameActivity).connector)
-        }
-    }
-
-    override fun onDetach() {
-        super.onDetach()
-        controller.removeConnector()
-    }
-
     override fun onStart() {
         super.onStart()
         if (controller.isMultiplayer) {
             LocalBroadcastManager.getInstance(context!!).registerReceiver(receiver, IntentFilter(IN_GAME_BROADCAST))
+            controller.setConnector((activity as GameActivity).connector)
         }
         if (controller.isComputer) {
             controller.scheduleRate()
@@ -60,6 +53,7 @@ class GameFragment : androidx.fragment.app.Fragment(), GameController.ViewCallba
     override fun onStop() {
         if (controller.isMultiplayer) {
             LocalBroadcastManager.getInstance(context!!).unregisterReceiver(receiver)
+            controller.removeConnector()
         }
         if (controller.isComputer) {
             controller.stopRate()
@@ -68,6 +62,9 @@ class GameFragment : androidx.fragment.app.Fragment(), GameController.ViewCallba
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        controller = GameController(this)
+        viewModel = GameViewModel(controller)
+
         gameView = inflater.inflate(fragment_game, container, false)
 
         gameView.game_grid.rowCount = controller.rowCount
@@ -89,7 +86,7 @@ class GameFragment : androidx.fragment.app.Fragment(), GameController.ViewCallba
                     val index = i * controller.columnCount + j
                     controller.onSelectCard(index)
 
-                    it.card_frame.visibility = if (controller.getCard(index).selected) ImageView.VISIBLE else ImageView.GONE
+                    it.card_frame.visibility = if (controller.getCard(index)?.selected!!) ImageView.VISIBLE else ImageView.GONE
 
                     Log.d("TG", index.toString())
                     controller.checkSets()
@@ -121,7 +118,36 @@ class GameFragment : androidx.fragment.app.Fragment(), GameController.ViewCallba
 
         allowCustomCards = activity!!.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE).getBoolean(PREFERENCE_CUSTOM_CARDS, false)
 
+        viewModel.getBoard().observe(activity!!, Observer {
+            onBoardUpdated(controller.getBoardLiveData().value!!)
+        })
+
+        viewModel.getDeck().observe(activity!!, Observer {
+            onBoardUpdated(controller.getBoardLiveData().value!!)
+        })
+
         return gameView
+    }
+
+    override fun vibrate(secs : Int) {
+        val vibrator : Vibrator = activity?.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+        val canVibrate: Boolean = vibrator.hasVibrator()
+        val milliseconds = 1000L * secs
+
+        if (canVibrate) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                // API 26
+                vibrator.vibrate(
+                        VibrationEffect.createOneShot(
+                                milliseconds,
+                                VibrationEffect.DEFAULT_AMPLITUDE
+                        )
+                )
+            } else {
+                // This method was deprecated in API level 26
+                vibrator.vibrate(milliseconds)
+            }
+        }
     }
 
     companion object {
