@@ -6,9 +6,7 @@ import androidx.lifecycle.Transformations
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
-import ru.ifmo.setgame.Connector
-import ru.ifmo.setgame.GameNavigation
-import ru.ifmo.setgame.Lobby
+import ru.ifmo.setgame.*
 import java.util.*
 
 /**
@@ -16,7 +14,7 @@ import java.util.*
  */
 // TODO maybe split in two
 class LobbyInfoViewModel(
-        connector: Connector,
+        private val connector: Connector,
         objectMapper: ObjectMapper,
         private val navigation: GameNavigation
 ) {
@@ -31,5 +29,11 @@ class LobbyInfoViewModel(
 
     fun joinLobby(lobbyId: Int) {
         navigation.joinLobby(lobbyId)
+    }
+
+    fun leaveLobby() {
+        // TODO call sth like gameState.leaveLobby()
+        connector.leaveLobby()
+        navigation.showLobbiesList()
     }
 }

@@ -13,7 +13,7 @@ import kotlinx.android.synthetic.main.fragment_lobby_info.view.*
 import ru.ifmo.setgame.*
 
 class LobbyInfoFragment : Fragment() {
-    var viewModel: LobbyInfoViewModel? = null
+    lateinit var viewModel: LobbyInfoViewModel
 
     private fun setLobbyInfo(lobby: Lobby) {
         val playersArray = lobby.in_lobby
@@ -48,18 +48,17 @@ class LobbyInfoFragment : Fragment() {
             }
         }
 
-        view.btn_leave.setOnClickListener {
-            (activity as GameActivity).connector.leaveLobby()
-            (activity as GameActivity).supportFragmentManager.beginTransaction()
-                    .replace(R.id.game_fragment, LobbySelectionFragment()).commit()
-        }
-
         viewModel = LobbyInfoViewModel(
                 (activity as GameActivity).connector,
                 jacksonObjectMapper(),
                 (activity as GameActivity).gameNavigation
         )
-        viewModel!!.lobbyInfoLiveData.observe(viewLifecycleOwner, ::setLobbyInfo)
+
+        view.btn_leave.setOnClickListener {
+            viewModel.leaveLobby()
+        }
+
+        viewModel.lobbyInfoLiveData.observe(viewLifecycleOwner, ::setLobbyInfo)
 
         return view
     }
