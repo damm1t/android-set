@@ -6,4 +6,6 @@ interface GameNavigation {
     fun startSingleplayerGame()
     fun startTrainingGame()
     fun showLobbiesList()
+    fun joinLobby(lobbyId: Int)
+    fun createLobby(maxPlayers: Int)
 }
