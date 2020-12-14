@@ -107,7 +107,6 @@ class Connector @VisibleForTesting constructor(
 
             writer.write(request)
             writer.flush()
-            // we get no response after this
         }
     }
 
