@@ -54,7 +54,11 @@ class LobbyInfoFragment : Fragment() {
                     .replace(R.id.game_fragment, LobbySelectionFragment()).commit()
         }
 
-        viewModel = LobbyInfoViewModel((activity as GameActivity).connector, jacksonObjectMapper())
+        viewModel = LobbyInfoViewModel(
+                (activity as GameActivity).connector,
+                jacksonObjectMapper(),
+                (activity as GameActivity).gameNavigation
+        )
         viewModel!!.lobbyInfoLiveData.observe(viewLifecycleOwner, ::setLobbyInfo)
 
         return view

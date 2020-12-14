@@ -55,7 +55,12 @@ class LobbySelectionFragment : Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_lobby_selection, container, false)
 
-        adapter = LobbyListAdapter(arrayOf())
+        viewModel = LobbyInfoViewModel(
+                (activity as GameActivity).connector,
+                jacksonObjectMapper(),
+                (activity as GameActivity).gameNavigation
+        )
+        adapter = LobbyListAdapter(arrayOf(), viewModel)
 
         view.recycler_view_lobbies.adapter = adapter
         view.recycler_view_lobbies.layoutManager = LinearLayoutManager(activity)
@@ -69,7 +74,6 @@ class LobbySelectionFragment : Fragment() {
             LobbyCreationDialog().show(fragmentManager!!, "create_lobby")
         }
 
-        viewModel = LobbyInfoViewModel((activity as GameActivity).connector, jacksonObjectMapper())
         viewModel.lobbiesListLiveData.observe(viewLifecycleOwner, ::setLobbiesList)
 
         return view

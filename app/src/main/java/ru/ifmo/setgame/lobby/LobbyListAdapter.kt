@@ -10,7 +10,10 @@ import ru.ifmo.setgame.Lobby
 import ru.ifmo.setgame.R
 
 
-class LobbyListAdapter(var data: Array<Lobby>) : RecyclerView.Adapter<LobbyListAdapter.VH>() {
+class LobbyListAdapter(
+        var data: Array<Lobby>,
+        private val viewModel: LobbyInfoViewModel
+        ) : RecyclerView.Adapter<LobbyListAdapter.VH>() {
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {
         val tv = LayoutInflater.from(parent.context).inflate(R.layout.item_lobby, parent, false)
         return VH(tv)
@@ -30,12 +33,8 @@ class LobbyListAdapter(var data: Array<Lobby>) : RecyclerView.Adapter<LobbyListA
 
         init {
             itemView.setOnClickListener {
-                (tv.context as AppCompatActivity).supportFragmentManager.beginTransaction()
-                        .replace(R.id.game_fragment, LobbyInfoFragment.newInstanceJoin(
-                                data[adapterPosition].lobby_id
-                        )).commit()
+                viewModel.joinLobby(data[adapterPosition].lobby_id)
             }
         }
     }
-
 }

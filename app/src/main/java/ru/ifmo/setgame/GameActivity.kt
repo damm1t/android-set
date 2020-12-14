@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import ru.ifmo.setgame.lobby.LobbyInfoFragment
 import ru.ifmo.setgame.lobby.LobbySelectionFragment
 
 class Lobby(
@@ -93,6 +94,13 @@ class GameActivity : AppCompatActivity() {
         override fun showLobbiesList() {
             supportFragmentManager.beginTransaction().apply {
                 replace(R.id.game_fragment, LobbySelectionFragment());
+                commit()
+            }
+        }
+
+        override fun joinLobby(lobbyId: Int) {
+            supportFragmentManager.beginTransaction().apply {
+                replace(R.id.game_fragment, LobbyInfoFragment.newInstanceJoin(lobbyId))
                 commit()
             }
         }

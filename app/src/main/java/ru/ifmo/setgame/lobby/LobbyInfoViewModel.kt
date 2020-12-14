@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import ru.ifmo.setgame.Connector
+import ru.ifmo.setgame.GameNavigation
 import ru.ifmo.setgame.Lobby
 import java.util.*
 
@@ -14,7 +15,11 @@ import java.util.*
  * ViewModel with data related to lobbies
  */
 // TODO maybe split in two
-class LobbyInfoViewModel(connector: Connector, objectMapper: ObjectMapper) {
+class LobbyInfoViewModel(
+        connector: Connector,
+        objectMapper: ObjectMapper,
+        private val navigation: GameNavigation
+) {
     val lobbiesListLiveData: LiveData<Array<Lobby>> =
             Transformations.map(connector.getLobbiesListLiveData()) { lobbiesListJson ->
         objectMapper.readValue<Array<Lobby>>(lobbiesListJson)
@@ -22,5 +27,9 @@ class LobbyInfoViewModel(connector: Connector, objectMapper: ObjectMapper) {
     val lobbyInfoLiveData: LiveData<Lobby> =
             Transformations.map(connector.getLobbyInfoLiveData()) { lobbyJson ->
         objectMapper.readValue<Lobby>(lobbyJson)
+    }
+
+    fun joinLobby(lobbyId: Int) {
+        navigation.joinLobby(lobbyId)
     }
 }
