@@ -33,7 +33,7 @@ dependencies {
 
     implementation 'com.android.support:multidex:1.0.3'
 
-    implementation 'com.google.dagger:dagger:2.x'
+    implementation 'com.google.dagger:dagger:2.30.1'
 
     implementation 'androidx.appcompat:appcompat:1.2.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
@@ -53,5 +53,5 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
     debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.0-alpha-2'
 
-    kapt 'com.google.dagger:dagger-compiler:2.x'
+    kapt 'com.google.dagger:dagger-compiler:2.30.1'
 }

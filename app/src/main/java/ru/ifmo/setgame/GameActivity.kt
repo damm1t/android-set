@@ -5,9 +5,10 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
-import kotlinx.android.synthetic.main.dialog_create_lobby.view.*
 import ru.ifmo.setgame.lobby.LobbyInfoFragment
 import ru.ifmo.setgame.lobby.LobbySelectionFragment
+import ru.ifmo.setgame.di.DaggerGameComponent
+import ru.ifmo.setgame.di.GameComponent
 
 class Lobby(
         val lobby_id: Int,
@@ -18,6 +19,7 @@ class Lobby(
 
 class GameActivity : AppCompatActivity() {
     val gameNavigation: GameNavigation = GameNavigationImpl()
+    lateinit var gameComponent: GameComponent
 
     lateinit var connector : Connector
         private set
@@ -38,6 +40,11 @@ class GameActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        gameComponent = DaggerGameComponent.builder()
+                .setContext(this)
+                .build()
+
         setContentView(R.layout.activity_game)
 
         intent.extras?.apply {
@@ -46,7 +53,7 @@ class GameActivity : AppCompatActivity() {
 
             when {
                 isMultiplayer -> {
-                    connector = Connector.createConnector()
+                    connector = gameComponent.connector()
                     connector.connect()
 
                     gameNavigation.showLobbiesList()
