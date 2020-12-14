@@ -70,8 +70,6 @@ class GameFragment : androidx.fragment.app.Fragment(), GameController.ViewCallba
         gameView.game_grid.rowCount = controller.rowCount
         gameView.game_grid.columnCount = controller.columnCount
 
-        controller.shuffleDeck()
-
         for (i in 0 until controller.rowCount) {
             for (j in 0 until controller.columnCount) {
                 val params = GridLayout.LayoutParams(GridLayout.spec(i, GridLayout.FILL, 1f), GridLayout.spec(j, GridLayout.FILL, 1f))
@@ -79,7 +77,6 @@ class GameFragment : androidx.fragment.app.Fragment(), GameController.ViewCallba
                 params.height = 0
 
                 val image = inflater.inflate(card_frame, gameView.game_grid, false) as FrameLayout
-                image.card_image.setImageDrawable(controller.getTopDeck().getDrawable(resources, allowCustomCards))
                 image.card_frame.setImageDrawable(ResourcesCompat.getDrawable(resources, card_frame_drawable, null))
 
                 image.setOnClickListener {
@@ -93,7 +90,6 @@ class GameFragment : androidx.fragment.app.Fragment(), GameController.ViewCallba
                 }
 
                 images.add(image)
-                controller.updateBoard()
 
                 gameView.game_grid.addView(image, params)
             }
@@ -119,10 +115,6 @@ class GameFragment : androidx.fragment.app.Fragment(), GameController.ViewCallba
         allowCustomCards = activity!!.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE).getBoolean(PREFERENCE_CUSTOM_CARDS, false)
 
         viewModel.getBoard().observe(activity!!, Observer {
-            onBoardUpdated(controller.getBoardLiveData().value!!)
-        })
-
-        viewModel.getDeck().observe(activity!!, Observer {
             onBoardUpdated(controller.getBoardLiveData().value!!)
         })
 
