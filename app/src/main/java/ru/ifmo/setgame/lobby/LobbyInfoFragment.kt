@@ -40,14 +40,6 @@ class LobbyInfoFragment : Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_lobby_info, container, false)
 
-        arguments?.apply {
-            if (getBoolean(INTENT_KEY_SHOULD_CREATE)) {
-                (activity as GameActivity).connector.createLobby(getInt(INTENT_KEY_MAX_PLAYERS))
-            } else {
-                (activity as GameActivity).connector.joinLobby(getInt(INTENT_KEY_LOBBY_ID))
-            }
-        }
-
         viewModel = LobbyInfoViewModel(
                 (activity as GameActivity).connector,
                 jacksonObjectMapper(),
@@ -61,29 +53,5 @@ class LobbyInfoFragment : Fragment() {
         viewModel.lobbyInfoLiveData.observe(viewLifecycleOwner, ::setLobbyInfo)
 
         return view
-    }
-
-    companion object {
-        private const val INTENT_KEY_SHOULD_CREATE = "create"
-        private const val INTENT_KEY_LOBBY_ID = "lobby_id"
-        private const val INTENT_KEY_MAX_PLAYERS = "max_players"
-
-        @JvmStatic
-        fun newInstanceJoin(lobbyId: Int) =
-                LobbyInfoFragment().apply {
-                    arguments = Bundle().apply {
-                        putInt(INTENT_KEY_LOBBY_ID, lobbyId)
-                        putBoolean(INTENT_KEY_SHOULD_CREATE, false)
-                    }
-                }
-
-        @JvmStatic
-        fun newInstanceCreate(maxPlayers: Int) =
-                LobbyInfoFragment().apply {
-                    arguments = Bundle().apply {
-                        putBoolean(INTENT_KEY_SHOULD_CREATE, true)
-                        putInt(INTENT_KEY_MAX_PLAYERS, maxPlayers)
-                    }
-                }
     }
 }

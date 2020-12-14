@@ -86,11 +86,13 @@ class GameActivity : AppCompatActivity() {
         }
 
         override fun joinLobby(lobbyId: Int) {
-            setFragment(LobbyInfoFragment.newInstanceJoin(lobbyId))
+            connector.joinLobby(lobbyId)
+            setFragment(LobbyInfoFragment())
         }
 
         override fun createLobby(maxPlayers: Int) {
-            setFragment(LobbyInfoFragment.newInstanceCreate(maxPlayers))
+            connector.createLobby(maxPlayers)
+            setFragment(LobbyInfoFragment())
         }
 
         private fun setFragment(fragment: Fragment) {
