@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.Fragment
 import kotlinx.android.synthetic.main.dialog_create_lobby.view.*
 import ru.ifmo.setgame.lobby.LobbyInfoFragment
 import ru.ifmo.setgame.lobby.LobbySelectionFragment
@@ -65,50 +66,36 @@ class GameActivity : AppCompatActivity() {
 
     private inner class GameNavigationImpl: GameNavigation {
         override fun showScore(title: String, time: Long, players: Array<String>, scores: IntArray) {
-            supportFragmentManager.beginTransaction().apply {
-                replace(R.id.game_fragment, GameScoreFragment.newInstance(title, time, players, scores))
-                commit()
-            }
+            setFragment(GameScoreFragment.newInstance(title, time, players, scores))
         }
 
         override fun startMultiplayerGame(gameJson: String) {
-            supportFragmentManager.beginTransaction().apply {
-                replace(R.id.game_fragment, GameFragment.newInstance(gameJson, true, false))
-                commit()
-            }
+            setFragment(GameFragment.newInstance(gameJson, true, false))
         }
 
         override fun startSingleplayerGame() {
-            supportFragmentManager.beginTransaction().apply {
-                replace(R.id.game_fragment, GameFragment.newInstance("", false, true))
-                commit()
-            }
+            setFragment(GameFragment.newInstance("", false, true))
         }
 
         override fun startTrainingGame() {
-            supportFragmentManager.beginTransaction().apply {
-                replace(R.id.game_fragment, GameFragment.newInstance("", false, false))
-                commit()
-            }
+            setFragment(GameFragment.newInstance("", false, false))
         }
 
         override fun showLobbiesList() {
-            supportFragmentManager.beginTransaction().apply {
-                replace(R.id.game_fragment, LobbySelectionFragment());
-                commit()
-            }
+            setFragment(LobbySelectionFragment())
         }
 
         override fun joinLobby(lobbyId: Int) {
-            supportFragmentManager.beginTransaction().apply {
-                replace(R.id.game_fragment, LobbyInfoFragment.newInstanceJoin(lobbyId))
-                commit()
-            }
+            setFragment(LobbyInfoFragment.newInstanceJoin(lobbyId))
         }
 
         override fun createLobby(maxPlayers: Int) {
+            setFragment(LobbyInfoFragment.newInstanceCreate(maxPlayers))
+        }
+
+        private fun setFragment(fragment: Fragment) {
             supportFragmentManager.beginTransaction().apply {
-                replace(R.id.game_fragment, LobbyInfoFragment.newInstanceCreate(maxPlayers))
+                replace(R.id.game_fragment, fragment)
                 commit()
             }
         }
