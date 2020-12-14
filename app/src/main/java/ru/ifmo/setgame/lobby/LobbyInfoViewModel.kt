@@ -36,4 +36,8 @@ class LobbyInfoViewModel(
         connector.leaveLobby()
         navigation.showLobbiesList()
     }
+
+    fun createLobby(maxPlayers: Int) {
+        navigation.createLobby(maxPlayers)
+    }
 }

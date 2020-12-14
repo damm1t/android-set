@@ -18,7 +18,7 @@ import ru.ifmo.setgame.GameActivity
 import ru.ifmo.setgame.Lobby
 import ru.ifmo.setgame.R
 
-class LobbyCreationDialog : DialogFragment() {
+class LobbyCreationDialog(private val viewModel: LobbyInfoViewModel) : DialogFragment() {
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val view = LayoutInflater.from(context).inflate(R.layout.dialog_create_lobby, null)
@@ -33,9 +33,7 @@ class LobbyCreationDialog : DialogFragment() {
                     view.max_players_picker.visibility = View.INVISIBLE
                     view.max_players_text.visibility = View.INVISIBLE
 
-                    (activity as GameActivity).supportFragmentManager.beginTransaction()
-                            .replace(R.id.game_fragment, LobbyInfoFragment.newInstanceCreate(view.max_players_picker.value))
-                            .commit()
+                    viewModel.createLobby(view.max_players_picker.value)
                 }.create()
     }
 }
@@ -71,7 +69,7 @@ class LobbySelectionFragment : Fragment() {
         }
 
         view.fab.setOnClickListener {
-            LobbyCreationDialog().show(fragmentManager!!, "create_lobby")
+            LobbyCreationDialog(viewModel).show(fragmentManager!!, "create_lobby")
         }
 
         viewModel.lobbiesListLiveData.observe(viewLifecycleOwner, ::setLobbiesList)

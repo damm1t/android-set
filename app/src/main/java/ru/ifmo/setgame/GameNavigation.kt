@@ -7,4 +7,5 @@ interface GameNavigation {
     fun startTrainingGame()
     fun showLobbiesList()
     fun joinLobby(lobbyId: Int)
+    fun createLobby(maxPlayers: Int)
 }

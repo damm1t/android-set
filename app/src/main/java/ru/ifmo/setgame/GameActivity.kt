@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import kotlinx.android.synthetic.main.dialog_create_lobby.view.*
 import ru.ifmo.setgame.lobby.LobbyInfoFragment
 import ru.ifmo.setgame.lobby.LobbySelectionFragment
 
@@ -101,6 +102,13 @@ class GameActivity : AppCompatActivity() {
         override fun joinLobby(lobbyId: Int) {
             supportFragmentManager.beginTransaction().apply {
                 replace(R.id.game_fragment, LobbyInfoFragment.newInstanceJoin(lobbyId))
+                commit()
+            }
+        }
+
+        override fun createLobby(maxPlayers: Int) {
+            supportFragmentManager.beginTransaction().apply {
+                replace(R.id.game_fragment, LobbyInfoFragment.newInstanceCreate(maxPlayers))
                 commit()
             }
         }
