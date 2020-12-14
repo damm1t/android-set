@@ -46,7 +46,7 @@ class GameActivity : AppCompatActivity() {
 
             when {
                 isMultiplayer -> {
-                    connector = Connector(this@GameActivity)
+                    connector = Connector.createConnector(this@GameActivity)
                     connector.connect()
 
                     gameNavigation.showLobbiesList()
