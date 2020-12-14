@@ -3,6 +3,7 @@ package ru.ifmo.setgame
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
+import androidx.lifecycle.LiveData
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.treeToValue
 import androidx.lifecycle.MutableLiveData
@@ -34,8 +35,8 @@ class GameController(private val viewCallback: ViewCallback) {
     private val boardLiveData = MutableLiveData<MutableList<PlayingCard>>()
     private val deckLiveData = MutableLiveData<MutableList<PlayingCard>>()
 
-    fun getBoardLiveData(): MutableLiveData<MutableList<PlayingCard>> = boardLiveData
-    fun getDeckLiveData(): MutableLiveData<MutableList<PlayingCard>> = deckLiveData
+    fun getBoardLiveData(): LiveData<MutableList<PlayingCard>> = boardLiveData
+    fun getDeckLiveData(): LiveData<MutableList<PlayingCard>> = deckLiveData
 
     init {
         deckLiveData.value = loadDefaultDeck()

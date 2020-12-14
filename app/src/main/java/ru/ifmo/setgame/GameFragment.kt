@@ -118,19 +118,15 @@ class GameFragment : androidx.fragment.app.Fragment(), GameController.ViewCallba
 
         allowCustomCards = activity!!.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE).getBoolean(PREFERENCE_CUSTOM_CARDS, false)
 
-        viewModel.boardLiveData.observe(activity!!, Observer {
+        viewModel.getBoard().observe(activity!!, Observer {
+            onBoardUpdated(controller.getBoardLiveData().value!!)
+        })
+
+        viewModel.getDeck().observe(activity!!, Observer {
             onBoardUpdated(controller.getBoardLiveData().value!!)
         })
 
         return gameView
-    }
-
-
-    private fun drawBoard() {
-        for (i in 0 until 12) {
-            images[i].card_image.setImageDrawable(controller.getCard(i)?.getDrawable(resources, allowCustomCards))
-            images[i].card_frame.visibility = ImageView.GONE
-        }
     }
 
     override fun vibrate(secs : Int) {
