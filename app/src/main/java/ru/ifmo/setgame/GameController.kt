@@ -33,14 +33,12 @@ class GameController(private val viewCallback: ViewCallback) {
     var timerGlobalFinish: Long = 0
 
     private val boardLiveData = MutableLiveData<MutableList<PlayingCard>>()
-    private val deckLiveData = MutableLiveData<MutableList<PlayingCard>>()
+    private val deck = loadDefaultDeck()
 
     fun getBoardLiveData(): LiveData<MutableList<PlayingCard>> = boardLiveData
-    fun getDeckLiveData(): LiveData<MutableList<PlayingCard>> = deckLiveData
 
     init {
-        deckLiveData.value = loadDefaultDeck()
-        boardLiveData.value = mutableListOf<PlayingCard>()
+        initBoard()
     }
 
     interface ViewCallback {
@@ -50,12 +48,17 @@ class GameController(private val viewCallback: ViewCallback) {
         fun vibrate(int: Int)
     }
 
-    fun shuffleDeck() {
-        deckLiveData.value?.shuffle()
-    }
+    private fun initBoard() {
+        boardLiveData.value = mutableListOf<PlayingCard>()
 
-    fun getTopDeck(): PlayingCard {
-        return deckLiveData.value?.get(0)!!
+        deck.shuffle()
+
+        for (i in 0 until rowCount) {
+            for (j in 0 until columnCount) {
+                deck[0].let { boardLiveData.value?.add(it) }
+                deck.removeAt(0)
+            }
+        }
     }
 
     fun getCard(i: Int): PlayingCard? {
@@ -64,12 +67,6 @@ class GameController(private val viewCallback: ViewCallback) {
 
     fun onSelectCard(i: Int) {
         boardLiveData.value?.get(i)?.selected  = !boardLiveData.value?.get(i)?.selected!!
-    }
-
-    // ToDo wat is update
-    fun updateBoard() {
-        deckLiveData.value?.get(0)?.let { boardLiveData.value?.add(it) }
-        deckLiveData.value?.removeAt(0)
     }
 
     fun setTimer() {
@@ -108,16 +105,16 @@ class GameController(private val viewCallback: ViewCallback) {
             connector!!.make_move(selected)
         } else {
             for (i in selected) {
-                deckLiveData.value?.get(0)?.let { boardLiveData.value?.set(i, it) }
-                if (deckLiveData.value?.size ?: 0 > 1) deckLiveData.value?.removeAt(0)
+                boardLiveData.value?.set(i, deck[0])
+                if (deck.size > 1) deck.removeAt(0)
             }
             var iterations = 5
             while (iterations-- != 0 && !hasSets()) {
                 Log.d("GameController", "set not found, reshuffle deck")
                 for (i in selected) {
-                    boardLiveData.value?.get(i)?.let { deckLiveData.value?.add(it) }
-                    deckLiveData.value?.get(0)?.let { boardLiveData.value?.set(i, it) }
-                    if (deckLiveData.value?.size ?: 0 > 1) deckLiveData.value?.removeAt(0)
+                    boardLiveData.value?.get(i)?.let { deck.add(it) }
+                    boardLiveData.value?.set(i, deck[0])
+                    if (deck.size > 1) deck.removeAt(0)
                 }
             }
 
@@ -200,7 +197,7 @@ class GameController(private val viewCallback: ViewCallback) {
     }
 
     private fun hasSets(): Boolean {
-        if (deckLiveData.value?.size ?: 0 == 1) return false
+        if (deck.size ?: 0 == 1) return false
 
         var has = false
         val propertiesSize = boardLiveData.value?.get(0)?.properties?.size
