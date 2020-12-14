@@ -120,7 +120,7 @@ class GameController(private val viewCallback: ViewCallback) {
                 }
             }
 
-            viewCallback.onBoardUpdated(boardLiveData.value!!)
+            boardLiveData.setValue(boardLiveData.value)
 
             if (!hasSets()) {
                 timerGlobalFinish = System.currentTimeMillis()
