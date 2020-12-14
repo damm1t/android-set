@@ -57,11 +57,6 @@ class Connector @VisibleForTesting constructor(
 
             writer.write(request)
             writer.flush()
-
-            val response = mapper.readTree(reader.readLine())
-            status = response.get("status").asText()
-            val lobbiesListJson = mapper.writeValueAsString(response.get("lobbies_list"))
-            lobbiesListLiveData.postValue(lobbiesListJson)
         }
     }
 
@@ -74,12 +69,6 @@ class Connector @VisibleForTesting constructor(
 
             writer.write(request)
             writer.flush()
-
-            val response = mapper.readTree(reader.readLine())
-            status = response.get("status").asText()
-            lobbyId = response.get("lobby_id").asInt()
-            val lobbyInfoJson = mapper.writeValueAsString(response.get("lobby"))
-            lobbyInfoLiveData.postValue(lobbyInfoJson)
         }
     }
 
@@ -92,20 +81,6 @@ class Connector @VisibleForTesting constructor(
 
             writer.write(request)
             writer.flush()
-
-            val response = mapper.readTree(reader.readLine())
-            status = response.get("status").asText()
-
-            // something went wrong, return to lobbies list
-            if (status != "IN_LOBBY") {
-                gameNavigation?.showLobbiesList()
-                return@launch
-            }
-
-            lobbyId = response.get("lobby_id").asInt()
-
-            val lobbyInfoJson = mapper.writeValueAsString(response.get("lobby"))
-            lobbyInfoLiveData.postValue(lobbyInfoJson)
         }
     }
 
@@ -118,15 +93,6 @@ class Connector @VisibleForTesting constructor(
 
             writer.write(request)
             writer.flush()
-
-            val response = mapper.readTree(reader.readLine())
-            status = response.get("status").asText()
-            lobbyId = -1
-
-            assert(status == "SELECTING_LOBBY")
-
-            val lobbiesListJson = mapper.writeValueAsString(response.get("lobbies_list"))
-            lobbiesListLiveData.postValue(lobbiesListJson)
         }
     }
 
@@ -151,12 +117,6 @@ class Connector @VisibleForTesting constructor(
 
         writer.write(request)
         writer.flush()
-
-        val response = mapper.readTree(reader.readLine())
-        playerId = response.get("player_id").asInt()
-        status = response.get("status").asText()
-        val lobbiesListJson = mapper.writeValueAsString(response.get("lobbies_list"))
-        lobbiesListLiveData.postValue(lobbiesListJson)
     }
 
     fun connect() = launch {
@@ -168,8 +128,30 @@ class Connector @VisibleForTesting constructor(
 
         while (socket.isConnected) {
             if (reader.ready()) {
+                if (status == "NEW") {
+                    val response = mapper.readTree(reader.readLine())
+                    playerId = response.get("player_id").asInt()
+                    status = response.get("status").asText()
+                    val lobbiesListJson = mapper.writeValueAsString(response.get("lobbies_list"))
+                    lobbiesListLiveData.postValue(lobbiesListJson)
+                }
                 if (status == "SELECTING_LOBBY") {
-                    assert(false)
+                    val response = mapper.readTree(reader.readLine())
+                    status = response.get("status").asText()
+
+                    if (status == "IN_LOBBY") {
+                        // moved into lobby
+                        lobbyId = response.get("lobby_id").asInt()
+
+                        val lobbyInfoJson = mapper.writeValueAsString(response.get("lobby"))
+                        lobbyInfoLiveData.postValue(lobbyInfoJson)
+                    } else if (status == "SELECTING_LOBBY") {
+                        // make sure we show lobbies list
+                        gameNavigation?.showLobbiesList()
+
+                        val lobbiesListJson = mapper.writeValueAsString(response.get("lobbies_list"))
+                        lobbiesListLiveData.postValue(lobbiesListJson)
+                    }
                 } else if (status == "IN_LOBBY") {
                     val tmp_str = reader.readLine()
                     Log.d("TG_connect_loop", tmp_str)
@@ -179,13 +161,20 @@ class Connector @VisibleForTesting constructor(
                     status = update.get("status").asText()
 
                     if (status == "IN_GAME") {
-
                         gameId = update.get("game_id").asInt()
                         val gameJson = mapper.writeValueAsString(update.get("game"))
                         gameNavigation?.startMultiplayerGame(gameJson)
-                    } else {
+                    } else if (status == "IN_LOBBY") {
                         val lobbyInfoJson = mapper.writeValueAsString(update.get("lobby"))
                         lobbyInfoLiveData.postValue(lobbyInfoJson)
+                    } else {
+                        Log.d("Connector", "received $update")
+                        lobbyId = -1
+
+                        assert(status == "SELECTING_LOBBY")
+
+                        val lobbiesListJson = mapper.writeValueAsString(update.get("lobbies_list"))
+                        lobbiesListLiveData.postValue(lobbiesListJson)
                     }
                 } else if (status == "IN_GAME") {
                     val tmp_str = reader.readLine()
