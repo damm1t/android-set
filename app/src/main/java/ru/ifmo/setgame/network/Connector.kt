@@ -19,12 +19,9 @@ import java.net.Socket
 import kotlin.coroutines.CoroutineContext
 
 class Connector @VisibleForTesting constructor(
-        private val socket: Socket
-        ) : AutoCloseable, CoroutineScope {
-    private val job = SupervisorJob()
-
-    override val coroutineContext: CoroutineContext
-        get() = Dispatchers.IO + job
+        private val socket: Socket,
+        private val coroutineScope: CoroutineScope
+        ) : AutoCloseable {
 
     private val mutex = Mutex()
     private lateinit var reader: BufferedReader // = BufferedReader(InputStreamReader(socket.getInputStream()))
@@ -46,7 +43,7 @@ class Connector @VisibleForTesting constructor(
     fun getLobbyInfoLiveData(): LiveData<String> = lobbyInfoLiveData
     fun getGameLiveData(): LiveData<String> = gameLiveData
 
-    fun requestLobbies() = launch {
+    fun requestLobbies() = coroutineScope.launch {
         mutex.withLock {
             val request = """{"status": "$status",
             |"player_id": $playerId,
@@ -56,7 +53,7 @@ class Connector @VisibleForTesting constructor(
         }
     }
 
-    fun createLobby(maxPlayers: Int) = launch {
+    fun createLobby(maxPlayers: Int) = coroutineScope.launch {
         mutex.withLock {
             val request = """{"status": "$status",
             |"player_id": $playerId,
@@ -67,7 +64,7 @@ class Connector @VisibleForTesting constructor(
         }
     }
 
-    fun joinLobby(mLobbyId: Int) = launch {
+    fun joinLobby(mLobbyId: Int) = coroutineScope.launch {
         mutex.withLock {
             val request = """{"status": "$status",
             |"player_id": $playerId,
@@ -78,7 +75,7 @@ class Connector @VisibleForTesting constructor(
         }
     }
 
-    fun leaveLobby() = launch {
+    fun leaveLobby() = coroutineScope.launch {
         mutex.withLock {
             val request = """{"status": "$status",
             |"player_id": $playerId,
@@ -89,7 +86,7 @@ class Connector @VisibleForTesting constructor(
         }
     }
 
-    fun make_move(positions: IntArray) = launch {
+    fun make_move(positions: IntArray) = coroutineScope.launch {
         mutex.withLock {
             val request = """{"status": "$status",
             |"player_id": $playerId,
@@ -109,7 +106,7 @@ class Connector @VisibleForTesting constructor(
         sendString(request)
     }
 
-    fun connect() = launch {
+    fun connect() = coroutineScope.launch {
         socket.connect(InetSocketAddress(HOST_ADDRESS, HOST_PORT))
         reader = BufferedReader(InputStreamReader(socket.getInputStream()))
         writer = BufferedWriter(OutputStreamWriter(socket.getOutputStream(), "UTF-8"))
@@ -213,7 +210,7 @@ class Connector @VisibleForTesting constructor(
 
     override fun close() {
         socket.close()
-        job.cancelChildren()
+        coroutineScope.coroutineContext.job.cancelChildren()
     }
 
     companion object {
@@ -223,7 +220,11 @@ class Connector @VisibleForTesting constructor(
         fun createConnector(): Connector {
             val socket = Socket()
 
-            return Connector(socket)
+            val job = SupervisorJob()
+
+            val coroutineContext: CoroutineContext = Dispatchers.IO + job
+
+            return Connector(socket, CoroutineScope(coroutineContext))
         }
     }
 }
