@@ -91,8 +91,6 @@ class GameFragment : androidx.fragment.app.Fragment(), GameController.ViewCallba
 
 
         arguments?.apply {
-            controller.isMultiplayer = getBoolean("multiplayer")
-            controller.isComputer = getBoolean("computer")
             controller.timerGlobalStart = System.currentTimeMillis()
 
             if (controller.isComputer) {

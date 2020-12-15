@@ -96,6 +96,10 @@ class GameActivity : AppCompatActivity() {
             setFragment(GameFragment.newInstance("", false, false))
         }
 
+        override fun showBoardScreen() {
+            setFragment(GameFragment.newInstance("", false, false))
+        }
+
         override fun showLobbiesList() {
             setFragment(LobbySelectionFragment())
         }

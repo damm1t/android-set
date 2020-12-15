@@ -5,21 +5,31 @@ import javax.inject.Inject
 
 class GameState @Inject constructor(
         private val navigationDelegate: ScreenNavigation,
-        private val connector: Connector
+        private val connector: Connector,
+        private val gameController: GameController
 ): GameNavigation {
     override fun showScore(title: String, time: Long, players: Array<String>, scores: IntArray) {
         navigationDelegate.showScore(title, time, players, scores)
     }
 
     override fun startMultiplayerGame(gameJson: String) {
+        gameController.isMultiplayer = true
+        gameController.isComputer = false
+
         navigationDelegate.startMultiplayerGame(gameJson)
     }
 
     override fun startSingleplayerGame() {
+        gameController.isMultiplayer = false
+        gameController.isComputer = true
+
         navigationDelegate.startSingleplayerGame()
     }
 
     override fun startTrainingGame() {
+        gameController.isMultiplayer = false
+        gameController.isComputer = false
+
         navigationDelegate.startTrainingGame()
     }
 
@@ -42,6 +52,7 @@ class GameState @Inject constructor(
         fun startMultiplayerGame(gameJson: String)
         fun startSingleplayerGame()
         fun startTrainingGame()
+        fun showBoardScreen()
         fun showLobbiesList()
         fun joinLobby(lobbyId: Int)
         fun createLobby(maxPlayers: Int)
