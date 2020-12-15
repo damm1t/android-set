@@ -90,17 +90,15 @@ class GameFragment : androidx.fragment.app.Fragment(), GameController.ViewCallba
         }
 
 
-        arguments?.apply {
-            controller.timerGlobalStart = System.currentTimeMillis()
+        controller.timerGlobalStart = System.currentTimeMillis()
 
-            if (controller.isComputer) {
-                controller.setTimer()
-            }
+        if (controller.isComputer) {
+            controller.setTimer()
+        }
 
-            if (controller.isMultiplayer) {
-                //todo investigate where we need to set connector
-                controller.setConnector((activity as GameActivity).connector)
-            }
+        if (controller.isMultiplayer) {
+            //todo investigate where we need to set connector
+            controller.setConnector((activity as GameActivity).connector)
         }
 
         allowCustomCards = activity!!.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE).getBoolean(PREFERENCE_CUSTOM_CARDS, false)
