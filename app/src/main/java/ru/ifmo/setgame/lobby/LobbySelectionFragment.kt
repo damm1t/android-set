@@ -17,6 +17,7 @@ import kotlinx.android.synthetic.main.fragment_lobby_selection.view.*
 import ru.ifmo.setgame.GameActivity
 import ru.ifmo.setgame.Lobby
 import ru.ifmo.setgame.R
+import ru.ifmo.setgame.di.ComponentHelper
 
 class LobbyCreationDialog(private val viewModel: LobbyInfoViewModel) : DialogFragment() {
 
@@ -53,11 +54,8 @@ class LobbySelectionFragment : Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_lobby_selection, container, false)
 
-        viewModel = LobbyInfoViewModel(
-                (activity as GameActivity).connector,
-                jacksonObjectMapper(),
-                (activity as GameActivity).gameNavigation
-        )
+        val gameComponent = ComponentHelper.getGameComponent(activity!!)
+        viewModel = gameComponent.lobbyInfoViewModel()
         adapter = LobbyListAdapter(arrayOf(), viewModel)
 
         view.recycler_view_lobbies.adapter = adapter
