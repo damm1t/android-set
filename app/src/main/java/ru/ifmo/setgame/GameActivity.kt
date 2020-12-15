@@ -20,7 +20,8 @@ class Lobby(
 )
 
 class GameActivity : AppCompatActivity() {
-    val gameNavigation: GameNavigation = GameNavigationImpl()
+    private val screenNavigation: GameState.ScreenNavigation = ScreenNavigationImpl()
+    private val gameState = GameState(screenNavigation)
     lateinit var gameComponent: GameComponent
 
     lateinit var connector : Connector
@@ -29,7 +30,7 @@ class GameActivity : AppCompatActivity() {
     override fun onStart() {
         super.onStart()
         if (::connector.isInitialized) {
-            connector.gameNavigation = gameNavigation
+            connector.gameNavigation = gameState
         }
     }
 
@@ -45,7 +46,7 @@ class GameActivity : AppCompatActivity() {
 
         gameComponent = DaggerGameComponent.builder()
                 .setContext(this)
-                .setGameNavigation(gameNavigation)
+                .setGameNavigation(gameState)
                 .setObjectMapper(jacksonObjectMapper())
                 .build()
 
@@ -60,10 +61,10 @@ class GameActivity : AppCompatActivity() {
                     connector = gameComponent.connector()
                     connector.connect()
 
-                    gameNavigation.showLobbiesList()
+                    screenNavigation.showLobbiesList()
                 }
-                isComputer -> gameNavigation.startSingleplayerGame()
-                else -> gameNavigation.startTrainingGame()
+                isComputer -> screenNavigation.startSingleplayerGame()
+                else -> screenNavigation.startTrainingGame()
             }
         }
     }
@@ -75,7 +76,7 @@ class GameActivity : AppCompatActivity() {
         super.onDestroy()
     }
 
-    private inner class GameNavigationImpl: GameNavigation {
+    private inner class ScreenNavigationImpl: GameState.ScreenNavigation {
         override fun showScore(title: String, time: Long, players: Array<String>, scores: IntArray) {
             setFragment(GameScoreFragment.newInstance(title, time, players, scores))
         }
