@@ -6,6 +6,7 @@ import org.junit.Assert.*
 import org.junit.runner.RunWith
 import org.mockito.Mockito
 import org.robolectric.RobolectricTestRunner
+import java.util.*
 import kotlin.random.Random
 
 @RunWith(RobolectricTestRunner::class)
@@ -80,6 +81,29 @@ class ControllerUnitTests {
             }
             assertEquals(changed.size, 3)
             assertTrue(changed.equals(mutableListOf(0 + 3 * row, 1 + 3 * row, 2 + 3 * row)))
+        }
+    }
+
+    @Test
+    fun createBoardFromJsonTest(){
+        val controller : GameController  = GameController(mockViewCallBack, false)
+        val json : String = "{\"game_id\": 337, \"in_game\": [6, 89], \"board\": {\"0\": [0, 2, 1, 1], \"1\": [1, 0, 1, 2], \"2\": [0, 2, 0, 0], \"3\": [1, 0, 2, 1], \"4\": [1, 2, 0, 2], \"5\": [0, 2, 1, 2], \"6\": [2, 0, 2, 0], \"7\": [2, 0, 1, 0], \"8\": [1, 2, 2, 1], \"9\": [2, 1, 0, 1], \"10\": [2, 1, 1, 0], \"11\": [0, 1, 1, 0]}}"
+        controller.createBoardFromJSON(json)
+        val board = controller.getBoardLiveData().value
+        if (board != null) {
+            val intArray = intArrayOf(0, 2, 1, 1)
+            assertTrue(Arrays.equals(board.get(0).properties, intArrayOf(0, 2, 1, 1)))
+            assertTrue(Arrays.equals((board.get(1).properties),  intArrayOf(1, 0, 1, 2)))
+            assertTrue(Arrays.equals(board.get(2).properties,  intArrayOf(0, 2, 0, 0)))
+            assertTrue(Arrays.equals(board.get(3).properties,  intArrayOf(1, 0, 2, 1)))
+            assertTrue(Arrays.equals(board.get(4).properties,  intArrayOf(1, 2, 0, 2)))
+            assertTrue(Arrays.equals(board.get(5).properties,  intArrayOf(0, 2, 1, 2)))
+            assertTrue(Arrays.equals(board.get(6).properties,  intArrayOf(2, 0, 2, 0)))
+            assertTrue(Arrays.equals(board.get(7).properties,  intArrayOf(2, 0, 1, 0)))
+            assertTrue(Arrays.equals(board.get(8).properties,  intArrayOf(1, 2, 2, 1)))
+            assertTrue(Arrays.equals(board.get(9).properties,  intArrayOf(2, 1, 0, 1)))
+            assertTrue(Arrays.equals(board.get(10).properties,  intArrayOf(2, 1, 1, 0)))
+            assertTrue(Arrays.equals(board.get(11).properties,  intArrayOf(0, 1, 1, 0)))
         }
     }
 }
