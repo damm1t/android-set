@@ -57,4 +57,7 @@ dependencies {
     testImplementation 'org.mockito:mockito-core:2.24.5'
     androidTestImplementation 'org.mockito:mockito-android:2.24.5'
     testCompile "org.robolectric:robolectric:3.3.2"
+    testImplementation 'org.mockito:mockito-core:2.24.5'
+    androidTestImplementation 'org.mockito:mockito-android:2.24.5'
+    testCompile "org.robolectric:robolectric:3.3.2"
 }
