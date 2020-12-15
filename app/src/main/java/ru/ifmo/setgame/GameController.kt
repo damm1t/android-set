@@ -13,16 +13,11 @@ import ru.ifmo.setgame.network.Connector
 import java.util.Timer
 import java.util.TimerTask
 
-import ru.ifmo.setgame.di.ActivityScope
-import javax.inject.Inject
-
 private const val DEFAULT_COLUMNS = 3
 private const val DEFAULT_ROWS = 4
 private const val CARDS_IN_SET = 3
 
-@ActivityScope
-class GameController @Inject constructor(
-        private val gameNavigation: GameNavigation,
+class GameController constructor(
         private val needToShuffle: Boolean = true) {
     val rowCount: Int = DEFAULT_ROWS
     val columnCount: Int = DEFAULT_COLUMNS
