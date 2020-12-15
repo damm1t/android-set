@@ -199,14 +199,11 @@ class GameController(private val viewCallback: ViewCallback, private val needToS
     }
 
     @VisibleForTesting
-    public fun isSet(cards: List<PlayingCard>?, propertiesSize: Int?): Boolean {
+    public fun isSet(cards: List<PlayingCard?>?, propertiesSize: Int?): Boolean {
         if (cards != null) {
             if (cards.size != cardsInSet) {
                 return false
             }
-        }
-        else {
-            return false
         }
 
         val properties = propertiesSize?.let { Array(it) { mutableListOf<Int>() } }
