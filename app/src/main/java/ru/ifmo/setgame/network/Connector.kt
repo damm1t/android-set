@@ -18,10 +18,10 @@ import java.net.InetSocketAddress
 import java.net.Socket
 import kotlin.coroutines.CoroutineContext
 
-class Connector @VisibleForTesting constructor(
+open class Connector @VisibleForTesting constructor(
         private val socket: Socket,
         private val coroutineScope: CoroutineScope
-        ) : AutoCloseable {
+) : AutoCloseable {
 
     private val mutex = Mutex()
     private lateinit var reader: BufferedReader // = BufferedReader(InputStreamReader(socket.getInputStream()))
@@ -39,7 +39,7 @@ class Connector @VisibleForTesting constructor(
     private var gameId = -1
     private var status = "NEW"
 
-    fun getLobbiesListLiveData(): LiveData<String> = lobbiesListLiveData
+    open fun getLobbiesListLiveData(): LiveData<String> = lobbiesListLiveData
     fun getLobbyInfoLiveData(): LiveData<String> = lobbyInfoLiveData
     fun getGameLiveData(): LiveData<String> = gameLiveData
 
