@@ -225,7 +225,7 @@ class GameController constructor(
     }
 
     @VisibleForTesting
-    private fun hasSets(): Boolean {
+    fun hasSets(): Boolean {
         if (deck.size == 1) return false
 
         var has = false
