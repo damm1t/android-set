@@ -34,6 +34,6 @@ class LobbyInfoViewModelTest {
         viewModel.lobbiesListLiveData.observeForever { receivedLobby = it }
         Assert.assertNotNull(receivedLobby)
         Assert.assertTrue(receivedLobby!!.isNotEmpty())
-        Assert.assertEquals(lobby, receivedLobby!![0])
+        Assert.assertEquals(lobby.lobby_id, receivedLobby!![0].lobby_id)
     }
 }
