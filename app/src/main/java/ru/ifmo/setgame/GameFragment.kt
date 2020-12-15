@@ -27,6 +27,7 @@ class GameFragment : androidx.fragment.app.Fragment(), GameController.ViewCallba
     private lateinit var controller: GameController
     private lateinit var gameView: View
     private lateinit var viewModel : GameViewModel
+    private lateinit var gameNavigation: GameNavigation
     private var allowCustomCards = false
 
     override fun onStart() {
@@ -56,6 +57,7 @@ class GameFragment : androidx.fragment.app.Fragment(), GameController.ViewCallba
 
         controller = gameComponent.gameController()
         viewModel = gameComponent.gameViewModel()
+        gameNavigation = gameComponent.gameNavigation()
 
         gameView = inflater.inflate(fragment_game, container, false)
 
@@ -165,6 +167,6 @@ class GameFragment : androidx.fragment.app.Fragment(), GameController.ViewCallba
             arrayOf(getString(R.string.player_you))
         }
 
-        (activity as GameActivity).gameNavigation.showScore(title, time, playersArray, scores)
+        gameNavigation.showScore(title, time, playersArray, scores)
     }
 }

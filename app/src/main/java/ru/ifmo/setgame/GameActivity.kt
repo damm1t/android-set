@@ -21,11 +21,12 @@ class Lobby(
 
 class GameActivity : AppCompatActivity() {
     private val screenNavigation: GameState.ScreenNavigation = ScreenNavigationImpl()
-    private val gameState = GameState(screenNavigation)
     lateinit var gameComponent: GameComponent
 
     lateinit var connector : Connector
         private set
+
+    private lateinit var gameState: GameState
 
     override fun onStart() {
         super.onStart()
@@ -46,9 +47,11 @@ class GameActivity : AppCompatActivity() {
 
         gameComponent = DaggerGameComponent.builder()
                 .setContext(this)
-                .setGameNavigation(gameState)
+                .setScreenNavigation(screenNavigation)
                 .setObjectMapper(jacksonObjectMapper())
                 .build()
+
+        gameState = gameComponent.gameState()
 
         setContentView(R.layout.activity_game)
 
@@ -98,12 +101,10 @@ class GameActivity : AppCompatActivity() {
         }
 
         override fun joinLobby(lobbyId: Int) {
-            connector.joinLobby(lobbyId)
             setFragment(LobbyInfoFragment())
         }
 
         override fun createLobby(maxPlayers: Int) {
-            connector.createLobby(maxPlayers)
             setFragment(LobbyInfoFragment())
         }
 

@@ -1,6 +1,12 @@
 package ru.ifmo.setgame
 
-class GameState(private val navigationDelegate: ScreenNavigation): GameNavigation {
+import ru.ifmo.setgame.network.Connector
+import javax.inject.Inject
+
+class GameState @Inject constructor(
+        private val navigationDelegate: ScreenNavigation,
+        private val connector: Connector
+): GameNavigation {
     override fun showScore(title: String, time: Long, players: Array<String>, scores: IntArray) {
         navigationDelegate.showScore(title, time, players, scores)
     }
@@ -22,10 +28,12 @@ class GameState(private val navigationDelegate: ScreenNavigation): GameNavigatio
     }
 
     override fun joinLobby(lobbyId: Int) {
+        connector.joinLobby(lobbyId)
         navigationDelegate.joinLobby(lobbyId)
     }
 
     override fun createLobby(maxPlayers: Int) {
+        connector.createLobby(maxPlayers)
         navigationDelegate.createLobby(maxPlayers)
     }
 

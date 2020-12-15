@@ -7,6 +7,7 @@ import dagger.Component
 import ru.ifmo.setgame.network.Connector
 import ru.ifmo.setgame.GameController
 import ru.ifmo.setgame.GameNavigation
+import ru.ifmo.setgame.GameState
 import ru.ifmo.setgame.GameViewModel
 import ru.ifmo.setgame.lobby.LobbyInfoViewModel
 import ru.ifmo.setgame.network.NetworkModule
@@ -16,7 +17,7 @@ import javax.inject.Scope
 @Retention(value = AnnotationRetention.RUNTIME)
 annotation class ActivityScope
 
-@Component(modules = [NetworkModule::class])
+@Component(modules = [NetworkModule::class, GameModule::class])
 @ActivityScope
 interface GameComponent {
     fun connector(): Connector
@@ -27,6 +28,10 @@ interface GameComponent {
 
     fun gameViewModel(): GameViewModel
 
+    fun gameState(): GameState
+
+    fun gameNavigation(): GameNavigation
+
     @Component.Builder
     interface Builder {
         @BindsInstance
@@ -36,7 +41,7 @@ interface GameComponent {
         fun setObjectMapper(objectMapper: ObjectMapper): Builder
 
         @BindsInstance
-        fun setGameNavigation(gameNavigation: GameNavigation): Builder
+        fun setScreenNavigation(screenNavigation: GameState.ScreenNavigation): Builder
 
         fun build(): GameComponent
     }
