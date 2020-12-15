@@ -19,7 +19,7 @@ private const val DEFAULT_COLUMNS = 3
 private const val DEFAULT_ROWS = 4
 private const val CARDS_IN_SET = 3
 
-class GameController(private val viewCallback: ViewCallback, private val needToShuffle: Boolean = true) {
+open class GameController(private val viewCallback: ViewCallback, private val needToShuffle: Boolean = true) {
     val rowCount: Int = DEFAULT_ROWS
     val columnCount: Int = DEFAULT_COLUMNS
     private val cardsInSet: Int = CARDS_IN_SET
@@ -42,7 +42,7 @@ class GameController(private val viewCallback: ViewCallback, private val needToS
 
     private val connectorGameObserver = Observer<String> { json -> createBoardFromJSON(json) }
 
-    fun getBoardLiveData(): LiveData<MutableList<PlayingCard>> = boardLiveData
+    open fun getBoardLiveData(): LiveData<MutableList<PlayingCard>> = boardLiveData
 
     fun getDeckSize(): Int {
         return deck.size
