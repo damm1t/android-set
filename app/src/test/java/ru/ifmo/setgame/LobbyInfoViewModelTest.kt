@@ -29,10 +29,11 @@ class LobbyInfoViewModelTest {
         val sentLobby = "[{\"lobby_id\":98,\"max_players\":2,\"in_lobby\":[],\"game_id\":null}]"
 
         liveData.value = sentLobby
+        var receivedLobby: Array<Lobby>? = null
 
-        val receivedLobby: Array<Lobby>? = viewModel.lobbiesListLiveData.value
+        viewModel.lobbiesListLiveData.observeForever { receivedLobby = it }
         Assert.assertNotNull(receivedLobby)
         Assert.assertTrue(receivedLobby!!.isNotEmpty())
-        Assert.assertEquals(lobby, receivedLobby[0])
+        Assert.assertEquals(lobby, receivedLobby!![0])
     }
 }
