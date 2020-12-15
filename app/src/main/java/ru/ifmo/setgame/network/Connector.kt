@@ -1,4 +1,4 @@
-package ru.ifmo.setgame
+package ru.ifmo.setgame.network
 
 import android.util.Log
 import androidx.annotation.VisibleForTesting
@@ -9,6 +9,7 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import ru.ifmo.setgame.GameNavigation
 import java.io.BufferedReader
 import java.io.BufferedWriter
 import java.io.InputStreamReader
