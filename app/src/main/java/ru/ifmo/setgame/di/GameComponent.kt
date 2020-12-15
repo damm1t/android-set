@@ -43,9 +43,6 @@ interface GameComponent {
         @BindsInstance
         fun setObjectMapper(objectMapper: ObjectMapper): Builder
 
-        @BindsInstance
-        fun setScreenNavigation(screenNavigation: GameState.ScreenNavigation): Builder
-
         fun build(): GameComponent
     }
 }

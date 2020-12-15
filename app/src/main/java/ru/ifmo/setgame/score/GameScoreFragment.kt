@@ -68,14 +68,6 @@ class GameScoreFragment : androidx.fragment.app.Fragment() {
 
     companion object {
         @JvmStatic
-        fun newInstance(title: String, time: Long, players: Array<String>, scores: IntArray) =
-                GameScoreFragment().apply {
-                    arguments = Bundle().apply {
-                        putString(TITLE_TAG, title)
-                        putLong(TIME_TAG, time)
-                        putStringArray(PLAYERS_TAG, players)
-                        putIntArray(SCORES_TAG, scores)
-                    }
-                }
+        fun newInstance() = GameScoreFragment()
     }
 }

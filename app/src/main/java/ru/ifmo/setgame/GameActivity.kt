@@ -21,7 +21,7 @@ class Lobby(
 )
 
 class GameActivity : AppCompatActivity() {
-    private val screenNavigation: GameState.ScreenNavigation = ScreenNavigationImpl()
+    private val screenNavigation = ScreenNavigationImpl()
     lateinit var gameComponent: GameComponent
 
     lateinit var connector : Connector
@@ -48,7 +48,6 @@ class GameActivity : AppCompatActivity() {
 
         gameComponent = DaggerGameComponent.builder()
                 .setContext(this)
-                .setScreenNavigation(screenNavigation)
                 .setObjectMapper(jacksonObjectMapper())
                 .build()
 
@@ -88,24 +87,24 @@ class GameActivity : AppCompatActivity() {
             GameScreen.LOBBIES_SCREEN -> screenNavigation.showLobbiesList()
             GameScreen.LOBBY_INFO_SCREEN -> screenNavigation.showLobbyInfoScreen()
             GameScreen.BOARD_SCREEN -> screenNavigation.showBoardScreen()
-            GameScreen.SCORE_SCREEN -> Unit // no-op
+            GameScreen.SCORE_SCREEN -> screenNavigation.showScore()
         }
     }
 
-    private inner class ScreenNavigationImpl: GameState.ScreenNavigation {
-        override fun showScore(title: String, time: Long, players: Array<String>, scores: IntArray) {
-            setFragment(GameScoreFragment.newInstance(title, time, players, scores))
+    private inner class ScreenNavigationImpl {
+        fun showScore() {
+            setFragment(GameScoreFragment.newInstance())
         }
 
-        override fun showBoardScreen() {
+        fun showBoardScreen() {
             setFragment(GameFragment.newInstance())
         }
 
-        override fun showLobbiesList() {
+        fun showLobbiesList() {
             setFragment(LobbySelectionFragment())
         }
 
-        override fun showLobbyInfoScreen() {
+        fun showLobbyInfoScreen() {
             setFragment(LobbyInfoFragment())
         }
 

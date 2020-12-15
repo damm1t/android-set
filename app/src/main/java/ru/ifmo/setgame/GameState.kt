@@ -17,7 +17,6 @@ enum class GameScreen {
 
 @ActivityScope
 class GameState @Inject constructor(
-        private val navigationDelegate: ScreenNavigation,
         private val connector: Connector,
         private val gameController: GameController
 ): GameNavigation {
@@ -36,7 +35,6 @@ class GameState @Inject constructor(
                 title, time, players, scores
         ))
         screenLiveData.postValue(GameScreen.SCORE_SCREEN)
-        navigationDelegate.showScore(title, time, players, scores)
     }
 
     override fun startMultiplayerGame(gameJson: String) {
@@ -75,12 +73,5 @@ class GameState @Inject constructor(
         connector.createLobby(maxPlayers)
 
         screenLiveData.postValue(GameScreen.LOBBY_INFO_SCREEN)
-    }
-
-    interface ScreenNavigation {
-        fun showScore(title: String, time: Long, players: Array<String>, scores: IntArray)
-        fun showBoardScreen()
-        fun showLobbiesList()
-        fun showLobbyInfoScreen()
     }
 }
