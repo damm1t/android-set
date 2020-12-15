@@ -64,12 +64,14 @@ class GameActivity : AppCompatActivity() {
                     connector = gameComponent.connector()
                     connector.connect()
 
-                    screenNavigation.showLobbiesList()
+                    gameState.showLobbiesList()
                 }
                 isComputer -> gameState.startSingleplayerGame()
                 else -> gameState.startTrainingGame()
             }
         }
+
+        gameState.getScreenLiveData().observe(this, ::showScreen)
     }
 
     override fun onDestroy() {
@@ -77,6 +79,16 @@ class GameActivity : AppCompatActivity() {
             connector.close()
         }
         super.onDestroy()
+    }
+
+    private fun showScreen(screen: GameScreen) {
+        when (screen) {
+            GameScreen.NONE -> Unit // no-op
+            GameScreen.LOBBIES_SCREEN -> screenNavigation.showLobbiesList()
+            GameScreen.LOBBY_INFO_SCREEN -> screenNavigation.showLobbyInfoScreen()
+            GameScreen.BOARD_SCREEN -> screenNavigation.showBoardScreen()
+            GameScreen.SCORE_SCREEN -> Unit // no-op
+        }
     }
 
     private inner class ScreenNavigationImpl: GameState.ScreenNavigation {

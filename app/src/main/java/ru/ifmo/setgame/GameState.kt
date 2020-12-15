@@ -39,7 +39,6 @@ class GameState @Inject constructor(
 
 
         screenLiveData.postValue(GameScreen.BOARD_SCREEN)
-        navigationDelegate.showBoardScreen()
     }
 
     override fun startSingleplayerGame() {
@@ -47,7 +46,6 @@ class GameState @Inject constructor(
         gameController.isComputer = true
 
         screenLiveData.postValue(GameScreen.BOARD_SCREEN)
-        navigationDelegate.showBoardScreen()
     }
 
     override fun startTrainingGame() {
@@ -55,26 +53,22 @@ class GameState @Inject constructor(
         gameController.isComputer = false
 
         screenLiveData.postValue(GameScreen.BOARD_SCREEN)
-        navigationDelegate.showBoardScreen()
     }
 
     override fun showLobbiesList() {
         screenLiveData.postValue(GameScreen.LOBBIES_SCREEN)
-        navigationDelegate.showLobbiesList()
     }
 
     override fun joinLobby(lobbyId: Int) {
         connector.joinLobby(lobbyId)
 
         screenLiveData.postValue(GameScreen.LOBBY_INFO_SCREEN)
-        navigationDelegate.showLobbyInfoScreen()
     }
 
     override fun createLobby(maxPlayers: Int) {
         connector.createLobby(maxPlayers)
 
         screenLiveData.postValue(GameScreen.LOBBY_INFO_SCREEN)
-        navigationDelegate.showLobbyInfoScreen()
     }
 
     interface ScreenNavigation {
