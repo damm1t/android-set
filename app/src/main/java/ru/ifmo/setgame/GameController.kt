@@ -7,7 +7,9 @@ import androidx.lifecycle.LiveData
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.treeToValue
 import androidx.lifecycle.MutableLiveData
-import java.util.*
+import androidx.lifecycle.Observer
+import java.util.Timer
+import java.util.TimerTask
 
 
 private const val DEFAULT_COLUMNS = 3
@@ -35,6 +37,8 @@ class GameController(private val viewCallback: ViewCallback) {
     private val boardLiveData = MutableLiveData<MutableList<PlayingCard>>()
     private val deck = loadDefaultDeck()
 
+    private val connectorGameObserver = Observer<String> { json -> createBoardFromJSON(json) }
+
     fun getBoardLiveData(): LiveData<MutableList<PlayingCard>> = boardLiveData
 
     init {
@@ -42,7 +46,6 @@ class GameController(private val viewCallback: ViewCallback) {
     }
 
     interface ViewCallback {
-        fun onBoardUpdated(board: MutableList<PlayingCard>)
         fun getStringById(resId: Int): String
         fun showScore(title: String, time: Long, players: Array<String>, scores: IntArray)
         fun vibrate(int: Int)
@@ -59,6 +62,8 @@ class GameController(private val viewCallback: ViewCallback) {
                 deck.removeAt(0)
             }
         }
+
+        boardLiveData.value = boardLiveData.value
     }
 
     fun getCard(i: Int): PlayingCard? {
@@ -75,9 +80,11 @@ class GameController(private val viewCallback: ViewCallback) {
 
     fun setConnector(connector: Connector) {
         this.connector = connector
+        connector.getGameLiveData().observeForever(connectorGameObserver)
     }
 
     fun removeConnector() {
+        connector?.getGameLiveData()?.removeObserver(connectorGameObserver)
         this.connector = null
     }
 
@@ -143,7 +150,7 @@ class GameController(private val viewCallback: ViewCallback) {
         }
     }
 
-    fun drawBoardFromJSON(json: String) {
+    fun createBoardFromJSON(json: String) {
         val objectMapper = jacksonObjectMapper()
         val jsonBoard = objectMapper.readTree(json).get("board")
 
@@ -157,7 +164,7 @@ class GameController(private val viewCallback: ViewCallback) {
             }
         }
 
-        viewCallback.onBoardUpdated(boardLiveData.value!!) //drawBoard()
+        boardLiveData.value = boardLiveData.value
     }
 
 
@@ -190,7 +197,7 @@ class GameController(private val viewCallback: ViewCallback) {
                 else {
                     viewCallback.vibrate(1)
                     boardLiveData.value!!.forEach({ it -> it.selected = false})
-                    viewCallback.onBoardUpdated(boardLiveData.value!!)
+                    boardLiveData.value = boardLiveData.value
                 }
             }
         }

@@ -22,8 +22,7 @@ import kotlin.coroutines.CoroutineContext
 const val IN_GAME_BROADCAST = "ru.ifmo.setgame.IN_GAME"
 
 class Connector @VisibleForTesting constructor(
-        private val socket: Socket,
-        private val localBroadcastManager: LocalBroadcastManager
+        private val socket: Socket
         ) : AutoCloseable, CoroutineScope {
     private val job = SupervisorJob()
 
@@ -39,6 +38,7 @@ class Connector @VisibleForTesting constructor(
 
     private val lobbiesListLiveData = MutableLiveData<String>()
     private val lobbyInfoLiveData = MutableLiveData<String>()
+    private val gameLiveData = MutableLiveData<String>()
 
     private var playerId = -1
     private var lobbyId = -1
@@ -47,6 +47,7 @@ class Connector @VisibleForTesting constructor(
 
     fun getLobbiesListLiveData(): LiveData<String> = lobbiesListLiveData
     fun getLobbyInfoLiveData(): LiveData<String> = lobbyInfoLiveData
+    fun getGameLiveData(): LiveData<String> = gameLiveData
 
     fun requestLobbies() = launch {
         mutex.withLock {
@@ -217,8 +218,8 @@ class Connector @VisibleForTesting constructor(
                         )
                         break
                     } else {
-                        val gameStr = mapper.writeValueAsString(update.get("game"))
-                        localBroadcastManager.sendBroadcast(Intent(IN_GAME_BROADCAST).apply { putExtra("game", gameStr) })
+                        val gameJson = mapper.writeValueAsString(update.get("game"))
+                        gameLiveData.postValue(gameJson)
                     }
                 }
             }
@@ -236,11 +237,10 @@ class Connector @VisibleForTesting constructor(
         private const val HOST_ADDRESS = "rsbat.dev"
         private const val HOST_PORT = 3691
 
-        fun createConnector(context: Context): Connector {
+        fun createConnector(): Connector {
             val socket = Socket()
-            val localBroadcastManager = LocalBroadcastManager.getInstance(context)
 
-            return Connector(socket, localBroadcastManager)
+            return Connector(socket)
         }
     }
 }

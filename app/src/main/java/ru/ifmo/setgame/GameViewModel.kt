@@ -3,9 +3,10 @@ package ru.ifmo.setgame
 import androidx.lifecycle.*
 
 class GameViewModel(controller: GameController) {
-    private val boardLiveData: LiveData<MutableList<PlayingCard>> = controller.getBoardLiveData()
+    private val boardLiveData: LiveData<List<PlayingCard>> =
+            Transformations.map(controller.getBoardLiveData()) { it }
 
-    fun getBoard() : LiveData<MutableList<PlayingCard>> {
+    fun getBoard() : LiveData<List<PlayingCard>> {
         return boardLiveData
     }
 }
