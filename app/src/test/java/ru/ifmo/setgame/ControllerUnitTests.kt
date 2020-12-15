@@ -16,7 +16,7 @@ class ControllerUnitTests {
     @Test
     fun hasSetsTest() {
         val controller = GameController(mockViewCallBack, false)
-        while (controller.getDeckSize() > 2){
+        while (controller.getDeckSize() > 2) {
             assertTrue(controller.hasSets())
             val row = Random.nextInt(4)
             controller.makeMove(intArrayOf(0 + 3 * row, 1 + 3 * row, 2 + 3 * row))

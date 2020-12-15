@@ -5,19 +5,18 @@ import android.os.Looper
 import android.util.Log
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.LiveData
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.fasterxml.jackson.module.kotlin.treeToValue
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
-import java.util.Timer
-import java.util.TimerTask
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.module.kotlin.treeToValue
+import java.util.*
 
 
 private const val DEFAULT_COLUMNS = 3
 private const val DEFAULT_ROWS = 4
 private const val CARDS_IN_SET = 3
 
-class GameController(private val viewCallback: ViewCallback, private val needToShuffle : Boolean = true) {
+class GameController(private val viewCallback: ViewCallback, private val needToShuffle: Boolean = true) {
     val rowCount: Int = DEFAULT_ROWS
     val columnCount: Int = DEFAULT_COLUMNS
     private val cardsInSet: Int = CARDS_IN_SET
@@ -78,7 +77,7 @@ class GameController(private val viewCallback: ViewCallback, private val needToS
     }
 
     fun onSelectCard(i: Int) {
-        boardLiveData.value?.get(i)?.selected  = !boardLiveData.value?.get(i)?.selected!!
+        boardLiveData.value?.get(i)?.selected = !boardLiveData.value?.get(i)?.selected!!
     }
 
     fun setTimer() {
@@ -175,14 +174,14 @@ class GameController(private val viewCallback: ViewCallback, private val needToS
     }
 
 
-    fun checkSets() : Boolean {
+    fun checkSets(): Boolean {
         val selectedCount = boardLiveData.value?.count { it.selected }
-        val selectedIsSet : Boolean = isSet(boardLiveData.value?.filter{it -> it.selected},
+        val selectedIsSet: Boolean = isSet(boardLiveData.value?.filter { it -> it.selected },
                 boardLiveData.value?.get(0)?.properties?.size)
         if (!selectedIsSet) {
             if (selectedCount == cardsInSet) {
                 viewCallback.vibrate(1)
-                boardLiveData.value!!.forEach({ it -> it.selected = false})
+                boardLiveData.value!!.forEach { it.selected = false }
                 boardLiveData.value = boardLiveData.value
             }
             return false
@@ -199,7 +198,7 @@ class GameController(private val viewCallback: ViewCallback, private val needToS
     }
 
     @VisibleForTesting
-    public fun isSet(cards: List<PlayingCard?>?, propertiesSize: Int?): Boolean {
+    fun isSet(cards: List<PlayingCard?>?, propertiesSize: Int?): Boolean {
         if (cards != null) {
             if (cards.size != cardsInSet) {
                 return false
@@ -224,7 +223,7 @@ class GameController(private val viewCallback: ViewCallback, private val needToS
     }
 
     @VisibleForTesting
-    public fun hasSets(): Boolean {
+    fun hasSets(): Boolean {
         if (deck.size ?: 0 == 1) return false
 
         var has = false
