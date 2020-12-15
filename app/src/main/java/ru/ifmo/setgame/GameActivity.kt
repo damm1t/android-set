@@ -84,18 +84,6 @@ class GameActivity : AppCompatActivity() {
             setFragment(GameScoreFragment.newInstance(title, time, players, scores))
         }
 
-        override fun startMultiplayerGame(gameJson: String) {
-            setFragment(GameFragment.newInstance())
-        }
-
-        override fun startSingleplayerGame() {
-            setFragment(GameFragment.newInstance())
-        }
-
-        override fun startTrainingGame() {
-            setFragment(GameFragment.newInstance())
-        }
-
         override fun showBoardScreen() {
             setFragment(GameFragment.newInstance())
         }
@@ -104,11 +92,7 @@ class GameActivity : AppCompatActivity() {
             setFragment(LobbySelectionFragment())
         }
 
-        override fun joinLobby(lobbyId: Int) {
-            setFragment(LobbyInfoFragment())
-        }
-
-        override fun createLobby(maxPlayers: Int) {
+        override fun showLobbyInfoScreen() {
             setFragment(LobbyInfoFragment())
         }
 

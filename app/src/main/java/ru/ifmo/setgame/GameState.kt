@@ -24,8 +24,12 @@ class GameState @Inject constructor(
 
     fun getScreenLiveData(): LiveData<GameScreen> = screenLiveData
 
+    init {
+        screenLiveData.value = GameScreen.NONE
+    }
+
     override fun showScore(title: String, time: Long, players: Array<String>, scores: IntArray) {
-        screenLiveData.value = GameScreen.SCORE_SCREEN
+        screenLiveData.postValue(GameScreen.SCORE_SCREEN)
         navigationDelegate.showScore(title, time, players, scores)
     }
 
@@ -33,53 +37,50 @@ class GameState @Inject constructor(
         gameController.isMultiplayer = true
         gameController.isComputer = false
 
-        screenLiveData.value = GameScreen.SCORE_SCREEN
-        navigationDelegate.startMultiplayerGame(gameJson)
+
+        screenLiveData.postValue(GameScreen.BOARD_SCREEN)
+        navigationDelegate.showBoardScreen()
     }
 
     override fun startSingleplayerGame() {
         gameController.isMultiplayer = false
         gameController.isComputer = true
 
-        screenLiveData.value = GameScreen.BOARD_SCREEN
-        navigationDelegate.startSingleplayerGame()
+        screenLiveData.postValue(GameScreen.BOARD_SCREEN)
+        navigationDelegate.showBoardScreen()
     }
 
     override fun startTrainingGame() {
         gameController.isMultiplayer = false
         gameController.isComputer = false
 
-        screenLiveData.value = GameScreen.BOARD_SCREEN
-        navigationDelegate.startTrainingGame()
+        screenLiveData.postValue(GameScreen.BOARD_SCREEN)
+        navigationDelegate.showBoardScreen()
     }
 
     override fun showLobbiesList() {
-        screenLiveData.value = GameScreen.LOBBIES_SCREEN
+        screenLiveData.postValue(GameScreen.LOBBIES_SCREEN)
         navigationDelegate.showLobbiesList()
     }
 
     override fun joinLobby(lobbyId: Int) {
         connector.joinLobby(lobbyId)
 
-        screenLiveData.value = GameScreen.LOBBY_INFO_SCREEN
-        navigationDelegate.joinLobby(lobbyId)
+        screenLiveData.postValue(GameScreen.LOBBY_INFO_SCREEN)
+        navigationDelegate.showLobbyInfoScreen()
     }
 
     override fun createLobby(maxPlayers: Int) {
         connector.createLobby(maxPlayers)
 
-        screenLiveData.value = GameScreen.LOBBY_INFO_SCREEN
-        navigationDelegate.createLobby(maxPlayers)
+        screenLiveData.postValue(GameScreen.LOBBY_INFO_SCREEN)
+        navigationDelegate.showLobbyInfoScreen()
     }
 
     interface ScreenNavigation {
         fun showScore(title: String, time: Long, players: Array<String>, scores: IntArray)
-        fun startMultiplayerGame(gameJson: String)
-        fun startSingleplayerGame()
-        fun startTrainingGame()
         fun showBoardScreen()
         fun showLobbiesList()
-        fun joinLobby(lobbyId: Int)
-        fun createLobby(maxPlayers: Int)
+        fun showLobbyInfoScreen()
     }
 }
