@@ -100,7 +100,6 @@ class GameFragment : androidx.fragment.app.Fragment(), GameController.ViewCallba
             if (controller.isMultiplayer) {
                 //todo investigate where we need to set connector
                 controller.setConnector((activity as GameActivity).connector)
-                controller.createBoardFromJSON(getString("json")!!)
             }
         }
 
@@ -136,12 +135,7 @@ class GameFragment : androidx.fragment.app.Fragment(), GameController.ViewCallba
 
     companion object {
         @JvmStatic
-        fun newInstance(json: String) =
-                GameFragment().apply {
-                    arguments = Bundle().apply {
-                        putString("json", json)
-                    }
-                }
+        fun newInstance() = GameFragment()
     }
 
     private fun onBoardUpdated(board: List<PlayingCard>) {

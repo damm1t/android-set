@@ -66,8 +66,8 @@ class GameActivity : AppCompatActivity() {
 
                     screenNavigation.showLobbiesList()
                 }
-                isComputer -> screenNavigation.startSingleplayerGame()
-                else -> screenNavigation.startTrainingGame()
+                isComputer -> gameState.startSingleplayerGame()
+                else -> gameState.startTrainingGame()
             }
         }
     }
@@ -85,19 +85,19 @@ class GameActivity : AppCompatActivity() {
         }
 
         override fun startMultiplayerGame(gameJson: String) {
-            setFragment(GameFragment.newInstance(gameJson))
+            setFragment(GameFragment.newInstance())
         }
 
         override fun startSingleplayerGame() {
-            setFragment(GameFragment.newInstance(""))
+            setFragment(GameFragment.newInstance())
         }
 
         override fun startTrainingGame() {
-            setFragment(GameFragment.newInstance(""))
+            setFragment(GameFragment.newInstance())
         }
 
         override fun showBoardScreen() {
-            setFragment(GameFragment.newInstance(""))
+            setFragment(GameFragment.newInstance())
         }
 
         override fun showLobbiesList() {

@@ -145,6 +145,7 @@ class Connector @VisibleForTesting constructor(
                     if (status == "IN_GAME") {
                         gameId = response.get("game_id").asInt()
                         val gameJson = mapper.writeValueAsString(response.get("game"))
+                        gameLiveData.postValue(gameJson)
                         gameNavigation?.startMultiplayerGame(gameJson)
                     } else if (status == "IN_LOBBY") {
                         val lobbyInfoJson = mapper.writeValueAsString(response.get("lobby"))

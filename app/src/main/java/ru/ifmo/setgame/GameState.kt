@@ -1,8 +1,10 @@
 package ru.ifmo.setgame
 
 import ru.ifmo.setgame.network.Connector
+import ru.ifmo.setgame.di.ActivityScope
 import javax.inject.Inject
 
+@ActivityScope
 class GameState @Inject constructor(
         private val navigationDelegate: ScreenNavigation,
         private val connector: Connector,

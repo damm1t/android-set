@@ -9,11 +9,13 @@ import ru.ifmo.setgame.GameState
 @Module
 class GameModule {
     @Provides
+    @ActivityScope
     fun provideGameNavigation(gameState: GameState): GameNavigation {
         return gameState
     }
 
     @Provides
+    @ActivityScope
     fun provideGameController(): GameController {
         return GameController()
     }
