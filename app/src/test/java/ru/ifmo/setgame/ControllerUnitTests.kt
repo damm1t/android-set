@@ -1,6 +1,7 @@
 package ru.ifmo.setgame
 
-import org.junit.Assert.*
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito
@@ -19,7 +20,7 @@ class ControllerUnitTests {
 
     @Test
     fun hasSetsTest() {
-        val controller : GameController  = GameController(mockViewCallBack, false)
+        val controller = GameController(mockViewCallBack, false)
         while (controller.getDeckSize() > 2){
             assertTrue(controller.hasSets())
             val row = Random.nextInt(4)
@@ -29,7 +30,7 @@ class ControllerUnitTests {
 
     @Test
     fun checkSets() {
-        val controller : GameController  = GameController(mockViewCallBack, false)
+        val controller = GameController(mockViewCallBack, false)
         val boardLiveData = controller.getBoardLiveData()
         val row = Random.nextInt(4)
         controller.onSelectCard(0 + 3 * row)
@@ -41,11 +42,4 @@ class ControllerUnitTests {
         controller.onSelectCard(Random.nextInt(12))
         assertFalse(controller.checkSets())
     }
-
-
-    @Test
-    fun failTest() {
-        assertEquals(3, 2 + 2)
-    }
-
 }
