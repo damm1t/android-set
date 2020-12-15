@@ -7,6 +7,7 @@ import dagger.Component
 import ru.ifmo.setgame.network.Connector
 import ru.ifmo.setgame.GameController
 import ru.ifmo.setgame.GameNavigation
+import ru.ifmo.setgame.GameViewModel
 import ru.ifmo.setgame.lobby.LobbyInfoViewModel
 import ru.ifmo.setgame.network.NetworkModule
 import javax.inject.Scope
@@ -23,6 +24,8 @@ interface GameComponent {
     fun lobbyInfoViewModel(): LobbyInfoViewModel
 
     fun gameController(): GameController
+
+    fun gameViewModel(): GameViewModel
 
     @Component.Builder
     interface Builder {

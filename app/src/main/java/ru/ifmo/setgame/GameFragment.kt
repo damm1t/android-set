@@ -55,7 +55,7 @@ class GameFragment : androidx.fragment.app.Fragment(), GameController.ViewCallba
         val gameComponent = ComponentHelper.getGameComponent(activity!!)
 
         controller = gameComponent.gameController()
-        viewModel = GameViewModel(controller)
+        viewModel = gameComponent.gameViewModel()
 
         gameView = inflater.inflate(fragment_game, container, false)
 
