@@ -12,14 +12,18 @@ import androidx.lifecycle.Observer
 import ru.ifmo.setgame.network.Connector
 import java.util.Timer
 import java.util.TimerTask
-import java.util.*
 
+import ru.ifmo.setgame.di.ActivityScope
+import javax.inject.Inject
 
 private const val DEFAULT_COLUMNS = 3
 private const val DEFAULT_ROWS = 4
 private const val CARDS_IN_SET = 3
 
-class GameController(private val viewCallback: ViewCallback, private val needToShuffle: Boolean = true) {
+@ActivityScope
+class GameController @Inject constructor(
+        private val gameNavigation: GameNavigation,
+        private val needToShuffle: Boolean = true) {
     val rowCount: Int = DEFAULT_ROWS
     val columnCount: Int = DEFAULT_COLUMNS
     private val cardsInSet: Int = CARDS_IN_SET
@@ -32,8 +36,9 @@ class GameController(private val viewCallback: ViewCallback, private val needToS
     var isComputer = false
 
     private var connector: Connector? = null
-    private lateinit var timerComp: Timer
+    private var viewCallback: ViewCallback? = null
 
+    private lateinit var timerComp: Timer
     var timerGlobalStart: Long = 0
     var timerGlobalFinish: Long = 0
 
@@ -96,6 +101,14 @@ class GameController(private val viewCallback: ViewCallback, private val needToS
         this.connector = null
     }
 
+    fun setViewCallback(viewCallback: ViewCallback) {
+        this.viewCallback = viewCallback
+    }
+
+    fun removeViewCallback() {
+        this.viewCallback = null
+    }
+
     fun scheduleRate() {
         timerComp.scheduleAtFixedRate(object : TimerTask() {
             override fun run() {
@@ -144,7 +157,7 @@ class GameController(private val viewCallback: ViewCallback, private val needToS
                             intArrayOf(score)
                         }
 
-                viewCallback.showScore(isComputer,
+                viewCallback?.showScore(isComputer,
                         (timerGlobalFinish - timerGlobalStart) / 1000, scoresArray)
             }
         }
@@ -174,7 +187,7 @@ class GameController(private val viewCallback: ViewCallback, private val needToS
                 boardLiveData.value?.get(0)?.properties?.size)
         if (!selectedIsSet) {
             if (selectedCount == cardsInSet) {
-                viewCallback.vibrate(1)
+                viewCallback?.vibrate(1)
                 boardLiveData.value!!.forEach { it.selected = false }
                 boardLiveData.value = boardLiveData.value
             }
@@ -217,8 +230,8 @@ class GameController(private val viewCallback: ViewCallback, private val needToS
     }
 
     @VisibleForTesting
-    fun hasSets(): Boolean {
-        if (deck.size ?: 0 == 1) return false
+    private fun hasSets(): Boolean {
+        if (deck.size == 1) return false
 
         var has = false
         val propertiesSize = boardLiveData.value?.get(0)?.properties?.size

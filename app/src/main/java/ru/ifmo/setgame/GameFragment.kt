@@ -19,6 +19,7 @@ import kotlinx.android.synthetic.main.fragment_game.view.*
 import ru.ifmo.setgame.R.drawable.card_frame_drawable
 import ru.ifmo.setgame.R.layout.card_frame
 import ru.ifmo.setgame.R.layout.fragment_game
+import ru.ifmo.setgame.di.ComponentHelper
 
 class GameFragment : androidx.fragment.app.Fragment(), GameController.ViewCallback {
 
@@ -30,6 +31,7 @@ class GameFragment : androidx.fragment.app.Fragment(), GameController.ViewCallba
 
     override fun onStart() {
         super.onStart()
+        controller.setViewCallback(this)
         if (controller.isMultiplayer) {
             controller.setConnector((activity as GameActivity).connector)
         }
@@ -45,11 +47,14 @@ class GameFragment : androidx.fragment.app.Fragment(), GameController.ViewCallba
         if (controller.isComputer) {
             controller.stopRate()
         }
+        controller.removeViewCallback()
         super.onStop()
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        controller = GameController(this)
+        val gameComponent = ComponentHelper.getGameComponent(activity!!)
+
+        controller = gameComponent.gameController()
         viewModel = GameViewModel(controller)
 
         gameView = inflater.inflate(fragment_game, container, false)

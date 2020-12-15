@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import dagger.BindsInstance
 import dagger.Component
 import ru.ifmo.setgame.network.Connector
+import ru.ifmo.setgame.GameController
 import ru.ifmo.setgame.GameNavigation
 import ru.ifmo.setgame.lobby.LobbyInfoViewModel
 import ru.ifmo.setgame.network.NetworkModule
@@ -20,6 +21,8 @@ interface GameComponent {
     fun connector(): Connector
 
     fun lobbyInfoViewModel(): LobbyInfoViewModel
+
+    fun gameController(): GameController
 
     @Component.Builder
     interface Builder {
