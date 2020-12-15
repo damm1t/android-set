@@ -11,6 +11,7 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import kotlinx.android.synthetic.main.fragment_lobby_info.*
 import kotlinx.android.synthetic.main.fragment_lobby_info.view.*
 import ru.ifmo.setgame.*
+import ru.ifmo.setgame.di.ComponentHelper
 
 class LobbyInfoFragment : Fragment() {
     lateinit var viewModel: LobbyInfoViewModel
@@ -40,11 +41,8 @@ class LobbyInfoFragment : Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_lobby_info, container, false)
 
-        viewModel = LobbyInfoViewModel(
-                (activity as GameActivity).connector,
-                jacksonObjectMapper(),
-                (activity as GameActivity).gameNavigation
-        )
+        val gameComponent = ComponentHelper.getGameComponent(activity!!)
+        viewModel = gameComponent.lobbyInfoViewModel()
 
         view.btn_leave.setOnClickListener {
             viewModel.leaveLobby()

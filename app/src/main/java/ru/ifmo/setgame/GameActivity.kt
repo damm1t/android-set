@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import ru.ifmo.setgame.lobby.LobbyInfoFragment
 import ru.ifmo.setgame.lobby.LobbySelectionFragment
 import ru.ifmo.setgame.di.DaggerGameComponent
@@ -43,6 +44,8 @@ class GameActivity : AppCompatActivity() {
 
         gameComponent = DaggerGameComponent.builder()
                 .setContext(this)
+                .setGameNavigation(gameNavigation)
+                .setObjectMapper(jacksonObjectMapper())
                 .build()
 
         setContentView(R.layout.activity_game)
