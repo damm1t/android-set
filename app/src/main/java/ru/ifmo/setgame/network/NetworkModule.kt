@@ -1,8 +1,8 @@
-package ru.ifmo.setgame.di
+package ru.ifmo.setgame.network
 
 import dagger.Module
 import dagger.Provides
-import ru.ifmo.setgame.Connector
+import ru.ifmo.setgame.di.ActivityScope
 
 @Module
 class NetworkModule {

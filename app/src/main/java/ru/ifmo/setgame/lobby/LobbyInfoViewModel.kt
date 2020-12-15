@@ -1,14 +1,12 @@
 package ru.ifmo.setgame.lobby
 
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Transformations
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import ru.ifmo.setgame.*
 import ru.ifmo.setgame.di.ActivityScope
-import java.util.*
+import ru.ifmo.setgame.network.Connector
 import javax.inject.Inject
 
 /**
