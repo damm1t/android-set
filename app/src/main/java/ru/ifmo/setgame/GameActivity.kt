@@ -11,6 +11,7 @@ import ru.ifmo.setgame.lobby.LobbySelectionFragment
 import ru.ifmo.setgame.di.DaggerGameComponent
 import ru.ifmo.setgame.di.GameComponent
 import ru.ifmo.setgame.network.Connector
+import ru.ifmo.setgame.score.GameScoreFragment
 
 class Lobby(
         val lobby_id: Int,

@@ -11,6 +11,7 @@ import ru.ifmo.setgame.GameState
 import ru.ifmo.setgame.GameViewModel
 import ru.ifmo.setgame.lobby.LobbyInfoViewModel
 import ru.ifmo.setgame.network.NetworkModule
+import ru.ifmo.setgame.score.ScoreViewModel
 import javax.inject.Scope
 
 @Scope
@@ -31,6 +32,8 @@ interface GameComponent {
     fun gameState(): GameState
 
     fun gameNavigation(): GameNavigation
+
+    fun scoreViewModel(): ScoreViewModel
 
     @Component.Builder
     interface Builder {

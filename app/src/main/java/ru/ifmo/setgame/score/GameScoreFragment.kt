@@ -1,4 +1,4 @@
-package ru.ifmo.setgame
+package ru.ifmo.setgame.score
 
 import android.content.Context
 import android.os.Bundle
@@ -7,6 +7,9 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import kotlinx.android.synthetic.main.fragment_score.view.*
+import ru.ifmo.setgame.*
+import ru.ifmo.setgame.di.ComponentHelper
+import ru.ifmo.setgame.di.GameComponent
 
 class GameScoreFragment : androidx.fragment.app.Fragment() {
     private val TITLE_TAG = "TITLE_TAG"
@@ -23,15 +26,24 @@ class GameScoreFragment : androidx.fragment.app.Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_score, container, false)
 
-        arguments?.let {
-            title = it.getString(TITLE_TAG)!!
-            time = it.getLong(TIME_TAG)
-            playersArray = it.getStringArray(PLAYERS_TAG)!!
-            scoresArray = it.getIntArray(SCORES_TAG)!!
+        val gameComponent = ComponentHelper.getGameComponent(activity!!)
+        val scoreViewModel = gameComponent.scoreViewModel()
+
+        scoreViewModel.getScoreLiveData().observe(viewLifecycleOwner) { scoreInfo ->
+            displayScore(scoreInfo)
         }
 
-        view.tv_score_title.text = title
-        view.tv_score_time.text = getString(R.string.game_time, time)
+        return view
+    }
+
+    private fun displayScore(scoreInfo: ScoreInfo) {
+        title = scoreInfo.title
+        time = scoreInfo.time
+        playersArray = scoreInfo.players
+        scoresArray = scoreInfo.scores
+
+        view!!.tv_score_title.text = title
+        view!!.tv_score_time.text = getString(R.string.game_time, time)
 
         var thisScore = 0
 
@@ -39,7 +51,7 @@ class GameScoreFragment : androidx.fragment.app.Fragment() {
             val tv = TextView(context)
             tv.text = getString(R.string.player_score, playersArray[i], scoresArray[i])
             tv.textSize = 16f
-            view.ll_score_list.addView(tv)
+            view!!.ll_score_list.addView(tv)
 
             if (playersArray[i] == getString(R.string.player_you)) {
                 thisScore = scoresArray[i]
@@ -52,8 +64,6 @@ class GameScoreFragment : androidx.fragment.app.Fragment() {
                 .putLong(STAT_TOTAL_TIME, preferences.getLong(STAT_TOTAL_TIME, 0) + time)
                 .putInt(STAT_TOTAL_SCORE, preferences.getInt(STAT_TOTAL_SCORE, 0) + thisScore)
                 .apply()
-
-        return view
     }
 
     companion object {
