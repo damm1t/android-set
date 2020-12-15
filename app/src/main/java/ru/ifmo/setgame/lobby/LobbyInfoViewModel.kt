@@ -7,13 +7,16 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import ru.ifmo.setgame.*
+import ru.ifmo.setgame.di.ActivityScope
 import java.util.*
+import javax.inject.Inject
 
 /**
  * ViewModel with data related to lobbies
  */
 // TODO maybe split in two
-class LobbyInfoViewModel(
+@ActivityScope
+class LobbyInfoViewModel @Inject constructor(
         private val connector: Connector,
         objectMapper: ObjectMapper,
         private val navigation: GameNavigation
