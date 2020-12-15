@@ -1,8 +1,7 @@
 package ru.ifmo.setgame
 
-import org.junit.Test
-
 import org.junit.Assert.*
+import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito
 import org.robolectric.RobolectricTestRunner
@@ -43,5 +42,10 @@ class ControllerUnitTests {
         assertFalse(controller.checkSets())
     }
 
+
+    @Test
+    fun failTest() {
+        assertEquals(3, 2 + 2)
+    }
 
 }
