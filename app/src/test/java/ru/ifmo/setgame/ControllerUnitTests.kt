@@ -62,4 +62,24 @@ class ControllerUnitTests {
         controller.onSelectCard(wrongSet3)
         assertFalse(controller.checkSets())
     }
+
+    @Test
+    fun makeMoveTest(){
+        val controller : GameController  = GameController(mockViewCallBack, false)
+        while (controller.getDeckSize() > 2){
+            val row = Random.nextInt(4)
+            val oldBoard = (controller.getBoardLiveData().value)?.toList()
+            controller.makeMove(intArrayOf(0 + 3 * row, 1 + 3 * row, 2 + 3 * row))
+            val newBoard =  (controller.getBoardLiveData().value)?.toList()
+            val changed = mutableListOf<Int>()
+            for (i in 0..11){
+                if (oldBoard != null) {
+                    if (!(newBoard?.contains(oldBoard.get(i)))!!)
+                        changed.add(i)
+                }
+            }
+            assertEquals(changed.size, 3)
+            assertTrue(changed.equals(mutableListOf(0 + 3 * row, 1 + 3 * row, 2 + 3 * row)))
+        }
+    }
 }
