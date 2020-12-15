@@ -45,5 +45,6 @@ before_script:
 
 script:
   - ./gradlew clean
-  - ./gradlew build
+  - ./gradlew assemble
   - ./gradlew test
+  - ./gradlew lint
