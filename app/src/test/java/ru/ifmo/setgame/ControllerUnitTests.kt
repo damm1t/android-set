@@ -15,7 +15,7 @@ class ControllerUnitTests {
 
     @Test
     fun hasSetsTest() {
-        val controller = GameController(mockViewCallBack, false)
+        val controller = GameController(false)
         while (controller.getDeckSize() > 2) {
             assertTrue(controller.hasSets())
             val row = Random.nextInt(4)
@@ -25,7 +25,7 @@ class ControllerUnitTests {
 
     @Test
     fun checkSetsTest() {
-        val controller = GameController(mockViewCallBack, false)
+        val controller = GameController(false)
         val boardLiveData = controller.getBoardLiveData()
         val propertiesSize = boardLiveData.value?.get(0)?.properties?.size
         val row = Random.nextInt(4)
@@ -65,7 +65,7 @@ class ControllerUnitTests {
 
     @Test
     fun makeMoveTest(){
-        val controller : GameController  = GameController(mockViewCallBack, false)
+        val controller : GameController  = GameController(false)
         while (controller.getDeckSize() > 2){
             val row = Random.nextInt(4)
             val oldBoard = (controller.getBoardLiveData().value)?.toList()
@@ -85,7 +85,7 @@ class ControllerUnitTests {
 
     @Test
     fun createBoardFromJsonTest(){
-        val controller : GameController  = GameController(mockViewCallBack, false)
+        val controller : GameController  = GameController(false)
         val json : String = "{\"game_id\": 337, \"in_game\": [6, 89], \"board\": {\"0\": [0, 2, 1, 1], \"1\": [1, 0, 1, 2], \"2\": [0, 2, 0, 0], \"3\": [1, 0, 2, 1], \"4\": [1, 2, 0, 2], \"5\": [0, 2, 1, 2], \"6\": [2, 0, 2, 0], \"7\": [2, 0, 1, 0], \"8\": [1, 2, 2, 1], \"9\": [2, 1, 0, 1], \"10\": [2, 1, 1, 0], \"11\": [0, 1, 1, 0]}}"
         controller.createBoardFromJSON(json)
         val board = controller.getBoardLiveData().value

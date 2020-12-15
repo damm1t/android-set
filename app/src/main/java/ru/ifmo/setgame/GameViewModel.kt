@@ -1,8 +1,11 @@
 package ru.ifmo.setgame
 
 import androidx.lifecycle.*
+import ru.ifmo.setgame.di.ActivityScope
+import javax.inject.Inject
 
-class GameViewModel(controller: GameController) {
+@ActivityScope
+class GameViewModel @Inject constructor(controller: GameController) {
     private val boardLiveData: LiveData<List<PlayingCard>> =
             Transformations.map(controller.getBoardLiveData()) { it }
 

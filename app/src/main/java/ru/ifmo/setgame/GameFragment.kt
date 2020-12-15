@@ -19,6 +19,7 @@ import kotlinx.android.synthetic.main.fragment_game.view.*
 import ru.ifmo.setgame.R.drawable.card_frame_drawable
 import ru.ifmo.setgame.R.layout.card_frame
 import ru.ifmo.setgame.R.layout.fragment_game
+import ru.ifmo.setgame.di.ComponentHelper
 
 class GameFragment : androidx.fragment.app.Fragment(), GameController.ViewCallback {
 
@@ -26,10 +27,12 @@ class GameFragment : androidx.fragment.app.Fragment(), GameController.ViewCallba
     private lateinit var controller: GameController
     private lateinit var gameView: View
     private lateinit var viewModel : GameViewModel
+    private lateinit var gameNavigation: GameNavigation
     private var allowCustomCards = false
 
     override fun onStart() {
         super.onStart()
+        controller.setViewCallback(this)
         if (controller.isMultiplayer) {
             controller.setConnector((activity as GameActivity).connector)
         }
@@ -45,12 +48,16 @@ class GameFragment : androidx.fragment.app.Fragment(), GameController.ViewCallba
         if (controller.isComputer) {
             controller.stopRate()
         }
+        controller.removeViewCallback()
         super.onStop()
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        controller = GameController(this)
-        viewModel = GameViewModel(controller)
+        val gameComponent = ComponentHelper.getGameComponent(activity!!)
+
+        controller = gameComponent.gameController()
+        viewModel = gameComponent.gameViewModel()
+        gameNavigation = gameComponent.gameNavigation()
 
         gameView = inflater.inflate(fragment_game, container, false)
 
@@ -83,20 +90,15 @@ class GameFragment : androidx.fragment.app.Fragment(), GameController.ViewCallba
         }
 
 
-        arguments?.apply {
-            controller.isMultiplayer = getBoolean("multiplayer")
-            controller.isComputer = getBoolean("computer")
-            controller.timerGlobalStart = System.currentTimeMillis()
+        controller.timerGlobalStart = System.currentTimeMillis()
 
-            if (controller.isComputer) {
-                controller.setTimer()
-            }
+        if (controller.isComputer) {
+            controller.setTimer()
+        }
 
-            if (controller.isMultiplayer) {
-                //todo investigate where we need to set connector
-                controller.setConnector((activity as GameActivity).connector)
-                controller.createBoardFromJSON(getString("json")!!)
-            }
+        if (controller.isMultiplayer) {
+            //todo investigate where we need to set connector
+            controller.setConnector((activity as GameActivity).connector)
         }
 
         allowCustomCards = activity!!.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE).getBoolean(PREFERENCE_CUSTOM_CARDS, false)
@@ -131,14 +133,7 @@ class GameFragment : androidx.fragment.app.Fragment(), GameController.ViewCallba
 
     companion object {
         @JvmStatic
-        fun newInstance(json: String, isMultiplayer: Boolean, isComputer: Boolean) =
-                GameFragment().apply {
-                    arguments = Bundle().apply {
-                        putString("json", json)
-                        putBoolean("multiplayer", isMultiplayer)
-                        putBoolean("computer", isComputer)
-                    }
-                }
+        fun newInstance() = GameFragment()
     }
 
     private fun onBoardUpdated(board: List<PlayingCard>) {
@@ -160,6 +155,6 @@ class GameFragment : androidx.fragment.app.Fragment(), GameController.ViewCallba
             arrayOf(getString(R.string.player_you))
         }
 
-        (activity as GameActivity).gameNavigation.showScore(title, time, playersArray, scores)
+        gameNavigation.showScore(title, time, playersArray, scores)
     }
 }

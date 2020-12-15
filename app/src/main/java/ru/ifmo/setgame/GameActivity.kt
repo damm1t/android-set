@@ -11,6 +11,7 @@ import ru.ifmo.setgame.lobby.LobbySelectionFragment
 import ru.ifmo.setgame.di.DaggerGameComponent
 import ru.ifmo.setgame.di.GameComponent
 import ru.ifmo.setgame.network.Connector
+import ru.ifmo.setgame.score.GameScoreFragment
 
 class Lobby(
         val lobby_id: Int,
@@ -20,16 +21,18 @@ class Lobby(
 )
 
 class GameActivity : AppCompatActivity() {
-    val gameNavigation: GameNavigation = GameNavigationImpl()
+    private val screenNavigation = ScreenNavigationImpl()
     lateinit var gameComponent: GameComponent
 
     lateinit var connector : Connector
         private set
 
+    private lateinit var gameState: GameState
+
     override fun onStart() {
         super.onStart()
         if (::connector.isInitialized) {
-            connector.gameNavigation = gameNavigation
+            connector.gameNavigation = gameState
         }
     }
 
@@ -45,9 +48,10 @@ class GameActivity : AppCompatActivity() {
 
         gameComponent = DaggerGameComponent.builder()
                 .setContext(this)
-                .setGameNavigation(gameNavigation)
                 .setObjectMapper(jacksonObjectMapper())
                 .build()
+
+        gameState = gameComponent.gameState()
 
         setContentView(R.layout.activity_game)
 
@@ -60,12 +64,14 @@ class GameActivity : AppCompatActivity() {
                     connector = gameComponent.connector()
                     connector.connect()
 
-                    gameNavigation.showLobbiesList()
+                    gameState.showLobbiesList()
                 }
-                isComputer -> gameNavigation.startSingleplayerGame()
-                else -> gameNavigation.startTrainingGame()
+                isComputer -> gameState.startSingleplayerGame()
+                else -> gameState.startTrainingGame()
             }
         }
+
+        gameState.getScreenLiveData().observe(this, ::showScreen)
     }
 
     override fun onDestroy() {
@@ -75,34 +81,30 @@ class GameActivity : AppCompatActivity() {
         super.onDestroy()
     }
 
-    private inner class GameNavigationImpl: GameNavigation {
-        override fun showScore(title: String, time: Long, players: Array<String>, scores: IntArray) {
-            setFragment(GameScoreFragment.newInstance(title, time, players, scores))
+    private fun showScreen(screen: GameScreen) {
+        when (screen) {
+            GameScreen.NONE -> Unit // no-op
+            GameScreen.LOBBIES_SCREEN -> screenNavigation.showLobbiesList()
+            GameScreen.LOBBY_INFO_SCREEN -> screenNavigation.showLobbyInfoScreen()
+            GameScreen.BOARD_SCREEN -> screenNavigation.showBoardScreen()
+            GameScreen.SCORE_SCREEN -> screenNavigation.showScore()
+        }
+    }
+
+    private inner class ScreenNavigationImpl {
+        fun showScore() {
+            setFragment(GameScoreFragment.newInstance())
         }
 
-        override fun startMultiplayerGame(gameJson: String) {
-            setFragment(GameFragment.newInstance(gameJson, true, false))
+        fun showBoardScreen() {
+            setFragment(GameFragment.newInstance())
         }
 
-        override fun startSingleplayerGame() {
-            setFragment(GameFragment.newInstance("", false, true))
-        }
-
-        override fun startTrainingGame() {
-            setFragment(GameFragment.newInstance("", false, false))
-        }
-
-        override fun showLobbiesList() {
+        fun showLobbiesList() {
             setFragment(LobbySelectionFragment())
         }
 
-        override fun joinLobby(lobbyId: Int) {
-            connector.joinLobby(lobbyId)
-            setFragment(LobbyInfoFragment())
-        }
-
-        override fun createLobby(maxPlayers: Int) {
-            connector.createLobby(maxPlayers)
+        fun showLobbyInfoScreen() {
             setFragment(LobbyInfoFragment())
         }
 
