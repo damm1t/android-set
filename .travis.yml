@@ -46,3 +46,4 @@ before_script:
 script:
   - ./gradlew clean
   - ./gradlew build
+  - ./gradlew testReleaseUnitTest
