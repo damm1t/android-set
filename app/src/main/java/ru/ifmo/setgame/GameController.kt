@@ -46,8 +46,7 @@ class GameController(private val viewCallback: ViewCallback) {
     }
 
     interface ViewCallback {
-        fun getStringById(resId: Int): String
-        fun showScore(title: String, time: Long, players: Array<String>, scores: IntArray)
+        fun showScore(againstComputer: Boolean, time: Long, scores: IntArray)
         fun vibrate(int: Int)
     }
 
@@ -129,23 +128,15 @@ class GameController(private val viewCallback: ViewCallback) {
 
             if (!hasSets()) {
                 timerGlobalFinish = System.currentTimeMillis()
-                val playersArray = if (isComputer) {
-                    arrayOf(viewCallback.getStringById(R.string.player_you),
-                            viewCallback.getStringById(R.string.player_computer))
-                } else {
-                    arrayOf(viewCallback.getStringById(R.string.player_you))
-                }
                 val scoresArray =
                         if (isComputer) {
                             intArrayOf(score, computerScore)
                         } else {
                             intArrayOf(score)
                         }
-                val title =
-                        if (isComputer) viewCallback.getStringById(R.string.singleplayer_over)
-                        else viewCallback.getStringById(R.string.training_over)
-                viewCallback.showScore(title, (timerGlobalFinish - timerGlobalStart) / 1000,
-                        playersArray, scoresArray)
+
+                viewCallback.showScore(isComputer,
+                        (timerGlobalFinish - timerGlobalStart) / 1000, scoresArray)
             }
         }
     }
