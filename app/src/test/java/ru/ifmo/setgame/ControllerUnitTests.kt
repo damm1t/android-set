@@ -1,8 +1,8 @@
 package ru.ifmo.setgame
 
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Test
-
-import org.junit.Assert.*
 import org.junit.runner.RunWith
 import org.mockito.Mockito
 import org.robolectric.RobolectricTestRunner
@@ -11,11 +11,11 @@ import kotlin.random.Random
 @RunWith(RobolectricTestRunner::class)
 class ControllerUnitTests {
 
-    val mockViewCallBack = Mockito.mock(GameController.ViewCallback::class.java)
+    private val mockViewCallBack: GameController.ViewCallback = Mockito.mock(GameController.ViewCallback::class.java)
 
     @Test
     fun hasSetsTest() {
-        val controller : GameController  = GameController(mockViewCallBack, false)
+        val controller = GameController(mockViewCallBack, false)
         while (controller.getDeckSize() > 2){
             assertTrue(controller.hasSets())
             val row = Random.nextInt(4)
@@ -25,7 +25,7 @@ class ControllerUnitTests {
 
     @Test
     fun checkSetsTest() {
-        val controller : GameController  = GameController(mockViewCallBack, false)
+        val controller = GameController(mockViewCallBack, false)
         val boardLiveData = controller.getBoardLiveData()
         val propertiesSize = boardLiveData.value?.get(0)?.properties?.size
         val row = Random.nextInt(4)
@@ -52,7 +52,7 @@ class ControllerUnitTests {
                             controller.isSet(listOf(boardLiveData.value?.get(wrongSet1),
                                     boardLiveData.value?.get(wrongSet2),
                                     boardLiveData.value?.get(wrongSet3)), propertiesSize)) {
-                        continue;
+                        continue
                     }
                 }
             }
