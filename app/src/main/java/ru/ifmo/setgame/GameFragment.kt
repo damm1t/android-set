@@ -1,9 +1,6 @@
 package ru.ifmo.setgame
 
-import android.content.BroadcastReceiver
 import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
 import android.os.Build
 import android.os.Bundle
 import android.os.VibrationEffect
@@ -17,7 +14,6 @@ import android.widget.ImageView
 import androidx.core.content.res.ResourcesCompat
 import androidx.gridlayout.widget.GridLayout
 import androidx.lifecycle.Observer
-import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import kotlinx.android.synthetic.main.card_frame.view.*
 import kotlinx.android.synthetic.main.fragment_game.view.*
 import ru.ifmo.setgame.R.drawable.card_frame_drawable
@@ -152,11 +148,18 @@ class GameFragment : androidx.fragment.app.Fragment(), GameController.ViewCallba
         }
     }
 
-    override fun getStringById(resId: Int): String {
-        return getString(resId)
-    }
+    override fun showScore(againstComputer: Boolean, time: Long, scores: IntArray) {
+        val title =
+                if (againstComputer) getString(R.string.singleplayer_over)
+                else getString(R.string.training_over)
 
-    override fun showScore(title: String, time: Long, players: Array<String>, scores: IntArray) {
-        (activity as GameActivity).gameNavigation.showScore(title, time, players, scores)
+        val playersArray = if (againstComputer) {
+            arrayOf(getString(R.string.player_you),
+                    getString(R.string.player_computer))
+        } else {
+            arrayOf(getString(R.string.player_you))
+        }
+
+        (activity as GameActivity).gameNavigation.showScore(title, time, playersArray, scores)
     }
 }
