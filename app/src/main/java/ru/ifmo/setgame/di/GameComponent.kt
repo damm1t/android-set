@@ -4,9 +4,10 @@ import android.content.Context
 import com.fasterxml.jackson.databind.ObjectMapper
 import dagger.BindsInstance
 import dagger.Component
-import ru.ifmo.setgame.Connector
+import ru.ifmo.setgame.network.Connector
 import ru.ifmo.setgame.GameNavigation
 import ru.ifmo.setgame.lobby.LobbyInfoViewModel
+import ru.ifmo.setgame.network.NetworkModule
 import javax.inject.Scope
 
 @Scope
