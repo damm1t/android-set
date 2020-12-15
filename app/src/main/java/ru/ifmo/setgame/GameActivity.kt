@@ -85,19 +85,19 @@ class GameActivity : AppCompatActivity() {
         }
 
         override fun startMultiplayerGame(gameJson: String) {
-            setFragment(GameFragment.newInstance(gameJson, true, false))
+            setFragment(GameFragment.newInstance(gameJson))
         }
 
         override fun startSingleplayerGame() {
-            setFragment(GameFragment.newInstance("", false, true))
+            setFragment(GameFragment.newInstance(""))
         }
 
         override fun startTrainingGame() {
-            setFragment(GameFragment.newInstance("", false, false))
+            setFragment(GameFragment.newInstance(""))
         }
 
         override fun showBoardScreen() {
-            setFragment(GameFragment.newInstance("", false, false))
+            setFragment(GameFragment.newInstance(""))
         }
 
         override fun showLobbiesList() {

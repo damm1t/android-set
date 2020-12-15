@@ -136,12 +136,10 @@ class GameFragment : androidx.fragment.app.Fragment(), GameController.ViewCallba
 
     companion object {
         @JvmStatic
-        fun newInstance(json: String, isMultiplayer: Boolean, isComputer: Boolean) =
+        fun newInstance(json: String) =
                 GameFragment().apply {
                     arguments = Bundle().apply {
                         putString("json", json)
-                        putBoolean("multiplayer", isMultiplayer)
-                        putBoolean("computer", isComputer)
                     }
                 }
     }
